@@ -6,282 +6,646 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DJIGIT TAU CRM</title>
 <style>
-:root{--gold:#c9a45c;--bg:#101114;--panel:#191a1f;--muted:#96979e;--line:#2b2c32;--white:#f5f3ee}
+:root {
+  --bg:#0b0d10;
+  --panel:#14171c;
+  --panel2:#1b1f25;
+  --line:#292e36;
+  --gold:#c49a45;
+  --gold2:#e2bd70;
+  --text:#f1f1f1;
+  --muted:#9299a3;
+  --green:#48b887;
+  --red:#e16c6c;
+  --blue:#6c9ed9;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--white);font:15px Arial,sans-serif}
-button,input,select{font:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-#login{min-height:100vh;display:grid;place-items:center;padding:20px}
-.login-card{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px}
-.logo{text-align:center;color:var(--gold);font-size:25px;font-weight:800;letter-spacing:3px}
-.sub{text-align:center;color:var(--muted);font-size:12px;letter-spacing:2px;margin:8px 0 28px}
-input,select{width:100%;padding:13px;background:#101114;border:1px solid var(--line);border-radius:10px;color:white;margin:7px 0 15px}
-button.primary{background:var(--gold);color:#171717;border:0;padding:13px 18px;border-radius:10px;font-weight:bold}
-button.secondary{background:#25262c;color:white;border:1px solid var(--line);padding:10px 14px;border-radius:9px}
-.full{width:100%}
-#error{color:#ff8c8c;min-height:20px;font-size:13px}
-#app{display:none}
-header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;background:#101114;z-index:3}
-.brand{font-weight:800;letter-spacing:2px;color:var(--gold)}
-.user{color:var(--muted);font-size:13px}
-.layout{max-width:1200px;margin:auto;padding:22px}
-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
-nav button{background:var(--panel);border:1px solid var(--line);color:#ddd;padding:11px 14px;border-radius:9px}
-nav button.active{background:var(--gold);color:#171717;border-color:var(--gold)}
-h1{font-size:26px;margin:8px 0 20px}
-h2{font-size:18px;margin-top:0}
-.muted{color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:13px;margin:18px 0}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-.metric{font-size:28px;font-weight:bold;color:var(--gold);margin-top:10px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
-.toolbar input{max-width:300px;margin:0}
-table{width:100%;border-collapse:collapse;min-width:540px}
-th,td{text-align:left;padding:13px;border-bottom:1px solid var(--line)}
-th{color:var(--muted);font-weight:normal;font-size:13px}
-.table-wrap{overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px}
-.empty{padding:25px;color:var(--muted)}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.small{font-size:12px;color:var(--muted)}
-.tag{color:var(--gold);font-size:12px}
-#modal{display:none;position:fixed;inset:0;background:#000b;z-index:5;place-items:center;padding:18px}
-.modal-card{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
-footer{padding:25px 0;color:var(--muted);font-size:12px}
-@media(max-width:600px){header{padding:0 14px}.layout{padding:16px}h1{font-size:22px}.user{font-size:11px}}
+.login{
+ min-height:100vh;display:flex;align-items:center;justify-content:center;
+ padding:20px;background:radial-gradient(circle at center,#242019,#0b0d10 65%)
+}
+.login-box{
+ width:100%;max-width:390px;background:var(--panel);border:1px solid #4a3b20;
+ border-radius:18px;padding:32px;box-shadow:0 20px 70px #0008
+}
+.logo{text-align:center;margin-bottom:28px}
+.logo-mark{font-size:30px;color:var(--gold);font-weight:900;letter-spacing:4px}
+.logo small{display:block;color:var(--muted);letter-spacing:3px;margin-top:8px}
+h1,h2,h3,p{margin-top:0}
+.login h2{text-align:center;font-size:20px}
+input,select,textarea{
+ width:100%;background:#0e1115;color:white;border:1px solid var(--line);
+ border-radius:8px;padding:12px;outline:none;margin:6px 0 14px
+}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+label{font-size:13px;color:#b9bec6}
+.btn{
+ border:0;border-radius:8px;padding:11px 15px;background:var(--gold);
+ color:#17130b;font-weight:bold
+}
+.btn:hover{background:var(--gold2)}
+.btn.secondary{background:#292e36;color:white}
+.btn.danger{background:#572b2b;color:#ffdada}
+.btn.small{padding:7px 10px;font-size:12px}
+.login .btn{width:100%;margin-top:8px}
+.hint{color:var(--muted);font-size:12px;line-height:1.6;margin-top:16px}
+.app{display:none;min-height:100vh}
+.sidebar{
+ position:fixed;left:0;top:0;bottom:0;width:235px;background:#101317;
+ border-right:1px solid var(--line);padding:22px 14px;overflow-y:auto;z-index:5
+}
+.brand{padding:8px 10px 25px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.brand strong{color:var(--gold);font-size:19px;letter-spacing:2px}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:7px}
+.nav-title{font-size:10px;color:#717984;padding:12px 10px 7px;text-transform:uppercase}
+.nav button{
+ display:flex;align-items:center;gap:12px;width:100%;padding:12px 11px;
+ background:transparent;border:0;color:#aeb4bd;text-align:left;border-radius:8px;
+ margin:2px 0;font-size:14px
+}
+.nav button:hover,.nav button.active{background:#292318;color:var(--gold2)}
+.nav button.active{border-left:3px solid var(--gold)}
+.sidebar-bottom{border-top:1px solid var(--line);margin-top:25px;padding-top:15px}
+.main{margin-left:235px;min-height:100vh}
+.topbar{
+ height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;
+ justify-content:space-between;padding:0 28px;background:#101317
+}
+.topbar-title{font-weight:bold}
+.user-info{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.avatar{width:34px;height:34px;border-radius:50%;background:#3b3020;color:var(--gold);
+ display:grid;place-items:center;font-weight:bold}
+.content{padding:27px;max-width:1500px;margin:auto}
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.page-head h1{font-size:24px;margin:0}
+.page-head p{color:var(--muted);font-size:13px;margin:7px 0 0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.stat,.card{
+ background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px
+}
+.stat span{color:var(--muted);font-size:12px}
+.stat strong{display:block;font-size:27px;margin:12px 0 5px}
+.stat small{color:var(--gold);font-size:11px}
+.card{margin-bottom:17px}
+.card h3{font-size:15px;margin-bottom:17px}
+.two-col{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+th{color:var(--muted);font-weight:normal;font-size:11px}
+td{color:#e4e6e9}
+tr:last-child td{border-bottom:0}
+.status{display:inline-block;padding:5px 8px;border-radius:20px;font-size:11px;background:#292e36}
+.status.green{color:#72d6a7;background:#18372c}
+.status.red{color:#f28b8b;background:#402323}
+.status.gold{color:var(--gold2);background:#382e1b}
+.status.blue{color:#9bc4f5;background:#1c2c40}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:15px}
+.toolbar input,.toolbar select{width:auto;min-width:150px;margin:0}
+.pipeline{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px;overflow-x:auto}
+.stage{background:#11151a;border:1px solid var(--line);border-radius:10px;padding:12px;min-height:220px}
+.stage h3{font-size:13px;color:var(--gold2)}
+.lead{background:var(--panel2);border:1px solid var(--line);padding:12px;border-radius:8px;margin:9px 0;cursor:pointer}
+.lead:hover{border-color:var(--gold)}
+.lead small{display:block;color:var(--muted);margin-top:7px}
+.bar{height:8px;background:#292e36;border-radius:10px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:10px}
+.modal-bg{display:none;position:fixed;inset:0;background:#000b;z-index:20;justify-content:center;align-items:center;padding:15px}
+.modal{background:var(--panel);border:1px solid #554323;border-radius:14px;padding:23px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h2{font-size:18px;margin:0}
+.close{background:none;border:0;color:white;font-size:25px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:12px}
+.empty{color:var(--muted);text-align:center;padding:30px}
+.mobile-menu{display:none;background:none;border:0;color:white;font-size:23px}
+.ai-box{background:linear-gradient(135deg,#252016,#15181d);border:1px solid #65502b}
+.ai-answer{white-space:pre-wrap;line-height:1.6;color:#ddd;font-size:13px}
+.notice{font-size:12px;color:var(--muted);line-height:1.6}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
+@media(max-width:700px){
+ .sidebar{transform:translateX(-100%);transition:.2s}
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-left:0}
+ .mobile-menu{display:block}
+ .topbar{padding:0 15px}
+ .content{padding:17px 13px}
+ .grid{gap:9px}
+ .stat{padding:13px}
+ .stat strong{font-size:22px}
+ .page-head{align-items:flex-start;flex-direction:column}
+ .form-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<section id="login">
- <div class="login-card">
-  <div class="logo">DJIGIT TAU</div>
-  <div class="sub">СТУДИЯ КАВКАЗСКОГО ТАНЦА · CRM</div>
+<div class="login" id="loginScreen">
+ <div class="login-box">
+  <div class="logo">
+   <div class="logo-mark">DJIGIT TAU</div>
+   <small>CRM • STUDIO MANAGEMENT</small>
+  </div>
+  <h2>Вход в систему</h2>
   <label>Логин</label>
   <input id="loginName" placeholder="Введите логин" autocomplete="username">
   <label>Пароль</label>
   <input id="loginPass" type="password" placeholder="Введите пароль" autocomplete="current-password">
-  <div id="error"></div>
-  <button class="primary full" onclick="login()">Войти в систему</button>
-  <p class="small">Демонстрационный доступ: director, admin, sales, teacher</p>
- </div>
-</section>
-
-<div id="app">
- <header>
-  <div class="brand">DJIGIT TAU</div>
-  <div class="row">
-   <span class="user" id="userLabel"></span>
-   <button class="secondary" onclick="logout()">Выйти</button>
+  <button class="btn" onclick="login()">ВОЙТИ В СИСТЕМУ</button>
+  <div class="hint">
+   Тестовые аккаунты:<br>
+   director / 123456 — Руководитель<br>
+   admin / 123456 — Администратор<br>
+   sales / 123456 — Отдел продаж<br>
+   teacher / 123456 — Педагог
   </div>
- </header>
- <main class="layout">
-  <nav id="nav"></nav>
-  <section id="content"></section>
-  <footer>DJIGIT TAU CRM · Демонстрационная версия</footer>
+  <p id="loginError" style="color:#f28b8b;font-size:12px;margin-top:12px"></p>
+ </div>
+</div>
+
+<div class="app" id="app">
+ <aside class="sidebar" id="sidebar">
+  <div class="brand">
+   <strong>DJIGIT TAU</strong>
+   <small>CRM • CONTROL SYSTEM</small>
+  </div>
+  <div class="nav" id="navigation"></div>
+  <div class="sidebar-bottom">
+   <button class="btn secondary" style="width:100%" onclick="logout()">Выйти из аккаунта</button>
+  </div>
+ </aside>
+ <main class="main">
+  <header class="topbar">
+   <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu" onclick="toggleMenu()">☰</button>
+    <span class="topbar-title" id="topTitle">Главная</span>
+   </div>
+   <div class="user-info">
+    <span id="roleLabel"></span>
+    <div class="avatar" id="userAvatar">D</div>
+   </div>
+  </header>
+  <div class="content" id="content"></div>
  </main>
 </div>
 
-<div id="modal">
- <div class="modal-card">
-  <div class="row"><h2 id="modalTitle">Добавить</h2><button class="secondary" onclick="closeModal()">Закрыть</button></div>
-  <div id="modalFields"></div>
-  <button class="primary full" onclick="saveRecord()">Сохранить</button>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+ <div class="modal">
+  <div class="modal-head">
+   <h2 id="modalTitle">Добавить</h2>
+   <button class="close" onclick="closeModal()">×</button>
+  </div>
+  <div id="modalBody"></div>
  </div>
 </div>
 
 <script>
-const accounts={
- director:{password:"123456",role:"Руководитель"},
- admin:{password:"123456",role:"Администратор"},
- sales:{password:"123456",role:"Отдел продаж"},
- teacher:{password:"123456",role:"Педагог"}
+const USERS={
+ director:{password:"123456",role:"director",name:"Руководитель"},
+ admin:{password:"123456",role:"admin",name:"Администратор"},
+ sales:{password:"123456",role:"sales",name:"Отдел продаж"},
+ teacher:{password:"123456",role:"teacher",name:"Педагог"}
 };
-const menus={
- director:["Главная","Заявки","Ученики","Группы","Филиалы","Педагоги","Финансы","Отчёты"],
- admin:["Главная","Заявки","Ученики","Группы","Филиалы","Педагоги","Финансы","Отчёты","AI-помощник"],
- sales:["Заявки","Ученики"],
- teacher:["Мои группы","Посещаемость"]
-};
-let currentUser=null,currentPage="",activeModal="";
-let data={
+
+const defaultData={
  "Заявки":[
-  {name:"Амина",phone:"+7 700 000 00 01",status:"Новая"},
-  {name:"Мурад",phone:"+7 700 000 00 02",status:"Связаться"}
+  {id:1,name:"Амина",phone:"+7 777 111 22 33",age:"8",direction:"Кавказские танцы",branch:"Айнабулак",stage:"Новая",comment:"Хочет на пробное"},
+  {id:2,name:"Марат",phone:"+7 701 222 33 44",age:"10",direction:"Кавказские танцы",branch:"Бостандык",stage:"Пробное занятие",comment:"Записан на пробное"},
+  {id:3,name:"Самира",phone:"+7 707 333 44 55",age:"7",direction:"Детская группа",branch:"Алмалы",stage:"Думает",comment:"Перезвонить"}
  ],
  "Ученики":[
-  {name:"Эльман",phone:"+7 700 000 00 03",group:"Средняя группа",status:"Активный"},
-  {name:"Камиль",phone:"+7 700 000 00 04",group:"Младшая группа",status:"Активный"}
+  {id:1,name:"Эльман Нариманович",phone:"+7 777 111 11 11",age:"12",group:"Младшая группа",branch:"Айнабулак",status:"Активный",lessons:8,paid:"Оплачено"},
+  {id:2,name:"Камиль",phone:"+7 701 222 22 22",age:"14",group:"Средняя группа",branch:"Бостандык",status:"Активный",lessons:4,paid:"Долг"},
+  {id:3,name:"Фатима",phone:"+7 707 333 33 33",age:"11",group:"Младшая группа",branch:"Алмалы",status:"Заморожен",lessons:0,paid:"Оплачено"}
  ],
  "Группы":[
-  {name:"Младшая группа",teacher:"Педагог 1",branch:"Алмалы"},
-  {name:"Средняя группа",teacher:"Педагог 2",branch:"Медеу"}
+  {id:1,name:"Младшая группа",age:"6–10 лет",teacher:"Камран",branch:"Айнабулак",schedule:"Пн, Ср, Пт 17:00",capacity:15},
+  {id:2,name:"Средняя группа",age:"11–15 лет",teacher:"Вугар",branch:"Бостандык",schedule:"Вт, Чт, Сб 18:00",capacity:15}
  ],
  "Филиалы":[
-  {name:"Айнабулак",address:"Алматы"},
-  {name:"Бостандык",address:"Алматы"},
-  {name:"Алмалы",address:"Алматы"},
-  {name:"Турксиб",address:"Алматы"},
-  {name:"Медеу",address:"Алматы"}
+  {id:1,name:"Айнабулак",address:"Алматы",phone:""},
+  {id:2,name:"Бостандык",address:"Алматы",phone:""},
+  {id:3,name:"Алмалы",address:"Алматы",phone:""},
+  {id:4,name:"Турксиб",address:"Алматы",phone:""},
+  {id:5,name:"Медеу",address:"Алматы",phone:""}
  ],
  "Педагоги":[
-  {name:"Педагог 1",phone:"+7 700 000 00 05",groups:"Младшая группа"},
-  {name:"Педагог 2",phone:"+7 700 000 00 06",groups:"Средняя группа"}
- ]
+  {id:1,name:"Камран",phone:"",direction:"Кавказские танцы",branch:"Айнабулак",groups:"Младшая группа",status:"Активный"},
+  {id:2,name:"Вугар",phone:"",direction:"Кавказские танцы",branch:"Бостандык",groups:"Средняя группа",status:"Активный"}
+ ],
+ "Финансы":[
+  {id:1,type:"Доход",title:"Абонемент",amount:30000,date:"2026-11-01",branch:"Айнабулак"},
+  {id:2,type:"Расход",title:"Аренда",amount:50000,date:"2026-11-02",branch:"Бостандык"}
+ ],
+ "Посещаемость":[]
 };
-let attendance={};
 
+let data=loadData();
+let currentUser=null;
+let currentPage="Главная";
+
+function loadData(){
+ try{
+  const saved=localStorage.getItem("djigitCRMData");
+  return saved?JSON.parse(saved):JSON.parse(JSON.stringify(defaultData));
+ }catch(e){return JSON.parse(JSON.stringify(defaultData))}
+}
+function saveData(){localStorage.setItem("djigitCRMData",JSON.stringify(data))}
 function login(){
- const name=document.getElementById("loginName").value.trim().toLowerCase();
- const pass=document.getElementById("loginPass").value;
- if(!accounts[name]||accounts[name].password!==pass){
-  document.getElementById("error").textContent="Неверный логин или пароль";
+ const u=document.getElementById("loginName").value.trim();
+ const p=document.getElementById("loginPass").value;
+ if(!USERS[u]||USERS[u].password!==p){
+  document.getElementById("loginError").textContent="Неверный логин или пароль";
   return;
  }
- currentUser={login:name,...accounts[name]};
- document.getElementById("login").style.display="none";
+ currentUser={...USERS[u],login:u};
+ document.getElementById("loginScreen").style.display="none";
  document.getElementById("app").style.display="block";
- document.getElementById("userLabel").textContent=currentUser.role;
- buildNav();
- openPage(menus[name][0]);
+ document.getElementById("roleLabel").textContent=currentUser.name;
+ document.getElementById("userAvatar").textContent=currentUser.name[0];
+ buildNavigation();
+ go("Главная");
 }
+document.getElementById("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
 function logout(){
  currentUser=null;
  document.getElementById("app").style.display="none";
- document.getElementById("login").style.display="grid";
+ document.getElementById("loginScreen").style.display="flex";
  document.getElementById("loginPass").value="";
 }
-function buildNav(){
- const nav=document.getElementById("nav");
+function toggleMenu(){document.getElementById("sidebar").classList.toggle("open")}
+
+const pages={
+ director:["Главная","Заявки","Ученики","Группы","Филиалы","Педагоги","Финансы","Отчёты","Посещаемость"],
+ admin:["Главная","Заявки","Ученики","Группы","Филиалы","Педагоги","Финансы","Отчёты","Посещаемость","AI-помощник"],
+ sales:["Заявки"],
+ teacher:["Мои группы","Мои ученики","Посещаемость","Расписание"]
+};
+const icons={"Главная":"⌂","Заявки":"▤","Ученики":"♙","Группы":"▦","Филиалы":"⌖","Педагоги":"♟","Финансы":"₸","Отчёты":"▥","Посещаемость":"✓","AI-помощник":"✦","Мои группы":"▦","Мои ученики":"♙","Расписание":"◷"};
+function buildNavigation(){
+ const nav=document.getElementById("navigation");
  nav.innerHTML="";
- menus[currentUser.login].forEach(item=>{
+ const allowed=pages[currentUser.role];
+ allowed.forEach((p,i)=>{
+  if(i===0)nav.innerHTML+='<div class="nav-title">Рабочее пространство</div>';
   const b=document.createElement("button");
-  b.textContent=item;b.onclick=()=>openPage(item);b.id="nav-"+item;
+  b.innerHTML=`<span>${icons[p]||"•"}</span>${p}`;
+  b.onclick=()=>go(p);
+  b.id="nav-"+p;
   nav.appendChild(b);
  });
 }
-function openPage(page){
+function go(page){
  currentPage=page;
- document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.textContent===page));
- const c=document.getElementById("content");
- if(page==="Главная")return dashboard(c);
- if(page==="Финансы")return finance(c);
- if(page==="Отчёты")return reports(c);
- if(page==="AI-помощник")return assistant(c);
- if(page==="Мои группы")return teacherGroups(c);
- if(page==="Посещаемость")return attendancePage(c);
- if(data[page])return tablePage(c,page);
- c.innerHTML="<h1>"+page+"</h1><p class='muted'>Раздел</p>";
+ document.getElementById("topTitle").textContent=page;
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ const active=document.getElementById("nav-"+page);
+ if(active)active.classList.add("active");
+ document.getElementById("sidebar").classList.remove("open");
+ render();
 }
-function dashboard(c){
- const students=data["Ученики"].length;
- const leads=data["Заявки"].length;
- c.innerHTML=`
- <h1>Главная панель</h1><p class="muted">Обзор работы студии</p>
- <div class="grid">
-  <div class="card">Всего учеников<div class="metric">${students}</div></div>
-  <div class="card">Заявки<div class="metric">${leads}</div></div>
-  <div class="card">Группы<div class="metric">${data["Группы"].length}</div></div>
-  <div class="card">Филиалы<div class="metric">${data["Филиалы"].length}</div></div>
+function canManage(){return ["director","admin"].includes(currentUser.role)}
+function money(n){return Number(n||0).toLocaleString("ru-RU")+" ₸"}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function stat(title,value,note=""){
+ return `<div class="stat"><span>${title}</span><strong>${value}</strong><small>${note}</small></div>`;
+}
+function head(title,sub,button=""){
+ return `<div class="page-head"><div><h1>${title}</h1><p>${sub||""}</p></div>${button}</div>`;
+}
+function render(){
+ const el=document.getElementById("content");
+ if(currentPage==="Главная")el.innerHTML=dashboard();
+ else if(currentPage==="Заявки")el.innerHTML=leadsPage();
+ else if(currentPage==="Ученики"||currentPage==="Мои ученики")el.innerHTML=studentsPage();
+ else if(currentPage==="Группы"||currentPage==="Мои группы")el.innerHTML=groupsPage();
+ else if(currentPage==="Филиалы")el.innerHTML=branchesPage();
+ else if(currentPage==="Педагоги")el.innerHTML=teachersPage();
+ else if(currentPage==="Финансы")el.innerHTML=financePage();
+ else if(currentPage==="Отчёты")el.innerHTML=reportsPage();
+ else if(currentPage==="Посещаемость")el.innerHTML=attendancePage();
+ else if(currentPage==="Расписание")el.innerHTML=schedulePage();
+ else if(currentPage==="AI-помощник")el.innerHTML=aiPage();
+}
+function dashboard(){
+ const students=data["Ученики"];
+ const active=students.filter(x=>x.status==="Активный").length;
+ const debt=students.filter(x=>x.paid==="Долг").length;
+ const income=data["Финансы"].filter(x=>x.type==="Доход").reduce((a,x)=>a+Number(x.amount),0);
+ const expense=data["Финансы"].filter(x=>x.type==="Расход").reduce((a,x)=>a+Number(x.amount),0);
+ const leads=data["Заявки"];
+ return head("Главная","Обзор работы студии DJIGIT TAU")+
+ `<div class="grid">
+ ${stat("Всего учеников",students.length,"В базе CRM")}
+ ${stat("Активные ученики",active,"Посещают занятия")}
+ ${stat("Новые заявки",leads.length,"В воронке продаж")}
+ ${stat("Задолженности",debt,"Требуют внимания")}
  </div>
  <div class="grid">
-  <div class="card"><h2>Воронка заявок</h2><p>Новые обращения: ${leads}</p><p class="muted">Здесь будут этапы работы с клиентами</p></div>
-  <div class="card"><h2>Посещаемость</h2><p class="muted">Отметки педагогов будут отображаться здесь</p></div>
+ ${stat("Доходы",money(income),"Все внесённые доходы")}
+ ${stat("Расходы",money(expense),"Все внесённые расходы")}
+ ${stat("Прибыль",money(income-expense),"Доходы минус расходы")}
+ ${stat("Филиалы",data["Филиалы"].length,"В системе")}
+ </div>
+ <div class="two-col">
+  <div class="card"><h3>Воронка заявок</h3>
+   ${["Новая","Связались","Пробное занятие","Думает","Записан"].map(s=>{
+    const n=leads.filter(x=>x.stage===s).length;
+    return `<div style="font-size:12px;display:flex;justify-content:space-between"><span>${s}</span><b>${n}</b></div><div class="bar"><i style="width:${leads.length?n/leads.length*100:0}%"></i></div>`;
+   }).join("")}
+  </div>
+  <div class="card"><h3>Филиалы</h3>
+   ${data["Филиалы"].map(b=>`<p style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(b.name)}</span><span class="status gold">${students.filter(s=>s.branch===b.name).length} учеников</span></p>`).join("")}
+  </div>
+ </div>
+ <div class="card"><h3>Последние заявки</h3>${table(["Имя","Телефон","Филиал","Этап"],leads.slice(0,5).map(x=>[x.name,x.phone,x.branch,x.stage]))}</div>`;
+}
+function table(headers,rows){
+ if(!rows.length)return `<div class="empty">Пока нет данных</div>`;
+ return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${v??""}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function leadsPage(){
+ const rows=data["Заявки"];
+ return head("Заявки","Воронка продаж и работа с клиентами",
+ canManage()||currentUser.role==="sales"?`<button class="btn" onclick="openForm('Заявки')">+ Добавить заявку</button>`:"")+
+ `<div class="toolbar"><input id="searchLead" placeholder="Поиск заявки..." oninput="filterRows('leadTable',this.value)"></div>
+ <div class="pipeline" id="leadTable">
+ ${["Новая","Связались","Пробное занятие","Думает","Записан"].map(stage=>`
+ <div class="stage"><h3>${stage} · ${rows.filter(x=>x.stage===stage).length}</h3>
+ ${rows.filter(x=>x.stage===stage).map(x=>`<div class="lead" onclick="showLead(${x.id})">
+ <b>${esc(x.name)}</b><small>${esc(x.phone)}</small><small>${esc(x.branch)}</small>
+ <small>${esc(x.direction)}</small></div>`).join("")||'<p class="notice">Нет заявок</p>'}
+ </div>`).join("")}
  </div>`;
 }
-function tablePage(c,page){
- const rows=data[page];
- const canAdd=["director","admin"].includes(currentUser.login) &&
-  !(currentUser.login==="sales"&&page==="Ученики");
- let html=`<div class="row"><div><h1>${page}</h1><p class="muted">Управление разделом</p></div>
- ${canAdd?'<button class="primary" onclick="addRecord()">＋ Добавить</button>':""}</div>
- <div class="toolbar"><input id="search" placeholder="Поиск..." oninput="filterRows()"></div>
- <div class="table-wrap"><table><thead><tr>`;
- const keys=rows.length?Object.keys(rows[0]):["name"];
- keys.forEach(k=>html+=`<th>${({name:"Имя / название",phone:"Телефон",status:"Статус",group:"Группа",teacher:"Педагог",branch:"Филиал",address:"Адрес",groups:"Группы"})[k]||k}</th>`);
- html+="</tr></thead><tbody id='tableBody'>";
- rows.forEach((r,i)=>html+=rowHtml(r,i,keys));
- html+="</tbody></table></div>";
- c.innerHTML=html;
+function showLead(id){
+ const x=data["Заявки"].find(a=>a.id===id);if(!x)return;
+ openModal("Карточка заявки",`
+ <p><b>${esc(x.name)}</b></p>
+ <p>Телефон: ${esc(x.phone)}</p><p>Возраст: ${esc(x.age)}</p>
+ <p>Направление: ${esc(x.direction)}</p><p>Филиал: ${esc(x.branch)}</p>
+ <p>Комментарий: ${esc(x.comment)}</p>
+ <label>Этап заявки</label><select id="editStage">${["Новая","Связались","Пробное занятие","Думает","Записан"].map(s=>`<option ${x.stage===s?"selected":""}>${s}</option>`).join("")}</select>
+ ${canManage()||currentUser.role==="sales"?`<div class="form-actions"><button class="btn danger" onclick="removeItem('Заявки',${id})">Удалить</button><button class="btn" onclick="updateLead(${id})">Сохранить</button></div>`:""}
+ `);
 }
-function rowHtml(r,i,keys){
- return "<tr>"+keys.map(k=>`<td>${escapeHtml(r[k]||"—")}</td>`).join("")+"</tr>";
+function updateLead(id){
+ const x=data["Заявки"].find(a=>a.id===id);x.stage=document.getElementById("editStage").value;
+ saveData();closeModal();render();
 }
-function escapeHtml(s){
- return String(s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-}
-function filterRows(){
- const q=document.getElementById("search").value.toLowerCase();
- const rows=data[currentPage],keys=Object.keys(rows[0]||{name:""});
- document.getElementById("tableBody").innerHTML=rows
- .map((r,i)=>({r,i})).filter(x=>keys.some(k=>String(x.r[k]||"").toLowerCase().includes(q)))
- .map(x=>rowHtml(x.r,x.i,keys)).join("");
-}
-function addRecord(){
- activeModal=currentPage;
- const fields={
-  "Заявки":[["name","Имя"],["phone","Телефон"],["status","Статус"]],
-  "Ученики":[["name","Имя ученика"],["phone","Телефон родителя"],["group","Группа"],["status","Статус"]],
-  "Группы":[["name","Название группы"],["teacher","Педагог"],["branch","Филиал"]],
-  "Филиалы":[["name","Название филиала"],["address","Адрес"]],
-  "Педагоги":[["name","Имя педагога"],["phone","Телефон"],["groups","Группы"]]
- }[activeModal]||[];
- document.getElementById("modalTitle").textContent="Добавить: "+activeModal;
- document.getElementById("modalFields").innerHTML=fields.map(([id,label])=>
- `<label>${label}</label><input id="field-${id}" placeholder="${label}">`).join("");
- document.getElementById("modal").style.display="grid";
-}
-function closeModal(){document.getElementById("modal").style.display="none"}
-function saveRecord(){
- const fields=[...document.querySelectorAll("#modalFields input")];
- const record={};
- fields.forEach(f=>record[f.id.replace("field-","")]=f.value.trim());
- if(!record.name){alert("Заполните имя или название");return}
- data[activeModal].push(record);
- closeModal();openPage(activeModal);
-}
-function finance(c){
- if(currentUser.login==="admin"){
-  c.innerHTML="<h1>Финансы</h1><div class='card'><h2>Операционные платежи</h2><p class='muted'>Администратор может вести оплату и задолженности. Сводные финансовые показатели доступны руководителю.</p></div>";
-  return;
+function studentsPage(){
+ let rows=data["Ученики"];
+ if(currentUser.role==="teacher"){
+  const mine=data["Группы"].filter(g=>g.teacher==="Камран").map(g=>g.name);
+  rows=rows.filter(s=>mine.includes(s.group));
  }
- c.innerHTML=`<h1>Финансы</h1><div class="grid">
- <div class="card">Доходы<div class="metric">0 ₸</div></div>
- <div class="card">Расходы<div class="metric">0 ₸</div></div>
- <div class="card">Долги<div class="metric">0 ₸</div></div>
- <div class="card">Прибыль<div class="metric">0 ₸</div></div></div>
- <p class="muted">Демонстрационные значения. Подключение реальных платежей ещё не настроено.</p>`;
+ return head(currentPage,"Список учеников и состояние абонементов",
+ canManage()?`<button class="btn" onclick="openForm('Ученики')">+ Добавить ученика</button>`:"")+
+ `<div class="grid">
+ ${stat("Всего",rows.length)}
+ ${stat("Активные",rows.filter(x=>x.status==="Активный").length)}
+ ${stat("Неактивные",rows.filter(x=>x.status==="Неактивный").length)}
+ ${stat("Замороженные",rows.filter(x=>x.status==="Заморожен").length)}
+ </div>
+ <div class="toolbar"><input placeholder="Поиск ученика..." oninput="filterRows('studentTable',this.value)">
+ <select onchange="filterByBranch(this.value,'studentTable')"><option value="">Все филиалы</option>${data["Филиалы"].map(b=>`<option>${esc(b.name)}</option>`).join("")}</select></div>
+ <div class="card"><div id="studentTable">${table(["ФИО","Телефон","Возраст","Группа","Филиал","Статус","Занятия","Оплата"],rows.map(x=>[
+ `<a href="#" onclick="showStudent(${x.id});return false" style="color:var(--gold2)">${esc(x.name)}</a>`,esc(x.phone),esc(x.age),esc(x.group),esc(x.branch),`<span class="status ${x.status==="Активный"?"green":"gold"}">${esc(x.status)}</span>`,x.lessons,`<span class="status ${x.paid==="Долг"?"red":"green"}">${esc(x.paid)}</span>`
+ ]))}</div></div>`;
 }
-function reports(c){
- c.innerHTML="<h1>Отчёты</h1><div class='card'><p>Отчёты по ученикам, заявкам, посещаемости, финансам, педагогам, группам и филиалам.</p><p class='muted'>Экспорт Excel и PDF будет подключён в следующей версии.</p></div>";
+function showStudent(id){
+ const x=data["Ученики"].find(a=>a.id===id);if(!x)return;
+ openModal("Карточка ученика",`
+ <h3>${esc(x.name)}</h3>
+ <p>Телефон: ${esc(x.phone)}</p><p>Возраст: ${esc(x.age)}</p>
+ <p>Группа: ${esc(x.group)}</p><p>Филиал: ${esc(x.branch)}</p>
+ <p>Остаток занятий: <b>${x.lessons}</b></p><p>Оплата: ${esc(x.paid)}</p>
+ ${canManage()||currentUser.role==="teacher"?`
+ <label>Статус</label><select id="studentStatus">${["Активный","Неактивный","Заморожен"].map(s=>`<option ${x.status===s?"selected":""}>${s}</option>`).join("")}</select>
+ <label>Остаток занятий</label><input id="studentLessons" type="number" value="${x.lessons}">
+ <div class="form-actions"><button class="btn" onclick="updateStudent(${id})">Сохранить</button></div>`:""}
+ ${canManage()?`<div class="form-actions"><button class="btn danger" onclick="removeItem('Ученики',${id})">Удалить ученика</button></div>`:""}
+ `);
 }
-function assistant(c){
- c.innerHTML=`<h1>AI-помощник</h1><div class="card"><h2>Помощник администратора</h2>
- <p class="muted">Здесь можно будет анализировать заявки, посещаемость и работу филиалов.</p>
- <p class="small">AI-функции пока не подключены.</p></div>`;
+function updateStudent(id){
+ const x=data["Ученики"].find(a=>a.id===id);
+ x.status=document.getElementById("studentStatus").value;
+ x.lessons=Number(document.getElementById("studentLessons").value);
+ saveData();closeModal();render();
 }
-function teacherGroups(c){
- const groups=data["Группы"].filter(g=>g.teacher.toLowerCase().includes("педагог"));
- c.innerHTML="<h1>Мои группы</h1><div class='grid'>"+
- (groups.length?groups.map(g=>`<div class="card"><h2>${escapeHtml(g.name)}</h2><p class="muted">${escapeHtml(g.branch)}</p><span class="tag">${escapeHtml(g.teacher)}</span></div>`).join(""):"<div class='card'>Группы пока не назначены этому педагогу.</div>")+"</div>";
+function groupsPage(){
+ let rows=data["Группы"];
+ if(currentUser.role==="teacher")rows=rows.filter(x=>x.teacher==="Камран");
+ return head(currentPage,"Группы, педагоги и расписание",
+ canManage()?`<button class="btn" onclick="openForm('Группы')">+ Добавить группу</button>`:"")+
+ `<div class="grid">${stat("Всего групп",rows.length)}${stat("Учеников",data["Ученики"].length)}${stat("Филиалов",data["Филиалы"].length)}${stat("Педагогов",data["Педагоги"].length)}</div>
+ <div class="card">${table(["Группа","Возраст","Педагог","Филиал","Расписание","Учеников","Вместимость"],rows.map(g=>[
+ esc(g.name),esc(g.age),esc(g.teacher),esc(g.branch),esc(g.schedule),
+ data["Ученики"].filter(s=>s.group===g.name).length,g.capacity
+ ]))}</div>`;
 }
-function attendancePage(c){
- const groups=data["Группы"];
- c.innerHTML=`<h1>Посещаемость</h1><div class="card">
- <p>Выберите группу и отметьте присутствие учеников.</p>
- <label>Группа</label><select id="attGroup">${groups.map(g=>`<option>${escapeHtml(g.name)}</option>`).join("")}</select>
- <label>Ученик</label><select id="attStudent">${data["Ученики"].map(s=>`<option>${escapeHtml(s.name)}</option>`).join("")}</select>
- <label>Статус</label><select id="attStatus"><option>Присутствовал</option><option>Отсутствовал</option><option>Уважительная причина</option></select>
- <button class="primary" onclick="saveAttendance()">Сохранить отметку</button>
- <p id="attMessage" class="muted"></p></div>`;
+function branchesPage(){
+ return head("Филиалы","Управление филиалами студии",
+ `<button class="btn" onclick="openForm('Филиалы')">+ Добавить филиал</button>`)+
+ `<div class="grid">${data["Филиалы"].map(b=>`
+ <div class="card"><h3>${esc(b.name)}</h3><p class="notice">${esc(b.address)}</p>
+ <strong style="font-size:24px">${data["Ученики"].filter(s=>s.branch===b.name).length}</strong>
+ <p class="notice">Учеников</p><span class="status green">В системе</span></div>`).join("")}</div>
+ <div class="card">${table(["Филиал","Адрес","Телефон","Группы","Ученики"],data["Филиалы"].map(b=>[
+ esc(b.name),esc(b.address),esc(b.phone),data["Группы"].filter(g=>g.branch===b.name).length,
+ data["Ученики"].filter(s=>s.branch===b.name).length
+ ]))}</div>`;
+}
+function teachersPage(){
+ return head("Педагоги","Команда и нагрузка",
+ `<button class="btn" onclick="openForm('Педагоги')">+ Добавить педагога</button>`)+
+ `<div class="grid">${stat("Педагогов",data["Педагоги"].length)}${stat("Групп",data["Группы"].length)}${stat("Учеников",data["Ученики"].length)}${stat("Филиалов",data["Филиалы"].length)}</div>
+ <div class="card">${table(["ФИО","Телефон","Направление","Филиал","Группы","Статус"],data["Педагоги"].map(t=>[
+ esc(t.name),esc(t.phone),esc(t.direction),esc(t.branch),esc(t.groups),`<span class="status green">${esc(t.status)}</span>`
+ ]))}</div>`;
+}
+function financePage(){
+ const rows=data["Финансы"];
+ const inc=rows.filter(x=>x.type==="Доход").reduce((a,x)=>a+Number(x.amount),0);
+ const out=rows.filter(x=>x.type==="Расход").reduce((a,x)=>a+Number(x.amount),0);
+ return head("Финансы","Доходы, расходы и финансовый результат",
+ `<button class="btn" onclick="openForm('Финансы')">+ Добавить операцию</button>`)+
+ `<div class="grid">${stat("Доходы",money(inc))}${stat("Расходы",money(out))}${stat("Прибыль",money(inc-out))}${stat("Операций",rows.length)}</div>
+ <div class="card"><h3>Финансовые операции</h3>${table(["Тип","Описание","Сумма","Дата","Филиал"],rows.map(x=>[
+ `<span class="status ${x.type==="Доход"?"green":"red"}">${x.type}</span>`,esc(x.title),money(x.amount),esc(x.date),esc(x.branch)
+ ]))}</div>`;
+}
+function reportsPage(){
+ const s=data["Ученики"],l=data["Заявки"],f=data["Финансы"];
+ return head("Отчёты","Сводная аналитика студии")+
+ `<div class="grid">${stat("Конверсия заявок",l.length?Math.round(l.filter(x=>x.stage==="Записан").length/l.length*100)+"%":"0%")}
+ ${stat("Активные ученики",s.filter(x=>x.status==="Активный").length)}
+ ${stat("Долги",s.filter(x=>x.paid==="Долг").length)}
+ ${stat("Всего операций",f.length)}</div>
+ <div class="card"><h3>Отчёт по филиалам</h3>${table(["Филиал","Ученики","Группы","Педагоги"],data["Филиалы"].map(b=>[
+ esc(b.name),s.filter(x=>x.branch===b.name).length,
+ data["Группы"].filter(x=>x.branch===b.name).length,
+ data["Педагоги"].filter(x=>x.branch===b.name).length
+ ]))}</div>
+ <div class="card"><h3>Отчёт по ученикам</h3>${table(["Статус","Количество"],["Активный","Неактивный","Заморожен"].map(st=>[st,s.filter(x=>x.status===st).length]))}</div>
+ <button class="btn" onclick="exportCSV()">Экспорт учеников в CSV</button>`;
+}
+function attendancePage(){
+ const isTeacher=currentUser.role==="teacher";
+ const groups=data["Группы"].filter(g=>!isTeacher||g.teacher==="Камран");
+ return head("Посещаемость","Отмечайте присутствие учеников на занятиях")+
+ `<div class="card">
+ <label>Группа</label><select id="attGroup" onchange="attendanceStudents()">${groups.map(g=>`<option>${esc(g.name)}</option>`).join("")}</select>
+ <label>Дата занятия</label><input id="attDate" type="date" value="${new Date().toISOString().slice(0,10)}">
+ <div id="attStudents"></div>
+ <button class="btn" onclick="saveAttendance()">Сохранить посещаемость</button>
+ </div>
+ <div class="card"><h3>Последние отметки</h3>${table(["Дата","Группа","Ученик","Статус"],data["Посещаемость"].slice(-20).reverse().map(a=>[
+ esc(a.date),esc(a.group),esc(a.student),esc(a.status)
+ ]))}</div>`;
+}
+function attendanceStudents(){
+ const group=document.getElementById("attGroup")?.value;
+ const students=data["Ученики"].filter(s=>s.group===group);
+ const oldDate=document.getElementById("attDate")?.value;
+ document.getElementById("attStudents").innerHTML=students.map(s=>`
+ <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:12px 0">
+ <span>${esc(s.name)}</span><select data-att="${s.id}" style="width:150px;margin:0">
+ <option>Присутствовал</option><option>Отсутствовал</option><option>Опоздал</option></select></div>`).join("")||'<p class="empty">В этой группе пока нет учеников</p>';
 }
 function saveAttendance(){
- const item={group:document.getElementById("attGroup").value,student:document.getElementById("attStudent").value,status:document.getElementById("attStatus").value,date:new Date().toLocaleDateString("ru-RU")};
- attendance[item.date+"-"+item.student]=item;
- document.getElementById("attMessage").textContent="Отметка сохранена: "+item.student+" — "+item.status;
+ const group=document.getElementById("attGroup").value;
+ const date=document.getElementById("attDate").value;
+ document.querySelectorAll("[data-att]").forEach(el=>{
+  const s=data["Ученики"].find(x=>x.id===Number(el.dataset.att));
+  if(s)data["Посещаемость"].push({date,group,student:s.name,status:el.value});
+ });
+ saveData();render();alert("Посещаемость сохранена");
 }
-document.addEventListener("keydown",e=>{
- if(e.key==="Enter"&&document.getElementById("login").style.display!=="none")login();
-});
+function schedulePage(){
+ return head("Расписание","Расписание занятий по группам")+
+ `<div class="card">${table(["Группа","Педагог","Филиал","Расписание"],data["Группы"].filter(g=>g.teacher==="Камран").map(g=>[
+ esc(g.name),esc(g.teacher),esc(g.branch),esc(g.schedule)
+ ]))}</div>`;
+}
+function aiPage(){
+ return head("AI-помощник","Помощник администратора DJIGIT TAU")+
+ `<div class="card ai-box">
+ <h3 style="color:var(--gold2)">✦ AI-помощник администратора</h3>
+ <p class="notice">Тестовый помощник. Он использует данные демоверсии и готовит примерные ответы.</p>
+ <label>Ваш вопрос</label>
+ <textarea id="aiQuestion" rows="3" placeholder="Например: сколько учеников имеют задолженность?"></textarea>
+ <button class="btn" onclick="askAI()">Получить ответ</button>
+ <div class="ai-answer" id="aiAnswer" style="margin-top:18px"></div>
+ </div>`;
+}
+function askAI(){
+ const q=document.getElementById("aiQuestion").value.toLowerCase();
+ const students=data["Ученики"];
+ const debts=students.filter(s=>s.paid==="Долг");
+ const active=students.filter(s=>s.status==="Активный");
+ const leads=data["Заявки"];
+ let answer="Я тестовый помощник DJIGIT TAU. В этой версии я могу показать основные цифры CRM. Для настоящих ответов на любые вопросы потребуется подключение AI-сервиса.";
+ if(q.includes("долг")||q.includes("задолж")){
+  answer=`Учеников с задолженностью: ${debts.length}.\n`+debts.map(s=>s.name+" — "+s.branch).join("\n");
+ }else if(q.includes("учен")){
+  answer=`Всего учеников: ${students.length}.\nАктивных: ${active.length}.\nЗамороженных: ${students.filter(s=>s.status==="Заморожен").length}.`;
+ }else if(q.includes("заяв")){
+  answer=`Всего заявок: ${leads.length}.\n`+leads.map(x=>x.name+" — "+x.stage).join("\n");
+ }else if(q.includes("груп")){
+  answer=`Групп в системе: ${data["Группы"].length}.\n`+data["Группы"].map(g=>g.name+" — "+g.branch).join("\n");
+ }else if(q.includes("филиал")){
+  answer=`Филиалов: ${data["Филиалы"].length}.\n`+data["Филиалы"].map(b=>b.name).join(", ");
+ }
+ document.getElementById("aiAnswer").textContent=answer;
+}
+function openForm(type){
+ if(!canManage()&&!(type==="Заявки"&&currentUser.role==="sales"))return;
+ const fields={
+ "Заявки":[["name","Имя"],["phone","Телефон"],["age","Возраст"],["direction","Направление"],["branch","Филиал"],["comment","Комментарий"]],
+ "Ученики":[["name","ФИО"],["phone","Телефон"],["age","Возраст"],["group","Группа"],["branch","Филиал"],["lessons","Остаток занятий"],["status","Статус"],["paid","Оплата"]],
+ "Группы":[["name","Название"],["age","Возраст"],["teacher","Педагог"],["branch","Филиал"],["schedule","Расписание"],["capacity","Вместимость"]],
+ "Филиалы":[["name","Название"],["address","Адрес"],["phone","Телефон"]],
+ "Педагоги":[["name","ФИО"],["phone","Телефон"],["direction","Направление"],["branch","Филиал"],["groups","Группы"],["status","Статус"]],
+ "Финансы":[["type","Тип операции"],["title","Описание"],["amount","Сумма"],["date","Дата"],["branch","Филиал"]]
+ };
+ let html='<form id="dataForm" onsubmit="addItem(event,\''+type+'\')"><div class="form-grid">';
+ fields[type].forEach(([key,label])=>{
+  html+=`<div><label>${label}</label>`;
+  if(key==="branch"){
+   html+=`<select name="${key}"><option value="">Выберите</option>${data["Филиалы"].map(x=>`<option>${esc(x.name)}</option>`).join("")}</select>`;
+  }else if(key==="group"){
+   html+=`<select name="${key}"><option value="">Выберите</option>${data["Группы"].map(x=>`<option>${esc(x.name)}</option>`).join("")}</select>`;
+  }else if(key==="teacher"){
+   html+=`<select name="${key}"><option value="">Выберите</option>${data["Педагоги"].map(x=>`<option>${esc(x.name)}</option>`).join("")}</select>`;
+  }else if(key==="status"){
+   html+=`<select name="${key}"><option>Активный</option><option>Неактивный</option><option>Заморожен</option></select>`;
+  }else if(key==="paid"){
+   html+=`<select name="${key}"><option>Оплачено</option><option>Долг</option></select>`;
+  }else if(key==="type"){
+   html+=`<select name="${key}"><option>Доход</option><option>Расход</option></select>`;
+  }else if(key==="date"){
+   html+=`<input name="${key}" type="date" value="${new Date().toISOString().slice(0,10)}">`;
+  }else if(key==="comment"||key==="schedule"){
+   html+=`<textarea name="${key}" rows="2"></textarea>`;
+  }else{
+   html+=`<input name="${key}" ${key==="amount"||key==="lessons"||key==="capacity"||key==="age"?"type=\"number\"":"type=\"text\""}>`;
+  }
+  html+="</div>";
+ });
+ html+='</div><div class="form-actions"><button type="button" class="btn secondary" onclick="closeModal()">Отмена</button><button class="btn" type="submit">Сохранить</button></div></form>';
+ openModal("Добавить: "+type,html);
+}
+function addItem(e,type){
+ e.preventDefault();
+ const form=new FormData(e.target);
+ const item=Object.fromEntries(form.entries());
+ item.id=Date.now();
+ if(type==="Заявки")item.stage="Новая";
+ if(type==="Ученики"){item.lessons=Number(item.lessons||0);item.status=item.status||"Активный";item.paid=item.paid||"Оплачено";}
+ if(type==="Группы")item.capacity=Number(item.capacity||15);
+ if(type==="Финансы")item.amount=Number(item.amount||0);
+ data[type].push(item);saveData();closeModal();render();
+}
+function removeItem(type,id){
+ if(!confirm("Удалить запись?"))return;
+ data[type]=data[type].filter(x=>x.id!==id);
+ saveData();closeModal();render();
+}
+function openModal(title,body){
+ document.getElementById("modalTitle").textContent=title;
+ document.getElementById("modalBody").innerHTML=body;
+ document.getElementById("modalBg").style.display="flex";
+}
+function closeModal(){document.getElementById("modalBg").style.display="none"}
+function filterRows(id,value){
+ const root=document.getElementById(id);if(!root)return;
+ root.querySelectorAll(".lead").forEach(row=>{
+  row.style.display=row.textContent.toLowerCase().includes(value.toLowerCase())?"":"none";
+ });
+ const table=root.querySelector("table");
+ if(table)table.querySelectorAll("tbody tr").forEach(row=>{
+  row.style.display=row.textContent.toLowerCase().includes(value.toLowerCase())?"":"none";
+ });
+}
+function filterByBranch(value,id){
+ const root=document.getElementById(id);if(!root)return;
+ root.querySelectorAll("tbody tr").forEach(row=>{
+  row.style.display=!value||row.cells[4]?.textContent===value?"":"none";
+ });
+}
+function exportCSV(){
+ const rows=data["Ученики"];
+ const header=["ФИО","Телефон","Возраст","Группа","Филиал","Статус","Занятия","Оплата"];
+ const csv=[header,...rows.map(x=>[x.name,x.phone,x.age,x.group,x.branch,x.status,x.lessons,x.paid])]
+ .map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\n");
+ const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="djigit-tau-students.csv";a.click();
+ URL.revokeObjectURL(a.href);
+}
 </script>
 </body>
 </html>
