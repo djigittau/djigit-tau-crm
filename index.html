@@ -1,50 +1,287 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#101010" />
-<title>DJIGIT TAU CRM — V1.0</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJIGIT TAU CRM</title>
 <style>
-:root{--bg:#0d0e10;--panel:#17191c;--panel2:#202226;--line:#2b2d31;--gold:#d5aa55;--gold2:#f0cf83;--text:#f4f2ed;--muted:#9b9da3;--green:#54c58a;--red:#ed7777}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-columns:245px 1fr}.sidebar{background:#111214;border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:22px}.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 18px;border-bottom:1px solid var(--line)}.eagle{width:42px;height:42px;border:1px solid #735b30;border-radius:12px;display:grid;place-items:center;color:var(--gold);font-size:23px}.brand strong{display:block;letter-spacing:1.5px;font-size:14px}.brand small{color:var(--gold);letter-spacing:2px}.role-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.3px;padding:0 10px}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#b8b9bd;text-align:left;padding:11px 12px;border-radius:10px;display:flex;gap:12px;align-items:center}.nav button.active,.nav button:hover{background:linear-gradient(90deg,#4a3920,#29231a);color:#fff}.nav .ico{width:19px;text-align:center;color:var(--gold)}.profile{margin-top:auto;border-top:1px solid var(--line);padding:16px 8px 0;display:flex;align-items:center;gap:10px}.avatar{width:36px;height:36px;border-radius:50%;background:#51432c;color:#f6d994;display:grid;place-items:center;font-weight:700}.profile small{display:block;color:var(--muted)}main{min-width:0;padding:26px 30px 50px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:26px}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:1.7px;text-transform:uppercase}.topbar h1{margin:3px 0 0;font-size:27px}.top-actions{display:flex;gap:9px;align-items:center}.select-role,.ghost,.gold-btn{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:10px 13px}.gold-btn{background:linear-gradient(135deg,#e4c47d,#b98836);border:0;color:#17130c;font-weight:700}.ghost:hover{border-color:var(--gold)}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.stat,.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px}.stat .label{color:var(--muted);font-size:12px}.stat .value{font-size:27px;font-weight:750;margin:8px 0 3px}.trend{font-size:11px;color:var(--green)}.content-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:15px}.card h2{font-size:16px;margin:0 0 15px}.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.muted{color:var(--muted)}.pipeline{display:grid;gap:10px}.pipe-row{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);padding:11px 12px;border-radius:9px}.count{color:var(--gold2);font-weight:700}.bar{height:7px;background:#303237;border-radius:20px;overflow:hidden;margin-top:7px}.bar span{display:block;height:100%;background:linear-gradient(90deg,#8e672e,#e2bf70);border-radius:20px}.activity{display:grid;gap:12px}.activity-item{display:flex;gap:11px;align-items:flex-start}.dot{width:8px;height:8px;background:var(--gold);border-radius:50%;margin-top:6px}.activity-item small{display:block;color:var(--muted);margin-top:2px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:480px}.table th,.table td{text-align:left;padding:12px 9px;border-bottom:1px solid var(--line);font-size:13px}.table th{color:var(--muted);font-weight:500}.pill{display:inline-block;border-radius:30px;padding:4px 8px;background:#283a30;color:#83d4a6;font-size:11px}.pill.gold{background:#3b301d;color:#e9c579}.pill.red{background:#402626;color:#f39a9a}.role-note{background:#211d16;border:1px solid #594627;color:#e7d2a7;padding:12px 14px;border-radius:11px;margin-bottom:15px;font-size:13px}.ai-panel{border:1px solid #755a2d;background:linear-gradient(145deg,#211b11,#17191c);border-radius:16px;padding:17px;margin-top:15px}.ai-title{display:flex;align-items:center;gap:10px;margin-bottom:12px}.spark{width:34px;height:34px;border-radius:10px;background:#4b391c;display:grid;place-items:center;color:#f0ce7e}.ai-title strong{display:block}.ai-title small{color:var(--green)}.chat{height:190px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:8px 0}.bubble{max-width:88%;padding:10px 12px;border-radius:12px;background:#292b2f;font-size:13px}.bubble.user{align-self:flex-end;background:#49391f;color:#fff0cf}.chat-form{display:flex;gap:8px}.chat-form input{min-width:0;flex:1;background:#101113;border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--text)}.hint{font-size:11px;color:var(--muted);margin-top:9px}.list{display:grid;gap:9px}.list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel2);padding:12px;border-radius:10px}.list-row strong{font-size:13px}.list-row small{display:block;color:var(--muted);font-size:11px}.empty{padding:30px;text-align:center;color:var(--muted)}.mobile-menu{display:none}
-@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}main{padding:20px 16px 40px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}.topbar h1{font-size:23px}.topbar{align-items:flex-start}.top-actions{flex-direction:column;align-items:stretch}.select-role,.gold-btn{font-size:12px;padding:9px}.mobile-menu{display:inline-block}.brand-mobile{display:flex;align-items:center;gap:9px;margin-bottom:18px}.brand-mobile .eagle{width:35px;height:35px}.brand-mobile strong{font-size:13px;letter-spacing:1px}}
-@media(max-width:420px){.grid{gap:8px}.stat,.card{padding:13px}.stat .value{font-size:23px}.topbar{gap:8px}.topbar h1{font-size:21px}.top-actions{max-width:145px}.select-role{max-width:145px}}
+:root{--gold:#c9a45c;--bg:#101114;--panel:#191a1f;--muted:#96979e;--line:#2b2c32;--white:#f5f3ee}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--white);font:15px Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login-card{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px}
+.logo{text-align:center;color:var(--gold);font-size:25px;font-weight:800;letter-spacing:3px}
+.sub{text-align:center;color:var(--muted);font-size:12px;letter-spacing:2px;margin:8px 0 28px}
+input,select{width:100%;padding:13px;background:#101114;border:1px solid var(--line);border-radius:10px;color:white;margin:7px 0 15px}
+button.primary{background:var(--gold);color:#171717;border:0;padding:13px 18px;border-radius:10px;font-weight:bold}
+button.secondary{background:#25262c;color:white;border:1px solid var(--line);padding:10px 14px;border-radius:9px}
+.full{width:100%}
+#error{color:#ff8c8c;min-height:20px;font-size:13px}
+#app{display:none}
+header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;background:#101114;z-index:3}
+.brand{font-weight:800;letter-spacing:2px;color:var(--gold)}
+.user{color:var(--muted);font-size:13px}
+.layout{max-width:1200px;margin:auto;padding:22px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+nav button{background:var(--panel);border:1px solid var(--line);color:#ddd;padding:11px 14px;border-radius:9px}
+nav button.active{background:var(--gold);color:#171717;border-color:var(--gold)}
+h1{font-size:26px;margin:8px 0 20px}
+h2{font-size:18px;margin-top:0}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:13px;margin:18px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.metric{font-size:28px;font-weight:bold;color:var(--gold);margin-top:10px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
+.toolbar input{max-width:300px;margin:0}
+table{width:100%;border-collapse:collapse;min-width:540px}
+th,td{text-align:left;padding:13px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:normal;font-size:13px}
+.table-wrap{overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.empty{padding:25px;color:var(--muted)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.small{font-size:12px;color:var(--muted)}
+.tag{color:var(--gold);font-size:12px}
+#modal{display:none;position:fixed;inset:0;background:#000b;z-index:5;place-items:center;padding:18px}
+.modal-card{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+footer{padding:25px 0;color:var(--muted);font-size:12px}
+@media(max-width:600px){header{padding:0 14px}.layout{padding:16px}h1{font-size:22px}.user{font-size:11px}}
 </style>
 </head>
 <body>
-<div class="app">
-<aside class="sidebar">
-  <div class="brand"><div class="eagle">♜</div><div><strong>DJIGIT TAU</strong><small>CRM SYSTEM</small></div></div>
-  <div class="role-label" id="sideRole">Рабочее пространство</div>
-  <nav class="nav" id="nav"></nav>
-  <div class="profile"><div class="avatar" id="avatar">К</div><div><strong id="profileName">Камран Г.</strong><small id="profileRole">Руководитель</small></div></div>
-</aside>
-<main>
-  <div class="brand-mobile"><div class="eagle">♜</div><div><strong>DJIGIT TAU</strong><div class="eyebrow">CRM SYSTEM</div></div></div>
-  <header class="topbar"><div><div class="eyebrow">DJIGIT TAU / CRM</div><h1 id="pageTitle">Главная</h1></div><div class="top-actions"><select class="select-role" id="roleSelect" aria-label="Выбрать демонстрационную роль"><option value="manager">Руководитель</option><option value="admin">Администратор</option><option value="teacher">Педагог</option><option value="parent">Родитель</option></select><button class="gold-btn" id="mainAction">＋ Новая заявка</button></div></header>
-  <div id="view"></div>
-</main>
+
+<section id="login">
+ <div class="login-card">
+  <div class="logo">DJIGIT TAU</div>
+  <div class="sub">СТУДИЯ КАВКАЗСКОГО ТАНЦА · CRM</div>
+  <label>Логин</label>
+  <input id="loginName" placeholder="Введите логин" autocomplete="username">
+  <label>Пароль</label>
+  <input id="loginPass" type="password" placeholder="Введите пароль" autocomplete="current-password">
+  <div id="error"></div>
+  <button class="primary full" onclick="login()">Войти в систему</button>
+  <p class="small">Демонстрационный доступ: director, admin, sales, teacher</p>
+ </div>
+</section>
+
+<div id="app">
+ <header>
+  <div class="brand">DJIGIT TAU</div>
+  <div class="row">
+   <span class="user" id="userLabel"></span>
+   <button class="secondary" onclick="logout()">Выйти</button>
+  </div>
+ </header>
+ <main class="layout">
+  <nav id="nav"></nav>
+  <section id="content"></section>
+  <footer>DJIGIT TAU CRM · Демонстрационная версия</footer>
+ </main>
 </div>
+
+<div id="modal">
+ <div class="modal-card">
+  <div class="row"><h2 id="modalTitle">Добавить</h2><button class="secondary" onclick="closeModal()">Закрыть</button></div>
+  <div id="modalFields"></div>
+  <button class="primary full" onclick="saveRecord()">Сохранить</button>
+ </div>
+</div>
+
 <script>
-const roles={
- manager:{title:'Руководитель',name:'Камран Г.',avatar:'К',menu:[['Главная','⌂'],['Заявки','▤'],['Ученики','♙'],['Группы','♧'],['Педагоги','♟'],['Расписание','▦'],['Финансы','₸'],['Отчёты','▥'],['Настройки','⚙']]},
- admin:{title:'Администратор',name:'Даша К.',avatar:'Д',menu:[['Главная','⌂'],['Заявки','▤'],['Ученики','♙'],['Группы','♧'],['Расписание','▦'],['Оплаты','₸'],['Посещаемость','✓'],['Сообщения','▱']]},
- teacher:{title:'Педагог',name:'Вугар Г.',avatar:'В',menu:[['Мои группы','♧'],['Ученики','♙'],['Посещаемость','✓'],['Расписание','▦'],['Объявления','▱']]},
- parent:{title:'Родитель',name:'Гусейнова А.',avatar:'А',menu:[['Главная','⌂'],['Мой ребёнок','♙'],['Расписание','▦'],['Посещаемость','✓'],['Оплаты','₸'],['Объявления','▱']]}
+const accounts={
+ director:{password:"123456",role:"Руководитель"},
+ admin:{password:"123456",role:"Администратор"},
+ sales:{password:"123456",role:"Отдел продаж"},
+ teacher:{password:"123456",role:"Педагог"}
 };
-let role='manager',page='Главная';
-const $=id=>document.getElementById(id);
-function navRender(){const r=roles[role];$('nav').innerHTML=r.menu.map(([n,i])=>`<button class="${page===n?'active':''}" data-page="${n}"><span class="ico">${i}</span>${n}</button>`).join('');document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page;render()});$('sideRole').textContent=r.title;$('profileName').textContent=r.name;$('profileRole').textContent=r.title;$('avatar').textContent=r.avatar;$('pageTitle').textContent=page;}
-function stats(items){return `<section class="grid">${items.map(x=>`<div class="stat"><div class="label">${x[0]}</div><div class="value">${x[1]}</div><div class="trend">${x[2]||''}</div></div>`).join('')}</section>`}
-function managerView(){return `<div class="role-note">Режим руководителя: полный обзор работы студии и финансов.</div>${stats([['Заявки','24','↑ 14% за месяц'],['Активные ученики','312','↑ 6% за месяц'],['Оплаты за месяц','4 680 000 ₸','↑ 8% за месяц'],['Задолженность','380 000 ₸','Требует внимания']])}<div class="content-grid"><div class="card"><h2>Воронка заявок</h2><div class="pipeline">${[['Новая заявка',12],['Пробное занятие',7],['Записан в группу',5],['Ожидает оплаты',4],['Активный ученик',296]].map(x=>`<div><div class="pipe-row"><span>${x[0]}</span><b class="count">${x[1]}</b></div><div class="bar"><span style="width:${Math.min(100,x[1]/296*100+5)}%"></span></div></div>`).join('')}</div></div><div class="card"><h2>Последние события</h2><div class="activity">${[['Новая заявка','Эльман Нариманов — 18:42'],['Поступила оплата','Абонемент группы «Юниоры»'],['Изменено расписание','Группа «Дети 1» — сегодня']].map(x=>`<div class="activity-item"><i class="dot"></i><div>${x[0]}<small>${x[1]}</small></div></div>`).join('')}</div></div></div>`}
-function adminView(){return `<div class="role-note">Административный аккаунт: управление заявками, учениками и оплатами. AI-помощник доступен только здесь.</div>${stats([['Новые заявки','12','Нужно обработать'],['Ученики','312','В базе студии'],['Ожидают оплаты','18','Проверить абонементы'],['Долги','380 000 ₸','По данным CRM']])}<div class="content-grid"><div class="card"><div class="card-head"><h2>Заявки на обработку</h2><span class="pill gold">12 новых</span></div><div class="list">${[['Алиев Тимур','+7 701 123 45 67 · Сегодня, 16:20'],['Гасанова Самира','+7 707 987 65 43 · Сегодня, 14:11'],['Ибрагимов Кемаль','+7 700 555 11 22 · Вчера, 20:34']].map(x=>`<div class="list-row"><div><strong>${x[0]}</strong><small>${x[1]}</small></div><button class="ghost" onclick="alert('Карточка заявки будет добавлена на следующем этапе')">Открыть</button></div>`).join('')}</div></div><div class="card"><h2>Быстрые задачи</h2><div class="list"><div class="list-row"><div><strong>Проверить задолженности</strong><small>18 учеников</small></div><span class="pill red">Важно</span></div><div class="list-row"><div><strong>Ответить на заявки</strong><small>12 новых обращений</small></div><span class="pill gold">В работе</span></div><div class="list-row"><div><strong>Подготовить отчёт</strong><small>За текущий месяц</small></div><span class="pill">План</span></div></div></div></div><section class="ai-panel"><div class="ai-title"><div class="spark">✦</div><div><strong>DJIGIT AI — помощник администратора</strong><small>Доступен только в административском аккаунте</small></div></div><div class="chat" id="chat"><div class="bubble">Здравствуйте! Я помогу с расчётами, аналитикой и подготовкой ответов родителям. Задайте вопрос.</div></div><form class="chat-form" id="chatForm"><input id="chatInput" placeholder="Например: посчитай задолженности..." autocomplete="off"><button class="gold-btn">Отправить</button></form><div class="hint">Демо-режим: ответы пока тестовые. Подключение реального AI и данных CRM сделаем следующим этапом.</div></section>`}
-function teacherView(){return `<div class="role-note">Педагог видит только назначенные ему группы и учеников.</div>${stats([['Мои группы','3','Назначено'],['Ученики','48','В трёх группах'],['Занятия сегодня','2','Следующее в 17:00'],['Посещаемость','92%','За текущий месяц']])}<div class="card" style="margin-top:15px"><h2>Мои группы</h2><div class="list">${[['Дети 1','6–8 лет · 18 учеников'],['Юниоры','9–12 лет · 16 учеников'],['Основной','13+ лет · 14 учеников']].map(x=>`<div class="list-row"><div><strong>${x[0]}</strong><small>${x[1]}</small></div><button class="ghost" onclick="alert('Список группы подключим следующим этапом')">Открыть</button></div>`).join('')}</div></div><div class="card" style="margin-top:15px"><h2>Посещаемость сегодня</h2><div class="table-wrap"><table class="table"><tr><th>Ученик</th><th>Группа</th><th>Статус</th></tr><tr><td>Алиев Тимур</td><td>Дети 1</td><td><span class="pill">Присутствует</span></td></tr><tr><td>Гасанова Самира</td><td>Дети 1</td><td><span class="pill">Присутствует</span></td></tr><tr><td>Ибрагимов Кемаль</td><td>Юниоры</td><td><span class="pill red">Отсутствует</span></td></tr></table></div></div>`}
-function parentView(){return `<div class="role-note">Личный кабинет родителя: информация только о вашем ребёнке.</div><div class="card"><div class="eyebrow">ЛИЧНЫЙ КАБИНЕТ</div><h2 style="font-size:22px;margin:7px 0">Здравствуйте, Айсель!</h2><div class="list-row"><div><strong style="font-size:16px">Гусейнов Эльман</strong><small>Группа: Юниоры · Педагог: Вугар Г.</small></div><span class="pill">Активен</span></div></div>${stats([['Ближайшее занятие','Завтра','17:00'],['Посещаемость','12 из 14','За месяц'],['Оплата','Оплачено','До 30 ноября']])}<div class="content-grid"><div class="card"><h2>Расписание группы</h2><div class="activity"><div>Понедельник <small>17:00–18:30</small></div><div>Среда <small>17:00–18:30</small></div><div>Пятница <small>17:00–18:30</small></div></div></div><div class="card"><h2>Объявления</h2><strong>Съёмка студии — 20 ноября</strong><p class="muted" style="font-size:13px">Просьба прийти в форме и тёмной обуви.</p></div></div>`}
-function genericPage(){let text=role==='parent'?'Здесь будет информация только о вашем ребёнке.':role==='teacher'?'Здесь будут данные ваших групп и учеников.':'Здесь будет рабочий раздел CRM.';return `<div class="card"><h2>${page}</h2><div class="empty">${text}<br><br>Этот раздел подключим и протестируем следующим этапом.</div></div>`}
-function render(){navRender();$('mainAction').style.display=(role==='manager'||role==='admin')?'inline-block':'none';$('mainAction').textContent=role==='manager'?'＋ Новая заявка': '＋ Добавить запись';$('view').innerHTML=page==='Главная'||page==='Мои группы'?({manager:managerView,admin:adminView,teacher:teacherView,parent:parentView}[role])():genericPage();if(role==='admin'&&(page==='Главная')){const f=$('chatForm');f.onsubmit=e=>{e.preventDefault();const input=$('chatInput'),q=input.value.trim();if(!q)return;const chat=$('chat');chat.insertAdjacentHTML('beforeend',`<div class="bubble user"></div>`);chat.lastElementChild.textContent=q;const answer=demoAI(q);chat.insertAdjacentHTML('beforeend',`<div class="bubble"></div>`);chat.lastElementChild.textContent=answer;input.value='';chat.scrollTop=chat.scrollHeight;};} }
-function demoAI(q){const s=q.toLowerCase();if(s.includes('долг')||s.includes('задолж'))return 'В демонстрационных данных задолженность составляет 380 000 ₸. Для точного списка должников подключим реальные записи учеников и оплат из базы CRM.';if(s.includes('оплат')||s.includes('доход')||s.includes('финанс'))return 'В демонстрационных данных оплаты за месяц составляют 4 680 000 ₸. После подключения базы смогу рассчитать поступления, расходы и итоговую прибыль по фактическим операциям.';if(s.includes('сообщ')||s.includes('родител')||s.includes('напиши'))return 'Могу подготовить вежливое сообщение родителю. Напишите имя, причину обращения и нужную информацию. Перед отправкой сообщение покажу вам для подтверждения.';if(s.includes('заяв'))return 'Сейчас в демонстрационной панели 12 новых заявок. После подключения базы смогу сортировать их по дате, статусу и ответственному администратору.';return 'Я помогу с финансами, аналитикой и общением с родителями. Пока это тестовый режим без доступа к реальной базе. Какую задачу нужно выполнить?';}
-$('roleSelect').onchange=e=>{role=e.target.value;page=role==='teacher'?'Мои группы':'Главная';render()};$('mainAction').onclick=()=>alert('Форма добавления будет реализована следующим этапом.');render();
+const menus={
+ director:["Главная","Заявки","Ученики","Группы","Филиалы","Педагоги","Финансы","Отчёты"],
+ admin:["Главная","Заявки","Ученики","Группы","Филиалы","Педагоги","Финансы","Отчёты","AI-помощник"],
+ sales:["Заявки","Ученики"],
+ teacher:["Мои группы","Посещаемость"]
+};
+let currentUser=null,currentPage="",activeModal="";
+let data={
+ "Заявки":[
+  {name:"Амина",phone:"+7 700 000 00 01",status:"Новая"},
+  {name:"Мурад",phone:"+7 700 000 00 02",status:"Связаться"}
+ ],
+ "Ученики":[
+  {name:"Эльман",phone:"+7 700 000 00 03",group:"Средняя группа",status:"Активный"},
+  {name:"Камиль",phone:"+7 700 000 00 04",group:"Младшая группа",status:"Активный"}
+ ],
+ "Группы":[
+  {name:"Младшая группа",teacher:"Педагог 1",branch:"Алмалы"},
+  {name:"Средняя группа",teacher:"Педагог 2",branch:"Медеу"}
+ ],
+ "Филиалы":[
+  {name:"Айнабулак",address:"Алматы"},
+  {name:"Бостандык",address:"Алматы"},
+  {name:"Алмалы",address:"Алматы"},
+  {name:"Турксиб",address:"Алматы"},
+  {name:"Медеу",address:"Алматы"}
+ ],
+ "Педагоги":[
+  {name:"Педагог 1",phone:"+7 700 000 00 05",groups:"Младшая группа"},
+  {name:"Педагог 2",phone:"+7 700 000 00 06",groups:"Средняя группа"}
+ ]
+};
+let attendance={};
+
+function login(){
+ const name=document.getElementById("loginName").value.trim().toLowerCase();
+ const pass=document.getElementById("loginPass").value;
+ if(!accounts[name]||accounts[name].password!==pass){
+  document.getElementById("error").textContent="Неверный логин или пароль";
+  return;
+ }
+ currentUser={login:name,...accounts[name]};
+ document.getElementById("login").style.display="none";
+ document.getElementById("app").style.display="block";
+ document.getElementById("userLabel").textContent=currentUser.role;
+ buildNav();
+ openPage(menus[name][0]);
+}
+function logout(){
+ currentUser=null;
+ document.getElementById("app").style.display="none";
+ document.getElementById("login").style.display="grid";
+ document.getElementById("loginPass").value="";
+}
+function buildNav(){
+ const nav=document.getElementById("nav");
+ nav.innerHTML="";
+ menus[currentUser.login].forEach(item=>{
+  const b=document.createElement("button");
+  b.textContent=item;b.onclick=()=>openPage(item);b.id="nav-"+item;
+  nav.appendChild(b);
+ });
+}
+function openPage(page){
+ currentPage=page;
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.textContent===page));
+ const c=document.getElementById("content");
+ if(page==="Главная")return dashboard(c);
+ if(page==="Финансы")return finance(c);
+ if(page==="Отчёты")return reports(c);
+ if(page==="AI-помощник")return assistant(c);
+ if(page==="Мои группы")return teacherGroups(c);
+ if(page==="Посещаемость")return attendancePage(c);
+ if(data[page])return tablePage(c,page);
+ c.innerHTML="<h1>"+page+"</h1><p class='muted'>Раздел</p>";
+}
+function dashboard(c){
+ const students=data["Ученики"].length;
+ const leads=data["Заявки"].length;
+ c.innerHTML=`
+ <h1>Главная панель</h1><p class="muted">Обзор работы студии</p>
+ <div class="grid">
+  <div class="card">Всего учеников<div class="metric">${students}</div></div>
+  <div class="card">Заявки<div class="metric">${leads}</div></div>
+  <div class="card">Группы<div class="metric">${data["Группы"].length}</div></div>
+  <div class="card">Филиалы<div class="metric">${data["Филиалы"].length}</div></div>
+ </div>
+ <div class="grid">
+  <div class="card"><h2>Воронка заявок</h2><p>Новые обращения: ${leads}</p><p class="muted">Здесь будут этапы работы с клиентами</p></div>
+  <div class="card"><h2>Посещаемость</h2><p class="muted">Отметки педагогов будут отображаться здесь</p></div>
+ </div>`;
+}
+function tablePage(c,page){
+ const rows=data[page];
+ const canAdd=["director","admin"].includes(currentUser.login) &&
+  !(currentUser.login==="sales"&&page==="Ученики");
+ let html=`<div class="row"><div><h1>${page}</h1><p class="muted">Управление разделом</p></div>
+ ${canAdd?'<button class="primary" onclick="addRecord()">＋ Добавить</button>':""}</div>
+ <div class="toolbar"><input id="search" placeholder="Поиск..." oninput="filterRows()"></div>
+ <div class="table-wrap"><table><thead><tr>`;
+ const keys=rows.length?Object.keys(rows[0]):["name"];
+ keys.forEach(k=>html+=`<th>${({name:"Имя / название",phone:"Телефон",status:"Статус",group:"Группа",teacher:"Педагог",branch:"Филиал",address:"Адрес",groups:"Группы"})[k]||k}</th>`);
+ html+="</tr></thead><tbody id='tableBody'>";
+ rows.forEach((r,i)=>html+=rowHtml(r,i,keys));
+ html+="</tbody></table></div>";
+ c.innerHTML=html;
+}
+function rowHtml(r,i,keys){
+ return "<tr>"+keys.map(k=>`<td>${escapeHtml(r[k]||"—")}</td>`).join("")+"</tr>";
+}
+function escapeHtml(s){
+ return String(s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function filterRows(){
+ const q=document.getElementById("search").value.toLowerCase();
+ const rows=data[currentPage],keys=Object.keys(rows[0]||{name:""});
+ document.getElementById("tableBody").innerHTML=rows
+ .map((r,i)=>({r,i})).filter(x=>keys.some(k=>String(x.r[k]||"").toLowerCase().includes(q)))
+ .map(x=>rowHtml(x.r,x.i,keys)).join("");
+}
+function addRecord(){
+ activeModal=currentPage;
+ const fields={
+  "Заявки":[["name","Имя"],["phone","Телефон"],["status","Статус"]],
+  "Ученики":[["name","Имя ученика"],["phone","Телефон родителя"],["group","Группа"],["status","Статус"]],
+  "Группы":[["name","Название группы"],["teacher","Педагог"],["branch","Филиал"]],
+  "Филиалы":[["name","Название филиала"],["address","Адрес"]],
+  "Педагоги":[["name","Имя педагога"],["phone","Телефон"],["groups","Группы"]]
+ }[activeModal]||[];
+ document.getElementById("modalTitle").textContent="Добавить: "+activeModal;
+ document.getElementById("modalFields").innerHTML=fields.map(([id,label])=>
+ `<label>${label}</label><input id="field-${id}" placeholder="${label}">`).join("");
+ document.getElementById("modal").style.display="grid";
+}
+function closeModal(){document.getElementById("modal").style.display="none"}
+function saveRecord(){
+ const fields=[...document.querySelectorAll("#modalFields input")];
+ const record={};
+ fields.forEach(f=>record[f.id.replace("field-","")]=f.value.trim());
+ if(!record.name){alert("Заполните имя или название");return}
+ data[activeModal].push(record);
+ closeModal();openPage(activeModal);
+}
+function finance(c){
+ if(currentUser.login==="admin"){
+  c.innerHTML="<h1>Финансы</h1><div class='card'><h2>Операционные платежи</h2><p class='muted'>Администратор может вести оплату и задолженности. Сводные финансовые показатели доступны руководителю.</p></div>";
+  return;
+ }
+ c.innerHTML=`<h1>Финансы</h1><div class="grid">
+ <div class="card">Доходы<div class="metric">0 ₸</div></div>
+ <div class="card">Расходы<div class="metric">0 ₸</div></div>
+ <div class="card">Долги<div class="metric">0 ₸</div></div>
+ <div class="card">Прибыль<div class="metric">0 ₸</div></div></div>
+ <p class="muted">Демонстрационные значения. Подключение реальных платежей ещё не настроено.</p>`;
+}
+function reports(c){
+ c.innerHTML="<h1>Отчёты</h1><div class='card'><p>Отчёты по ученикам, заявкам, посещаемости, финансам, педагогам, группам и филиалам.</p><p class='muted'>Экспорт Excel и PDF будет подключён в следующей версии.</p></div>";
+}
+function assistant(c){
+ c.innerHTML=`<h1>AI-помощник</h1><div class="card"><h2>Помощник администратора</h2>
+ <p class="muted">Здесь можно будет анализировать заявки, посещаемость и работу филиалов.</p>
+ <p class="small">AI-функции пока не подключены.</p></div>`;
+}
+function teacherGroups(c){
+ const groups=data["Группы"].filter(g=>g.teacher.toLowerCase().includes("педагог"));
+ c.innerHTML="<h1>Мои группы</h1><div class='grid'>"+
+ (groups.length?groups.map(g=>`<div class="card"><h2>${escapeHtml(g.name)}</h2><p class="muted">${escapeHtml(g.branch)}</p><span class="tag">${escapeHtml(g.teacher)}</span></div>`).join(""):"<div class='card'>Группы пока не назначены этому педагогу.</div>")+"</div>";
+}
+function attendancePage(c){
+ const groups=data["Группы"];
+ c.innerHTML=`<h1>Посещаемость</h1><div class="card">
+ <p>Выберите группу и отметьте присутствие учеников.</p>
+ <label>Группа</label><select id="attGroup">${groups.map(g=>`<option>${escapeHtml(g.name)}</option>`).join("")}</select>
+ <label>Ученик</label><select id="attStudent">${data["Ученики"].map(s=>`<option>${escapeHtml(s.name)}</option>`).join("")}</select>
+ <label>Статус</label><select id="attStatus"><option>Присутствовал</option><option>Отсутствовал</option><option>Уважительная причина</option></select>
+ <button class="primary" onclick="saveAttendance()">Сохранить отметку</button>
+ <p id="attMessage" class="muted"></p></div>`;
+}
+function saveAttendance(){
+ const item={group:document.getElementById("attGroup").value,student:document.getElementById("attStudent").value,status:document.getElementById("attStatus").value,date:new Date().toLocaleDateString("ru-RU")};
+ attendance[item.date+"-"+item.student]=item;
+ document.getElementById("attMessage").textContent="Отметка сохранена: "+item.student+" — "+item.status;
+}
+document.addEventListener("keydown",e=>{
+ if(e.key==="Enter"&&document.getElementById("login").style.display!=="none")login();
+});
 </script>
 </body>
 </html>
