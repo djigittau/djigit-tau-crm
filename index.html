@@ -6,86 +6,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DJIGIT TAU CRM</title>
 <style>
-:root {
-  --bg:#0b0d10;
-  --panel:#14171c;
-  --panel2:#1b1f25;
-  --line:#292e36;
-  --gold:#c49a45;
-  --gold2:#e2bd70;
-  --text:#f1f1f1;
-  --muted:#9299a3;
-  --green:#48b887;
-  --red:#e16c6c;
-  --blue:#6c9ed9;
+:root{
+--bg:#0b0d10;--panel:#14171c;--panel2:#1c2026;--line:#2b3038;
+--gold:#c49a45;--gold2:#e5c477;--text:#f1f1f1;--muted:#9299a3;
+--green:#48b887;--red:#e16c6c;--blue:#6c9ed9
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-.login{
- min-height:100vh;display:flex;align-items:center;justify-content:center;
- padding:20px;background:radial-gradient(circle at center,#242019,#0b0d10 65%)
-}
-.login-box{
- width:100%;max-width:390px;background:var(--panel);border:1px solid #4a3b20;
- border-radius:18px;padding:32px;box-shadow:0 20px 70px #0008
-}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle,#292319,#0b0d10 65%)}
+.login-box{width:100%;max-width:390px;background:var(--panel);border:1px solid #554323;border-radius:18px;padding:30px}
 .logo{text-align:center;margin-bottom:28px}
-.logo-mark{font-size:30px;color:var(--gold);font-weight:900;letter-spacing:4px}
-.logo small{display:block;color:var(--muted);letter-spacing:3px;margin-top:8px}
-h1,h2,h3,p{margin-top:0}
-.login h2{text-align:center;font-size:20px}
-input,select,textarea{
- width:100%;background:#0e1115;color:white;border:1px solid var(--line);
- border-radius:8px;padding:12px;outline:none;margin:6px 0 14px
-}
+.logo strong{font-size:28px;color:var(--gold);letter-spacing:4px}
+.logo small{display:block;color:var(--muted);margin-top:8px;letter-spacing:3px}
+.login h2{text-align:center}
+input,select,textarea{width:100%;background:#0e1115;color:white;border:1px solid var(--line);border-radius:8px;padding:12px;margin:6px 0 14px;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--gold)}
 label{font-size:13px;color:#b9bec6}
-.btn{
- border:0;border-radius:8px;padding:11px 15px;background:var(--gold);
- color:#17130b;font-weight:bold
-}
+.btn{border:0;border-radius:8px;padding:11px 15px;background:var(--gold);color:#17130b;font-weight:bold}
 .btn:hover{background:var(--gold2)}
 .btn.secondary{background:#292e36;color:white}
 .btn.danger{background:#572b2b;color:#ffdada}
 .btn.small{padding:7px 10px;font-size:12px}
-.login .btn{width:100%;margin-top:8px}
-.hint{color:var(--muted);font-size:12px;line-height:1.6;margin-top:16px}
+.login .btn{width:100%}
+.hint{color:var(--muted);font-size:12px;line-height:1.7;margin-top:17px}
 .app{display:none;min-height:100vh}
-.sidebar{
- position:fixed;left:0;top:0;bottom:0;width:235px;background:#101317;
- border-right:1px solid var(--line);padding:22px 14px;overflow-y:auto;z-index:5
-}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:235px;background:#101317;border-right:1px solid var(--line);padding:22px 14px;overflow-y:auto;z-index:5}
 .brand{padding:8px 10px 25px;border-bottom:1px solid var(--line);margin-bottom:20px}
 .brand strong{color:var(--gold);font-size:19px;letter-spacing:2px}
 .brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:7px}
 .nav-title{font-size:10px;color:#717984;padding:12px 10px 7px;text-transform:uppercase}
-.nav button{
- display:flex;align-items:center;gap:12px;width:100%;padding:12px 11px;
- background:transparent;border:0;color:#aeb4bd;text-align:left;border-radius:8px;
- margin:2px 0;font-size:14px
-}
+.nav button{display:flex;gap:12px;width:100%;padding:12px 11px;background:transparent;border:0;color:#aeb4bd;text-align:left;border-radius:8px;margin:2px 0;font-size:14px}
 .nav button:hover,.nav button.active{background:#292318;color:var(--gold2)}
 .nav button.active{border-left:3px solid var(--gold)}
 .sidebar-bottom{border-top:1px solid var(--line);margin-top:25px;padding-top:15px}
 .main{margin-left:235px;min-height:100vh}
-.topbar{
- height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;
- justify-content:space-between;padding:0 28px;background:#101317
-}
+.topbar{height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:#101317}
 .topbar-title{font-weight:bold}
 .user-info{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
-.avatar{width:34px;height:34px;border-radius:50%;background:#3b3020;color:var(--gold);
- display:grid;place-items:center;font-weight:bold}
+.avatar{width:34px;height:34px;border-radius:50%;background:#3b3020;color:var(--gold);display:grid;place-items:center;font-weight:bold}
 .content{padding:27px;max-width:1500px;margin:auto}
 .page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
 .page-head h1{font-size:24px;margin:0}
 .page-head p{color:var(--muted);font-size:13px;margin:7px 0 0}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
-.stat,.card{
- background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px
-}
+.stat,.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
 .stat span{color:var(--muted);font-size:12px}
 .stat strong{display:block;font-size:27px;margin:12px 0 5px}
 .stat small{color:var(--gold);font-size:11px}
@@ -96,7 +62,6 @@ label{font-size:13px;color:#b9bec6}
 table{width:100%;border-collapse:collapse;min-width:600px}
 th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
 th{color:var(--muted);font-weight:normal;font-size:11px}
-td{color:#e4e6e9}
 tr:last-child td{border-bottom:0}
 .status{display:inline-block;padding:5px 8px;border-radius:20px;font-size:11px;background:#292e36}
 .status.green{color:#72d6a7;background:#18372c}
@@ -105,7 +70,7 @@ tr:last-child td{border-bottom:0}
 .status.blue{color:#9bc4f5;background:#1c2c40}
 .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:15px}
 .toolbar input,.toolbar select{width:auto;min-width:150px;margin:0}
-.pipeline{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px;overflow-x:auto}
+.pipeline{display:grid;grid-template-columns:repeat(5,minmax(190px,1fr));gap:12px;overflow-x:auto}
 .stage{background:#11151a;border:1px solid var(--line);border-radius:10px;padding:12px;min-height:220px}
 .stage h3{font-size:13px;color:var(--gold2)}
 .lead{background:var(--panel2);border:1px solid var(--line);padding:12px;border-radius:8px;margin:9px 0;cursor:pointer}
@@ -114,7 +79,7 @@ tr:last-child td{border-bottom:0}
 .bar{height:8px;background:#292e36;border-radius:10px;overflow:hidden;margin:10px 0}
 .bar i{display:block;height:100%;background:var(--gold);border-radius:10px}
 .modal-bg{display:none;position:fixed;inset:0;background:#000b;z-index:20;justify-content:center;align-items:center;padding:15px}
-.modal{background:var(--panel);border:1px solid #554323;border-radius:14px;padding:23px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
+.modal{background:var(--panel);border:1px solid #554323;border-radius:14px;padding:23px;width:100%;max-width:540px;max-height:90vh;overflow:auto}
 .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-head h2{font-size:18px;margin:0}
 .close{background:none;border:0;color:white;font-size:25px}
@@ -122,22 +87,29 @@ tr:last-child td{border-bottom:0}
 .form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:12px}
 .empty{color:var(--muted);text-align:center;padding:30px}
 .mobile-menu{display:none;background:none;border:0;color:white;font-size:23px}
+.notice{font-size:12px;color:var(--muted);line-height:1.6}
+.attendance-table{width:100%;border-collapse:collapse;min-width:650px}
+.attendance-table th,.attendance-table td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+.attendance-table th{color:var(--muted);font-weight:normal}
+.attendance-table tr.warning{background:#3b2020}
+.attendance-table tr.warning td{color:#ffaaaa}
+.attendance-table select{margin:0;min-width:145px}
+.attendance-warning{color:#ff7777;font-size:11px;font-weight:bold}
 .ai-box{background:linear-gradient(135deg,#252016,#15181d);border:1px solid #65502b}
 .ai-answer{white-space:pre-wrap;line-height:1.6;color:#ddd;font-size:13px}
-.notice{font-size:12px;color:var(--muted);line-height:1.6}
 @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
 @media(max-width:700px){
- .sidebar{transform:translateX(-100%);transition:.2s}
- .sidebar.open{transform:translateX(0)}
- .main{margin-left:0}
- .mobile-menu{display:block}
- .topbar{padding:0 15px}
- .content{padding:17px 13px}
- .grid{gap:9px}
- .stat{padding:13px}
- .stat strong{font-size:22px}
- .page-head{align-items:flex-start;flex-direction:column}
- .form-grid{grid-template-columns:1fr}
+.sidebar{transform:translateX(-100%);transition:.2s}
+.sidebar.open{transform:translateX(0)}
+.main{margin-left:0}
+.mobile-menu{display:block}
+.topbar{padding:0 15px}
+.content{padding:17px 13px}
+.grid{gap:9px}
+.stat{padding:13px}
+.stat strong{font-size:22px}
+.page-head{align-items:flex-start;flex-direction:column}
+.form-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -146,23 +118,22 @@ tr:last-child td{border-bottom:0}
 <div class="login" id="loginScreen">
  <div class="login-box">
   <div class="logo">
-   <div class="logo-mark">DJIGIT TAU</div>
+   <strong>DJIGIT TAU</strong>
    <small>CRM • STUDIO MANAGEMENT</small>
   </div>
   <h2>Вход в систему</h2>
   <label>Логин</label>
-  <input id="loginName" placeholder="Введите логин" autocomplete="username">
+  <input id="loginName" placeholder="Введите логин">
   <label>Пароль</label>
-  <input id="loginPass" type="password" placeholder="Введите пароль" autocomplete="current-password">
+  <input id="loginPass" type="password" placeholder="Введите пароль">
   <button class="btn" onclick="login()">ВОЙТИ В СИСТЕМУ</button>
   <div class="hint">
-   Тестовые аккаунты:<br>
    director / 123456 — Руководитель<br>
    admin / 123456 — Администратор<br>
    sales / 123456 — Отдел продаж<br>
    teacher / 123456 — Педагог
   </div>
-  <p id="loginError" style="color:#f28b8b;font-size:12px;margin-top:12px"></p>
+  <p id="loginError" style="color:#f28b8b;font-size:12px"></p>
  </div>
 </div>
 
@@ -195,7 +166,7 @@ tr:last-child td{border-bottom:0}
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
  <div class="modal">
   <div class="modal-head">
-   <h2 id="modalTitle">Добавить</h2>
+   <h2 id="modalTitle">Карточка</h2>
    <button class="close" onclick="closeModal()">×</button>
   </div>
   <div id="modalBody"></div>
@@ -213,17 +184,17 @@ const USERS={
 const defaultData={
  "Заявки":[
   {id:1,name:"Амина",phone:"+7 777 111 22 33",age:"8",direction:"Кавказские танцы",branch:"Айнабулак",stage:"Новая",comment:"Хочет на пробное"},
-  {id:2,name:"Марат",phone:"+7 701 222 33 44",age:"10",direction:"Кавказские танцы",branch:"Бостандык",stage:"Пробное занятие",comment:"Записан на пробное"},
+  {id:2,name:"Марат",phone:"+7 701 222 33 44",age:"10",direction:"Кавказские танцы",branch:"Бостандык",stage:"Пробное занятие",comment:"Записан"},
   {id:3,name:"Самира",phone:"+7 707 333 44 55",age:"7",direction:"Детская группа",branch:"Алмалы",stage:"Думает",comment:"Перезвонить"}
  ],
  "Ученики":[
-  {id:1,name:"Эльман Нариманович",phone:"+7 777 111 11 11",age:"12",group:"Младшая группа",branch:"Айнабулак",status:"Активный",lessons:8,paid:"Оплачено"},
-  {id:2,name:"Камиль",phone:"+7 701 222 22 22",age:"14",group:"Средняя группа",branch:"Бостандык",status:"Активный",lessons:4,paid:"Долг"},
-  {id:3,name:"Фатима",phone:"+7 707 333 33 33",age:"11",group:"Младшая группа",branch:"Алмалы",status:"Заморожен",lessons:0,paid:"Оплачено"}
+  {id:1,name:"Эльман Нариманович",phone:"+7 777 111 11 11",age:"12",group:"Младшая группа",branch:"Айнабулак",status:"Активный",lessons:8,packageTotal:8,paid:"Оплачено"},
+  {id:2,name:"Камиль",phone:"+7 701 222 22 22",age:"14",group:"Средняя группа",branch:"Бостандык",status:"Активный",lessons:1,packageTotal:8,paid:"Долг"},
+  {id:3,name:"Фатима",phone:"+7 707 333 33 33",age:"11",group:"Младшая группа",branch:"Алмалы",status:"Активный",lessons:5,packageTotal:8,paid:"Оплачено"}
  ],
  "Группы":[
-  {id:1,name:"Младшая группа",age:"6–10 лет",teacher:"Камран",branch:"Айнабулак",schedule:"Пн, Ср, Пт 17:00",capacity:15},
-  {id:2,name:"Средняя группа",age:"11–15 лет",teacher:"Вугар",branch:"Бостандык",schedule:"Вт, Чт, Сб 18:00",capacity:15}
+  {id:1,name:"Младшая группа",age:"6–10 лет",teacher:"Камран",branch:"Айнабулак",schedule:"Пн, Ср, Пт 17:00",time:"17:00",capacity:15},
+  {id:2,name:"Средняя группа",age:"11–15 лет",teacher:"Вугар",branch:"Бостандык",schedule:"Вт, Чт, Сб 18:00",time:"18:00",capacity:15}
  ],
  "Филиалы":[
   {id:1,name:"Айнабулак",address:"Алматы",phone:""},
@@ -233,8 +204,8 @@ const defaultData={
   {id:5,name:"Медеу",address:"Алматы",phone:""}
  ],
  "Педагоги":[
-  {id:1,name:"Камран",phone:"",direction:"Кавказские танцы",branch:"Айнабулак",groups:"Младшая группа",status:"Активный"},
-  {id:2,name:"Вугар",phone:"",direction:"Кавказские танцы",branch:"Бостандык",groups:"Средняя группа",status:"Активный"}
+  {id:1,name:"Камран",login:"teacher",phone:"",direction:"Кавказские танцы",branch:"Айнабулак",groups:"Младшая группа",status:"Активный"},
+  {id:2,name:"Вугар",login:"teacher2",phone:"",direction:"Кавказские танцы",branch:"Бостандык",groups:"Средняя группа",status:"Активный"}
  ],
  "Финансы":[
   {id:1,type:"Доход",title:"Абонемент",amount:30000,date:"2026-11-01",branch:"Айнабулак"},
@@ -243,17 +214,23 @@ const defaultData={
  "Посещаемость":[]
 };
 
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function loadData(){
+ try{
+  const saved=localStorage.getItem("djigitCRMData");
+  if(!saved)return clone(defaultData);
+  const parsed=JSON.parse(saved);
+  Object.keys(defaultData).forEach(k=>{if(!parsed[k])parsed[k]=clone(defaultData[k])});
+  return parsed;
+ }catch(e){return clone(defaultData)}
+}
 let data=loadData();
 let currentUser=null;
 let currentPage="Главная";
 
-function loadData(){
- try{
-  const saved=localStorage.getItem("djigitCRMData");
-  return saved?JSON.parse(saved):JSON.parse(JSON.stringify(defaultData));
- }catch(e){return JSON.parse(JSON.stringify(defaultData))}
+function saveData(){
+ localStorage.setItem("djigitCRMData",JSON.stringify(data));
 }
-function saveData(){localStorage.setItem("djigitCRMData",JSON.stringify(data))}
 function login(){
  const u=document.getElementById("loginName").value.trim();
  const p=document.getElementById("loginPass").value;
@@ -262,12 +239,15 @@ function login(){
   return;
  }
  currentUser={...USERS[u],login:u};
+ if(u==="teacher2"){
+  currentUser={role:"teacher",name:"Педагог Вугар",login:"teacher2"};
+ }
  document.getElementById("loginScreen").style.display="none";
  document.getElementById("app").style.display="block";
  document.getElementById("roleLabel").textContent=currentUser.name;
  document.getElementById("userAvatar").textContent=currentUser.name[0];
  buildNavigation();
- go("Главная");
+ go(pages[currentUser.role][0]);
 }
 document.getElementById("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
 function logout(){
@@ -284,13 +264,15 @@ const pages={
  sales:["Заявки"],
  teacher:["Мои группы","Мои ученики","Посещаемость","Расписание"]
 };
-const icons={"Главная":"⌂","Заявки":"▤","Ученики":"♙","Группы":"▦","Филиалы":"⌖","Педагоги":"♟","Финансы":"₸","Отчёты":"▥","Посещаемость":"✓","AI-помощник":"✦","Мои группы":"▦","Мои ученики":"♙","Расписание":"◷"};
+const icons={
+ "Главная":"⌂","Заявки":"▤","Ученики":"♙","Группы":"▦","Филиалы":"⌖",
+ "Педагоги":"♟","Финансы":"₸","Отчёты":"▥","Посещаемость":"✓",
+ "AI-помощник":"✦","Мои группы":"▦","Мои ученики":"♙","Расписание":"◷"
+};
 function buildNavigation(){
  const nav=document.getElementById("navigation");
- nav.innerHTML="";
- const allowed=pages[currentUser.role];
- allowed.forEach((p,i)=>{
-  if(i===0)nav.innerHTML+='<div class="nav-title">Рабочее пространство</div>';
+ nav.innerHTML='<div class="nav-title">Рабочее пространство</div>';
+ pages[currentUser.role].forEach(p=>{
   const b=document.createElement("button");
   b.innerHTML=`<span>${icons[p]||"•"}</span>${p}`;
   b.onclick=()=>go(p);
@@ -309,12 +291,27 @@ function go(page){
 }
 function canManage(){return ["director","admin"].includes(currentUser.role)}
 function money(n){return Number(n||0).toLocaleString("ru-RU")+" ₸"}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function esc(s){
+ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
 function stat(title,value,note=""){
  return `<div class="stat"><span>${title}</span><strong>${value}</strong><small>${note}</small></div>`;
 }
 function head(title,sub,button=""){
  return `<div class="page-head"><div><h1>${title}</h1><p>${sub||""}</p></div>${button}</div>`;
+}
+function table(headers,rows){
+ if(!rows.length)return '<div class="empty">Пока нет данных</div>';
+ return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${v??""}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function teacherGroups(){
+ const teacher=data["Педагоги"].find(t=>t.login===currentUser.login);
+ if(teacher)return data["Группы"].filter(g=>g.teacher===teacher.name);
+ return data["Группы"].filter(g=>g.teacher==="Камран");
+}
+function teacherStudents(){
+ const names=teacherGroups().map(g=>g.name);
+ return data["Ученики"].filter(s=>names.includes(s.group));
 }
 function render(){
  const el=document.getElementById("content");
@@ -345,37 +342,33 @@ function dashboard(){
  ${stat("Задолженности",debt,"Требуют внимания")}
  </div>
  <div class="grid">
- ${stat("Доходы",money(income),"Все внесённые доходы")}
- ${stat("Расходы",money(expense),"Все внесённые расходы")}
- ${stat("Прибыль",money(income-expense),"Доходы минус расходы")}
- ${stat("Филиалы",data["Филиалы"].length,"В системе")}
+ ${stat("Доходы",money(income))}
+ ${stat("Расходы",money(expense))}
+ ${stat("Прибыль",money(income-expense))}
+ ${stat("Филиалы",data["Филиалы"].length)}
  </div>
  <div class="two-col">
-  <div class="card"><h3>Воронка заявок</h3>
-   ${["Новая","Связались","Пробное занятие","Думает","Записан"].map(s=>{
-    const n=leads.filter(x=>x.stage===s).length;
-    return `<div style="font-size:12px;display:flex;justify-content:space-between"><span>${s}</span><b>${n}</b></div><div class="bar"><i style="width:${leads.length?n/leads.length*100:0}%"></i></div>`;
-   }).join("")}
-  </div>
-  <div class="card"><h3>Филиалы</h3>
-   ${data["Филиалы"].map(b=>`<p style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(b.name)}</span><span class="status gold">${students.filter(s=>s.branch===b.name).length} учеников</span></p>`).join("")}
-  </div>
+ <div class="card"><h3>Воронка заявок</h3>
+ ${["Новая","Связались","Пробное занятие","Думает","Записан"].map(s=>{
+  const n=leads.filter(x=>x.stage===s).length;
+  return `<div style="font-size:12px;display:flex;justify-content:space-between"><span>${s}</span><b>${n}</b></div><div class="bar"><i style="width:${leads.length?n/leads.length*100:0}%"></i></div>`;
+ }).join("")}
  </div>
- <div class="card"><h3>Последние заявки</h3>${table(["Имя","Телефон","Филиал","Этап"],leads.slice(0,5).map(x=>[x.name,x.phone,x.branch,x.stage]))}</div>`;
-}
-function table(headers,rows){
- if(!rows.length)return `<div class="empty">Пока нет данных</div>`;
- return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${v??""}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+ <div class="card"><h3>Филиалы</h3>
+ ${data["Филиалы"].map(b=>`<p style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(b.name)}</span><span class="status gold">${students.filter(s=>s.branch===b.name).length} учеников</span></p>`).join("")}
+ </div></div>
+ <div class="card"><h3>Последние заявки</h3>${table(["Имя","Телефон","Филиал","Этап"],leads.slice(0,5).map(x=>[esc(x.name),esc(x.phone),esc(x.branch),esc(x.stage)]))}</div>`;
 }
 function leadsPage(){
  const rows=data["Заявки"];
  return head("Заявки","Воронка продаж и работа с клиентами",
- canManage()||currentUser.role==="sales"?`<button class="btn" onclick="openForm('Заявки')">+ Добавить заявку</button>`:"")+
- `<div class="toolbar"><input id="searchLead" placeholder="Поиск заявки..." oninput="filterRows('leadTable',this.value)"></div>
+ `<button class="btn" onclick="openForm('Заявки')">+ Добавить заявку</button>`)+
+ `<div class="toolbar"><input placeholder="Поиск заявки..." oninput="filterRows('leadTable',this.value)"></div>
  <div class="pipeline" id="leadTable">
  ${["Новая","Связались","Пробное занятие","Думает","Записан"].map(stage=>`
  <div class="stage"><h3>${stage} · ${rows.filter(x=>x.stage===stage).length}</h3>
- ${rows.filter(x=>x.stage===stage).map(x=>`<div class="lead" onclick="showLead(${x.id})">
+ ${rows.filter(x=>x.stage===stage).map(x=>`
+ <div class="lead" onclick="showLead(${x.id})">
  <b>${esc(x.name)}</b><small>${esc(x.phone)}</small><small>${esc(x.branch)}</small>
  <small>${esc(x.direction)}</small></div>`).join("")||'<p class="notice">Нет заявок</p>'}
  </div>`).join("")}
@@ -385,47 +378,61 @@ function showLead(id){
  const x=data["Заявки"].find(a=>a.id===id);if(!x)return;
  openModal("Карточка заявки",`
  <p><b>${esc(x.name)}</b></p>
- <p>Телефон: ${esc(x.phone)}</p><p>Возраст: ${esc(x.age)}</p>
- <p>Направление: ${esc(x.direction)}</p><p>Филиал: ${esc(x.branch)}</p>
+ <p>Телефон: ${esc(x.phone)}</p>
+ <p>Возраст: ${esc(x.age)}</p>
+ <p>Направление: ${esc(x.direction)}</p>
+ <p>Филиал: ${esc(x.branch)}</p>
  <p>Комментарий: ${esc(x.comment)}</p>
- <label>Этап заявки</label><select id="editStage">${["Новая","Связались","Пробное занятие","Думает","Записан"].map(s=>`<option ${x.stage===s?"selected":""}>${s}</option>`).join("")}</select>
- ${canManage()||currentUser.role==="sales"?`<div class="form-actions"><button class="btn danger" onclick="removeItem('Заявки',${id})">Удалить</button><button class="btn" onclick="updateLead(${id})">Сохранить</button></div>`:""}
- `);
+ <label>Этап заявки</label>
+ <select id="editStage">${["Новая","Связались","Пробное занятие","Думает","Записан"].map(s=>`<option ${x.stage===s?"selected":""}>${s}</option>`).join("")}</select>
+ <div class="form-actions">
+ <button class="btn danger" onclick="removeItem('Заявки',${id})">Удалить</button>
+ <button class="btn" onclick="updateLead(${id})">Сохранить</button>
+ </div>`);
 }
 function updateLead(id){
- const x=data["Заявки"].find(a=>a.id===id);x.stage=document.getElementById("editStage").value;
+ const x=data["Заявки"].find(a=>a.id===id);
+ x.stage=document.getElementById("editStage").value;
  saveData();closeModal();render();
 }
 function studentsPage(){
- let rows=data["Ученики"];
- if(currentUser.role==="teacher"){
-  const mine=data["Группы"].filter(g=>g.teacher==="Камран").map(g=>g.name);
-  rows=rows.filter(s=>mine.includes(s.group));
- }
- return head(currentPage,"Список учеников и состояние абонементов",
+ let rows=currentUser.role==="teacher"?teacherStudents():data["Ученики"];
+ return head(currentPage,"Список учеников и абонементов",
  canManage()?`<button class="btn" onclick="openForm('Ученики')">+ Добавить ученика</button>`:"")+
  `<div class="grid">
  ${stat("Всего",rows.length)}
  ${stat("Активные",rows.filter(x=>x.status==="Активный").length)}
  ${stat("Неактивные",rows.filter(x=>x.status==="Неактивный").length)}
- ${stat("Замороженные",rows.filter(x=>x.status==="Заморожен").length)}
+ ${stat("Пора продлить",rows.filter(x=>Number(x.lessons)<=1&&x.status==="Активный").length)}
  </div>
- <div class="toolbar"><input placeholder="Поиск ученика..." oninput="filterRows('studentTable',this.value)">
- <select onchange="filterByBranch(this.value,'studentTable')"><option value="">Все филиалы</option>${data["Филиалы"].map(b=>`<option>${esc(b.name)}</option>`).join("")}</select></div>
- <div class="card"><div id="studentTable">${table(["ФИО","Телефон","Возраст","Группа","Филиал","Статус","Занятия","Оплата"],rows.map(x=>[
- `<a href="#" onclick="showStudent(${x.id});return false" style="color:var(--gold2)">${esc(x.name)}</a>`,esc(x.phone),esc(x.age),esc(x.group),esc(x.branch),`<span class="status ${x.status==="Активный"?"green":"gold"}">${esc(x.status)}</span>`,x.lessons,`<span class="status ${x.paid==="Долг"?"red":"green"}">${esc(x.paid)}</span>`
+ <div class="toolbar">
+ <input placeholder="Поиск ученика..." oninput="filterRows('studentTable',this.value)">
+ <select onchange="filterByBranch(this.value,'studentTable')"><option value="">Все филиалы</option>${data["Филиалы"].map(b=>`<option>${esc(b.name)}</option>`).join("")}</select>
+ </div>
+ <div class="card"><div id="studentTable">${table(["ФИО","Телефон","Возраст","Группа","Филиал","Статус","Остаток","Оплата"],rows.map(x=>[
+ `<a href="#" onclick="showStudent(${x.id});return false" style="color:var(--gold2)">${esc(x.name)}</a>`,
+ esc(x.phone),esc(x.age),esc(x.group),esc(x.branch),
+ `<span class="status ${x.status==="Активный"?"green":"gold"}">${esc(x.status)}</span>`,
+ `<b style="color:${Number(x.lessons)<=1?"#ff7777":"inherit"}">${x.lessons}/8</b>`,
+ `<span class="status ${x.paid==="Долг"?"red":"green"}">${esc(x.paid)}</span>`
  ]))}</div></div>`;
 }
 function showStudent(id){
  const x=data["Ученики"].find(a=>a.id===id);if(!x)return;
+ const editable=canManage()||currentUser.role==="teacher";
  openModal("Карточка ученика",`
  <h3>${esc(x.name)}</h3>
- <p>Телефон: ${esc(x.phone)}</p><p>Возраст: ${esc(x.age)}</p>
- <p>Группа: ${esc(x.group)}</p><p>Филиал: ${esc(x.branch)}</p>
- <p>Остаток занятий: <b>${x.lessons}</b></p><p>Оплата: ${esc(x.paid)}</p>
- ${canManage()||currentUser.role==="teacher"?`
- <label>Статус</label><select id="studentStatus">${["Активный","Неактивный","Заморожен"].map(s=>`<option ${x.status===s?"selected":""}>${s}</option>`).join("")}</select>
- <label>Остаток занятий</label><input id="studentLessons" type="number" value="${x.lessons}">
+ <p>Телефон: ${esc(x.phone)}</p>
+ <p>Возраст: ${esc(x.age)}</p>
+ <p>Группа: ${esc(x.group)}</p>
+ <p>Филиал: ${esc(x.branch)}</p>
+ <p>Остаток занятий: <b>${x.lessons} из 8</b></p>
+ <p>Оплата: ${esc(x.paid)}</p>
+ ${editable?`
+ <label>Статус</label>
+ <select id="studentStatus">${["Активный","Неактивный","Заморожен","Пробное"].map(s=>`<option ${x.status===s?"selected":""}>${s}</option>`).join("")}</select>
+ <label>Остаток занятий</label>
+ <input id="studentLessons" type="number" min="0" max="8" value="${x.lessons}">
  <div class="form-actions"><button class="btn" onclick="updateStudent(${id})">Сохранить</button></div>`:""}
  ${canManage()?`<div class="form-actions"><button class="btn danger" onclick="removeItem('Ученики',${id})">Удалить ученика</button></div>`:""}
  `);
@@ -433,15 +440,14 @@ function showStudent(id){
 function updateStudent(id){
  const x=data["Ученики"].find(a=>a.id===id);
  x.status=document.getElementById("studentStatus").value;
- x.lessons=Number(document.getElementById("studentLessons").value);
+ x.lessons=Math.max(0,Math.min(8,Number(document.getElementById("studentLessons").value)));
  saveData();closeModal();render();
 }
 function groupsPage(){
- let rows=data["Группы"];
- if(currentUser.role==="teacher")rows=rows.filter(x=>x.teacher==="Камран");
+ const rows=currentUser.role==="teacher"?teacherGroups():data["Группы"];
  return head(currentPage,"Группы, педагоги и расписание",
  canManage()?`<button class="btn" onclick="openForm('Группы')">+ Добавить группу</button>`:"")+
- `<div class="grid">${stat("Всего групп",rows.length)}${stat("Учеников",data["Ученики"].length)}${stat("Филиалов",data["Филиалы"].length)}${stat("Педагогов",data["Педагоги"].length)}</div>
+ `<div class="grid">${stat("Всего групп",rows.length)}${stat("Учеников",currentUser.role==="teacher"?teacherStudents().length:data["Ученики"].length)}${stat("Филиалов",data["Филиалы"].length)}${stat("Педагогов",data["Педагоги"].length)}</div>
  <div class="card">${table(["Группа","Возраст","Педагог","Филиал","Расписание","Учеников","Вместимость"],rows.map(g=>[
  esc(g.name),esc(g.age),esc(g.teacher),esc(g.branch),esc(g.schedule),
  data["Ученики"].filter(s=>s.group===g.name).length,g.capacity
@@ -455,7 +461,8 @@ function branchesPage(){
  <strong style="font-size:24px">${data["Ученики"].filter(s=>s.branch===b.name).length}</strong>
  <p class="notice">Учеников</p><span class="status green">В системе</span></div>`).join("")}</div>
  <div class="card">${table(["Филиал","Адрес","Телефон","Группы","Ученики"],data["Филиалы"].map(b=>[
- esc(b.name),esc(b.address),esc(b.phone),data["Группы"].filter(g=>g.branch===b.name).length,
+ esc(b.name),esc(b.address),esc(b.phone),
+ data["Группы"].filter(g=>g.branch===b.name).length,
  data["Ученики"].filter(s=>s.branch===b.name).length
  ]))}</div>`;
 }
@@ -463,8 +470,8 @@ function teachersPage(){
  return head("Педагоги","Команда и нагрузка",
  `<button class="btn" onclick="openForm('Педагоги')">+ Добавить педагога</button>`)+
  `<div class="grid">${stat("Педагогов",data["Педагоги"].length)}${stat("Групп",data["Группы"].length)}${stat("Учеников",data["Ученики"].length)}${stat("Филиалов",data["Филиалы"].length)}</div>
- <div class="card">${table(["ФИО","Телефон","Направление","Филиал","Группы","Статус"],data["Педагоги"].map(t=>[
- esc(t.name),esc(t.phone),esc(t.direction),esc(t.branch),esc(t.groups),`<span class="status green">${esc(t.status)}</span>`
+ <div class="card">${table(["ФИО","Логин","Телефон","Направление","Филиал","Группы","Статус"],data["Педагоги"].map(t=>[
+ esc(t.name),esc(t.login),esc(t.phone),esc(t.direction),esc(t.branch),esc(t.groups),esc(t.status)
  ]))}</div>`;
 }
 function financePage(){
@@ -490,52 +497,174 @@ function reportsPage(){
  data["Группы"].filter(x=>x.branch===b.name).length,
  data["Педагоги"].filter(x=>x.branch===b.name).length
  ]))}</div>
- <div class="card"><h3>Отчёт по ученикам</h3>${table(["Статус","Количество"],["Активный","Неактивный","Заморожен"].map(st=>[st,s.filter(x=>x.status===st).length]))}</div>
+ <div class="card"><h3>Отчёт по ученикам</h3>${table(["Статус","Количество"],["Активный","Неактивный","Заморожен","Пробное"].map(st=>[st,s.filter(x=>x.status===st).length]))}</div>
  <button class="btn" onclick="exportCSV()">Экспорт учеников в CSV</button>`;
 }
+
 function attendancePage(){
- const isTeacher=currentUser.role==="teacher";
- const groups=data["Группы"].filter(g=>!isTeacher||g.teacher==="Камран");
- return head("Посещаемость","Отмечайте присутствие учеников на занятиях")+
- `<div class="card">
- <label>Группа</label><select id="attGroup" onchange="attendanceStudents()">${groups.map(g=>`<option>${esc(g.name)}</option>`).join("")}</select>
- <label>Дата занятия</label><input id="attDate" type="date" value="${new Date().toISOString().slice(0,10)}">
+ const groups=teacherGroups();
+ const today=new Date().toISOString().slice(0,10);
+ return head("Посещаемость","Отметка занятий и автоматическое списание абонементов")+
+ `<div class="grid">
+ ${stat("Мои ученики",teacherStudents().length)}
+ ${stat("Остаток 1 занятие",teacherStudents().filter(s=>Number(s.lessons)===1).length)}
+ ${stat("Пора продлить",teacherStudents().filter(s=>Number(s.lessons)<=1&&s.status==="Активный").length)}
+ ${stat("Пробные",teacherStudents().filter(s=>s.status==="Пробное").length)}
+ </div>
+ <div class="card">
+ <h3>Отметка занятия</h3>
+ <label>Моя группа</label>
+ <select id="attGroup" onchange="attendanceStudents()">
+ ${groups.map(g=>`<option value="${esc(g.name)}">${esc(g.name)}</option>`).join("")}
+ </select>
+ <label>Дата занятия</label>
+ <input id="attDate" type="date" value="${today}" onchange="attendanceStudents()">
+ <label>Время занятия</label>
+ <input id="attTime" type="time" value="${esc(groups[0]?.time||"17:00")}">
  <div id="attStudents"></div>
+ <div style="margin-top:18px">
  <button class="btn" onclick="saveAttendance()">Сохранить посещаемость</button>
  </div>
- <div class="card"><h3>Последние отметки</h3>${table(["Дата","Группа","Ученик","Статус"],data["Посещаемость"].slice(-20).reverse().map(a=>[
- esc(a.date),esc(a.group),esc(a.student),esc(a.status)
- ]))}</div>`;
+ <p class="notice">Есть и Нет списывают занятие. Справка, Пробное и Репетиция перед концертом не списывают.</p>
+ </div>
+ <div class="card">
+ <h3>История посещаемости</h3>
+ ${table(["Дата","Время","Группа","Ученик","Статус","Списание"],data["Посещаемость"].filter(a=>groups.some(g=>g.name===a.group)).slice().reverse().map(a=>[
+ esc(a.date),esc(a.time||"—"),esc(a.group),esc(a.student),esc(a.status),a.deducted?"−1 занятие":"0"
+ ]))}
+ </div>
+ <div class="card">
+ <h3>Отчёт по пропускам за месяц</h3>
+ ${monthlyAbsenceReport()}
+ </div>`;
 }
+
 function attendanceStudents(){
  const group=document.getElementById("attGroup")?.value;
- const students=data["Ученики"].filter(s=>s.group===group);
- const oldDate=document.getElementById("attDate")?.value;
- document.getElementById("attStudents").innerHTML=students.map(s=>`
- <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:12px 0">
- <span>${esc(s.name)}</span><select data-att="${s.id}" style="width:150px;margin:0">
- <option>Присутствовал</option><option>Отсутствовал</option><option>Опоздал</option></select></div>`).join("")||'<p class="empty">В этой группе пока нет учеников</p>';
+ const date=document.getElementById("attDate")?.value;
+ const container=document.getElementById("attStudents");
+ if(!container)return;
+
+ const students=teacherStudents().filter(s=>s.group===group);
+
+ if(!students.length){
+  container.innerHTML='<div class="empty">В этой группе пока нет учеников</div>';
+  return;
+ }
+
+ container.innerHTML=`
+ <div class="table-wrap" style="margin-top:20px">
+ <table class="attendance-table">
+ <thead><tr><th>Ученик</th><th>Остаток</th><th>Посещение</th></tr></thead>
+ <tbody>
+ ${students.map(s=>{
+  const remaining=Number(s.lessons||0);
+  const warning=remaining<=1&&s.status==="Активный";
+  const old=data["Посещаемость"].find(a=>
+   a.studentId===s.id&&a.group===group&&a.date===date
+  );
+  const options=["Есть","Нет","Справка","Пробное","Репетиция перед концертом"];
+  return `<tr class="${warning?"warning":""}">
+   <td><b>${esc(s.name)}</b>
+   ${warning?'<div class="attendance-warning">Пора продлить</div>':""}
+   ${s.status==="Пробное"?'<div class="status blue">Пробное</div>':""}
+   </td>
+   <td><b>${remaining}</b> / 8</td>
+   <td><select data-att="${s.id}">
+   ${options.map(o=>`<option ${old?.status===o?"selected":""}>${o}</option>`).join("")}
+   </select></td>
+  </tr>`;
+ }).join("")}
+ </tbody></table></div>`;
 }
+
 function saveAttendance(){
- const group=document.getElementById("attGroup").value;
- const date=document.getElementById("attDate").value;
- document.querySelectorAll("[data-att]").forEach(el=>{
-  const s=data["Ученики"].find(x=>x.id===Number(el.dataset.att));
-  if(s)data["Посещаемость"].push({date,group,student:s.name,status:el.value});
+ const group=document.getElementById("attGroup")?.value;
+ const date=document.getElementById("attDate")?.value;
+ const time=document.getElementById("attTime")?.value;
+
+ if(!group||!date||!time){
+  alert("Выберите группу, дату и время занятия");
+  return;
+ }
+
+ const selects=document.querySelectorAll("[data-att]");
+ if(!selects.length){
+  alert("В этой группе нет учеников");
+  return;
+ }
+
+ selects.forEach(el=>{
+  const student=data["Ученики"].find(s=>s.id===Number(el.dataset.att));
+  if(!student)return;
+
+  const oldIndex=data["Посещаемость"].findIndex(a=>
+   a.studentId===student.id&&a.group===group&&a.date===date
+  );
+
+  // Возвращаем ранее списанное занятие при изменении отметки
+  if(oldIndex!==-1){
+   const old=data["Посещаемость"][oldIndex];
+   if(old.deducted)student.lessons=Number(student.lessons||0)+1;
+   data["Посещаемость"].splice(oldIndex,1);
+  }
+
+  const status=el.value;
+  const mustDeduct=status==="Есть"||status==="Нет";
+  let deducted=false;
+
+  if(mustDeduct){
+   if(Number(student.lessons)>0){
+    student.lessons=Number(student.lessons)-1;
+    deducted=true;
+   }else{
+    alert("У ученика "+student.name+" закончился абонемент.");
+   }
+  }
+
+  data["Посещаемость"].push({
+   id:Date.now()+Math.random(),
+   date,time,group,
+   student:student.name,
+   studentId:student.id,
+   status,
+   deducted
+  });
  });
- saveData();render();alert("Посещаемость сохранена");
+
+ saveData();
+ alert("Посещаемость сохранена. Остатки пересчитаны.");
+ render();
 }
+
+function monthlyAbsenceReport(){
+ const groups=teacherGroups();
+ const now=new Date();
+ const prefix=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+ const records=data["Посещаемость"].filter(a=>
+  a.date.startsWith(prefix)&&groups.some(g=>g.name===a.group)
+ );
+ const students=teacherStudents();
+ return table(["Группа","Ученик","Пропуски","Справки"],students.map(s=>[
+ esc(s.group),esc(s.name),
+ records.filter(a=>a.studentId===s.id&&a.status==="Нет").length,
+ records.filter(a=>a.studentId===s.id&&a.status==="Справка").length
+ ]));
+}
+
 function schedulePage(){
- return head("Расписание","Расписание занятий по группам")+
- `<div class="card">${table(["Группа","Педагог","Филиал","Расписание"],data["Группы"].filter(g=>g.teacher==="Камран").map(g=>[
- esc(g.name),esc(g.teacher),esc(g.branch),esc(g.schedule)
+ const groups=teacherGroups();
+ return head("Расписание","Расписание моих групп")+
+ `<div class="card">${table(["Группа","Возраст","Филиал","Расписание","Время"],groups.map(g=>[
+ esc(g.name),esc(g.age),esc(g.branch),esc(g.schedule),esc(g.time||"—")
  ]))}</div>`;
 }
+
 function aiPage(){
  return head("AI-помощник","Помощник администратора DJIGIT TAU")+
  `<div class="card ai-box">
  <h3 style="color:var(--gold2)">✦ AI-помощник администратора</h3>
- <p class="notice">Тестовый помощник. Он использует данные демоверсии и готовит примерные ответы.</p>
+ <p class="notice">Демонстрационный помощник. Использует данные тестовой CRM.</p>
  <label>Ваш вопрос</label>
  <textarea id="aiQuestion" rows="3" placeholder="Например: сколько учеников имеют задолженность?"></textarea>
  <button class="btn" onclick="askAI()">Получить ответ</button>
@@ -548,7 +677,7 @@ function askAI(){
  const debts=students.filter(s=>s.paid==="Долг");
  const active=students.filter(s=>s.status==="Активный");
  const leads=data["Заявки"];
- let answer="Я тестовый помощник DJIGIT TAU. В этой версии я могу показать основные цифры CRM. Для настоящих ответов на любые вопросы потребуется подключение AI-сервиса.";
+ let answer="Я тестовый помощник DJIGIT TAU. Могу показать основные показатели системы. Для настоящих AI-ответов нужно подключить AI-сервис.";
  if(q.includes("долг")||q.includes("задолж")){
   answer=`Учеников с задолженностью: ${debts.length}.\n`+debts.map(s=>s.name+" — "+s.branch).join("\n");
  }else if(q.includes("учен")){
@@ -557,21 +686,22 @@ function askAI(){
   answer=`Всего заявок: ${leads.length}.\n`+leads.map(x=>x.name+" — "+x.stage).join("\n");
  }else if(q.includes("груп")){
   answer=`Групп в системе: ${data["Группы"].length}.\n`+data["Группы"].map(g=>g.name+" — "+g.branch).join("\n");
- }else if(q.includes("филиал")){
-  answer=`Филиалов: ${data["Филиалы"].length}.\n`+data["Филиалы"].map(b=>b.name).join(", ");
  }
  document.getElementById("aiAnswer").textContent=answer;
 }
+
 function openForm(type){
  if(!canManage()&&!(type==="Заявки"&&currentUser.role==="sales"))return;
+
  const fields={
  "Заявки":[["name","Имя"],["phone","Телефон"],["age","Возраст"],["direction","Направление"],["branch","Филиал"],["comment","Комментарий"]],
  "Ученики":[["name","ФИО"],["phone","Телефон"],["age","Возраст"],["group","Группа"],["branch","Филиал"],["lessons","Остаток занятий"],["status","Статус"],["paid","Оплата"]],
- "Группы":[["name","Название"],["age","Возраст"],["teacher","Педагог"],["branch","Филиал"],["schedule","Расписание"],["capacity","Вместимость"]],
+ "Группы":[["name","Название"],["age","Возраст"],["teacher","Педагог"],["branch","Филиал"],["schedule","Расписание"],["time","Время"],["capacity","Вместимость"]],
  "Филиалы":[["name","Название"],["address","Адрес"],["phone","Телефон"]],
- "Педагоги":[["name","ФИО"],["phone","Телефон"],["direction","Направление"],["branch","Филиал"],["groups","Группы"],["status","Статус"]],
+ "Педагоги":[["name","ФИО"],["login","Логин"],["phone","Телефон"],["direction","Направление"],["branch","Филиал"],["groups","Группы"],["status","Статус"]],
  "Финансы":[["type","Тип операции"],["title","Описание"],["amount","Сумма"],["date","Дата"],["branch","Филиал"]]
  };
+
  let html='<form id="dataForm" onsubmit="addItem(event,\''+type+'\')"><div class="form-grid">';
  fields[type].forEach(([key,label])=>{
   html+=`<div><label>${label}</label>`;
@@ -582,7 +712,7 @@ function openForm(type){
   }else if(key==="teacher"){
    html+=`<select name="${key}"><option value="">Выберите</option>${data["Педагоги"].map(x=>`<option>${esc(x.name)}</option>`).join("")}</select>`;
   }else if(key==="status"){
-   html+=`<select name="${key}"><option>Активный</option><option>Неактивный</option><option>Заморожен</option></select>`;
+   html+=`<select name="${key}"><option>Активный</option><option>Неактивный</option><option>Заморожен</option><option>Пробное</option></select>`;
   }else if(key==="paid"){
    html+=`<select name="${key}"><option>Оплачено</option><option>Долг</option></select>`;
   }else if(key==="type"){
@@ -592,37 +722,60 @@ function openForm(type){
   }else if(key==="comment"||key==="schedule"){
    html+=`<textarea name="${key}" rows="2"></textarea>`;
   }else{
-   html+=`<input name="${key}" ${key==="amount"||key==="lessons"||key==="capacity"||key==="age"?"type=\"number\"":"type=\"text\""}>`;
+   const number=["amount","lessons","capacity","age"].includes(key);
+   html+=`<input name="${key}" type="${number?"number":"text"}" ${key==="lessons"?'value="8" min="0" max="8"':""}>`;
   }
   html+="</div>";
  });
- html+='</div><div class="form-actions"><button type="button" class="btn secondary" onclick="closeModal()">Отмена</button><button class="btn" type="submit">Сохранить</button></div></form>';
+ html+=`</div><div class="form-actions">
+ <button type="button" class="btn secondary" onclick="closeModal()">Отмена</button>
+ <button class="btn" type="submit">Сохранить</button>
+ </div></form>`;
  openModal("Добавить: "+type,html);
 }
+
 function addItem(e,type){
  e.preventDefault();
  const form=new FormData(e.target);
  const item=Object.fromEntries(form.entries());
  item.id=Date.now();
+
  if(type==="Заявки")item.stage="Новая";
- if(type==="Ученики"){item.lessons=Number(item.lessons||0);item.status=item.status||"Активный";item.paid=item.paid||"Оплачено";}
+
+ if(type==="Ученики"){
+  item.lessons=Number(item.lessons||8);
+  item.packageTotal=8;
+  item.status=item.status||"Активный";
+  item.paid=item.paid||"Оплачено";
+ }
+
  if(type==="Группы")item.capacity=Number(item.capacity||15);
  if(type==="Финансы")item.amount=Number(item.amount||0);
- data[type].push(item);saveData();closeModal();render();
+
+ data[type].push(item);
+ saveData();
+ closeModal();
+ render();
 }
+
 function removeItem(type,id){
+ if(!canManage()&&!(type==="Заявки"&&currentUser.role==="sales"))return;
  if(!confirm("Удалить запись?"))return;
  data[type]=data[type].filter(x=>x.id!==id);
  saveData();closeModal();render();
 }
+
 function openModal(title,body){
  document.getElementById("modalTitle").textContent=title;
  document.getElementById("modalBody").innerHTML=body;
  document.getElementById("modalBg").style.display="flex";
 }
-function closeModal(){document.getElementById("modalBg").style.display="none"}
+function closeModal(){
+ document.getElementById("modalBg").style.display="none";
+}
 function filterRows(id,value){
- const root=document.getElementById(id);if(!root)return;
+ const root=document.getElementById(id);
+ if(!root)return;
  root.querySelectorAll(".lead").forEach(row=>{
   row.style.display=row.textContent.toLowerCase().includes(value.toLowerCase())?"":"none";
  });
@@ -632,7 +785,8 @@ function filterRows(id,value){
  });
 }
 function filterByBranch(value,id){
- const root=document.getElementById(id);if(!root)return;
+ const root=document.getElementById(id);
+ if(!root)return;
  root.querySelectorAll("tbody tr").forEach(row=>{
   row.style.display=!value||row.cells[4]?.textContent===value?"":"none";
  });
@@ -640,10 +794,14 @@ function filterByBranch(value,id){
 function exportCSV(){
  const rows=data["Ученики"];
  const header=["ФИО","Телефон","Возраст","Группа","Филиал","Статус","Занятия","Оплата"];
- const csv=[header,...rows.map(x=>[x.name,x.phone,x.age,x.group,x.branch,x.status,x.lessons,x.paid])]
- .map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\n");
+ const csv=[header,...rows.map(x=>[
+  x.name,x.phone,x.age,x.group,x.branch,x.status,x.lessons,x.paid
+ ])].map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\n");
  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
- const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="djigit-tau-students.csv";a.click();
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="djigit-tau-students.csv";
+ a.click();
  URL.revokeObjectURL(a.href);
 }
 </script>
