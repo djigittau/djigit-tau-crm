@@ -3,466 +3,1351 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DJIGIT TAU CRM — Финансы</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101010">
+<title>DJIGIT TAU CRM</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
- --bg:#101010;--panel:#191919;--panel2:#222;
- --gold:#d5ad59;--text:#f5f5f5;--muted:#999;
- --border:#333;--green:#49bd83;--red:#e46b6b;
+--bg:#101010;--panel:#191919;--panel2:#22201c;
+--line:#34312a;--text:#f3f0e9;--muted:#999185;
+--gold:#c7a35b;--gold2:#e0c17b;--green:#83ae83;
+--red:#d47b70;box-sizing:border-box
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);
- font-family:Arial,sans-serif}
-header{height:65px;background:#151515;border-bottom:1px solid var(--border);
- display:flex;align-items:center;justify-content:space-between;
- padding:0 22px;position:sticky;top:0;z-index:5}
-.logo{font-size:21px;font-weight:bold;color:var(--gold);letter-spacing:2px}
-.layout{display:flex;min-height:calc(100vh - 65px)}
-nav{width:230px;background:#151515;padding:18px 12px;
- border-right:1px solid var(--border);flex-shrink:0}
-nav button{display:block;width:100%;text-align:left;
- background:none;color:#bbb;border:0;padding:13px 14px;
- border-radius:7px;margin-bottom:4px;cursor:pointer;font-size:14px}
-nav button.active,nav button:hover{background:#302719;color:var(--gold)}
-main{padding:24px;width:100%;min-width:0;max-width:1600px;margin:auto}
-h2{font-size:23px;margin:0 0 20px}
-h3{font-size:16px;margin:0 0 15px}
-.muted{color:var(--muted);font-size:12px}
-.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
- gap:13px;margin-bottom:22px}
-.card,.panel{background:var(--panel);border:1px solid var(--border);
- border-radius:11px;padding:18px}
-.card small{color:var(--muted)}
-.card strong{display:block;font-size:24px;margin-top:12px}
-.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:12px 9px;border-bottom:1px solid var(--border);
- text-align:left;white-space:nowrap}
-th{color:var(--gold);font-weight:600}
-.table-wrap{overflow-x:auto}
-button,.btn{cursor:pointer}
-.primary{background:var(--gold);color:#151515;border:0;
- border-radius:7px;padding:11px 15px;font-weight:bold}
-.secondary{background:#292929;color:white;border:1px solid #444;
- border-radius:7px;padding:10px 13px}
-.danger{background:#522727;color:white;border:0;border-radius:6px;padding:7px}
-input,select,textarea{background:#111;color:white;border:1px solid #444;
- border-radius:6px;padding:11px;width:100%;min-width:0}
-label{font-size:12px;color:#bbb;display:block;margin-bottom:6px}
-.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
-.section{display:none}.section.active{display:block}
-.tag{padding:5px 8px;border-radius:5px;background:#333;font-size:11px}
-.tag.in{color:var(--green)}.tag.out{color:var(--red)}
-.modal{display:none;position:fixed;inset:0;background:#000b;
- z-index:10;align-items:center;justify-content:center;padding:15px}
-.modal.show{display:flex}
-.modalbox{background:#1b1b1b;border:1px solid var(--gold);
- border-radius:12px;padding:22px;width:100%;max-width:600px;
- max-height:90vh;overflow:auto}
-.modalhead{display:flex;justify-content:space-between;margin-bottom:18px}
-.close{background:none;border:0;color:white;font-size:25px}
-.empty{text-align:center;color:var(--muted);padding:25px}
-@media(max-width:850px){
- .layout{display:block}nav{width:100%;display:flex;overflow-x:auto;
- padding:8px;border-right:0;border-bottom:1px solid var(--border)}
- nav button{width:auto;white-space:nowrap;margin:0 3px}
- main{padding:14px}
- .cards{grid-template-columns:repeat(2,1fr)}
- .grid2{grid-template-columns:1fr}
+body{margin:0;background:var(--bg);color:var(--text);font:14px Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.side{
+position:fixed;left:0;top:0;bottom:0;width:245px;
+background:#151515;border-right:1px solid var(--line);
+padding:18px 13px;overflow:auto;z-index:10
 }
-@media(max-width:420px){
- .cards{grid-template-columns:1fr 1fr;gap:8px}
- .card{padding:12px}.card strong{font-size:19px}
- .formgrid{grid-template-columns:1fr}
+.brand{display:flex;align-items:center;gap:12px;padding:5px 8px 22px;border-bottom:1px solid var(--line)}
+.logo{width:43px;height:43px;border-radius:12px;background:linear-gradient(140deg,var(--gold2),#80602e);display:grid;place-items:center;color:#17130b;font-size:23px}
+.brand b{letter-spacing:1.5px}
+.brand small{display:block;color:var(--gold);font-size:9px;letter-spacing:2px;margin-top:5px}
+.navgroup{margin-top:20px}
+.navtitle{font-size:9px;color:#777168;letter-spacing:1.5px;padding:0 10px 8px;font-weight:bold}
+.nav button{display:flex;gap:10px;align-items:center;width:100%;padding:11px 10px;margin:2px 0;border:0;border-radius:8px;background:none;color:#b8b2a7;text-align:left;font-size:12px}
+.nav button.active,.nav button:hover{background:#332b1e;color:var(--gold2)}
+.nav .ico{width:20px;text-align:center;font-size:16px}
+.main{margin-left:245px;min-width:0}
+.top{height:66px;position:sticky;top:0;z-index:5;background:#151515;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:8px 25px;gap:10px}
+.crumb{font-size:12px;color:var(--muted)}
+.crumb b{color:white}
+.topright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.page{max-width:1500px;margin:auto;padding:25px}
+.heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px}
+.eyebrow{font-size:9px;color:var(--gold);letter-spacing:2px;font-weight:bold}
+h1{font-size:25px;margin:8px 0 5px}
+.sub{font-size:11px;color:var(--muted)}
+.btn{border:0;border-radius:8px;padding:11px 15px;background:linear-gradient(135deg,var(--gold2),#a47b3b);color:#17130b;font-weight:bold;font-size:11px}
+.btn.secondary{background:#292720;color:#e8d8b5;border:1px solid #4a402e}
+.btn.danger{background:#49251f;color:#ffd0c8;border:1px solid #784137}
+.field{width:100%;padding:11px;background:#111;border:1px solid #403c33;color:white;border-radius:7px;font-size:12px;outline:none}
+.field:focus{border-color:var(--gold)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stat,.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px;min-width:0}
+.stat label{font-size:11px;color:#aaa397}
+.stat strong{display:block;font-size:24px;margin:10px 0 5px}
+.stat small{font-size:10px;color:var(--green)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:14px}
+.card h3{font-size:13px;margin:0 0 7px}
+.hint{font-size:10px;color:var(--muted);margin-bottom:13px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-size:11px}
+.row span{color:#aaa397;text-align:right}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}
+.toolbar input{max-width:400px}
+.tablewrap{overflow:auto}
+.table{width:100%;border-collapse:collapse;min-width:700px}
+.table th{text-align:left;color:#898276;font-size:9px;padding:12px;border-bottom:1px solid var(--line)}
+.table td{padding:12px;border-bottom:1px solid #292722;font-size:10px;color:#c8c1b5}
+.table td b{color:white}
+.tag{display:inline-block;padding:5px 8px;border-radius:20px;background:#293126;color:#9bc293;font-size:9px}
+.tag.warn{background:#382d1e;color:#e0ba73}
+.tag.blue{background:#202c36;color:#9dbad2}
+.tag.red{background:#402723;color:#e8a49a}
+.mini{border:1px solid #51452e;background:#30291e;color:#d9bb7a;border-radius:6px;padding:6px 8px;font-size:9px}
+.notice{background:#29251d;border:1px solid #55452b;color:#d8c397;border-radius:8px;padding:12px;font-size:10px;line-height:1.6;margin-bottom:14px}
+.empty{text-align:center;padding:25px;color:var(--muted)}
+.columns{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:10px;overflow:auto}
+.col{background:#181818;border:1px solid var(--line);border-radius:10px;padding:10px;min-width:180px}
+.colhead{padding:6px;border-bottom:1px solid var(--line);font-size:11px;font-weight:bold;display:flex;justify-content:space-between}
+.lead{background:#24221e;border:1px solid #39352d;border-radius:8px;padding:11px;margin-top:9px}
+.lead b{font-size:11px}
+.lead small{display:block;color:var(--muted);font-size:9px;margin-top:6px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.modalbg{position:fixed;inset:0;background:#000c;display:none;place-items:center;z-index:30;padding:12px}
+.modal{width:min(520px,100%);background:#1c1b18;border:1px solid #55462e;border-radius:13px;padding:20px;max-height:92vh;overflow:auto}
+.modal h2{font-size:18px;margin:0 0 18px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.formfield{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.formfield label{font-size:10px;color:#bdb5a8}
+.full{grid-column:1/-1}
+.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.toast{position:fixed;bottom:18px;right:18px;background:#2a281f;border:1px solid #76603a;color:#f0ddb2;padding:12px 16px;border-radius:8px;z-index:70;font-size:11px}
+.hamb{display:none;background:none;color:white;border:0;font-size:21px}
+.bar{height:7px;background:#333029;border-radius:8px;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--gold)}
+@media(max-width:950px){
+.side{width:210px}.main{margin-left:210px}
+.stats{grid-template-columns:repeat(2,1fr)}
+.page{padding:18px}.grid2{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+.side{transform:translateX(-100%);transition:.2s;width:250px}
+.side.open{transform:none}
+.main{margin-left:0}
+.hamb{display:block}
+.top{padding:8px 12px}
+.page{padding:16px 11px}
+h1{font-size:22px}
+.heading .btn{font-size:0;padding:10px}
+.heading .btn:after{content:"+";font-size:18px}
+.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:20px}
+.formgrid{grid-template-columns:1fr}
+.full{grid-column:auto}
 }
 </style>
 </head>
 <body>
-<header>
- <div class="logo">DJIGIT TAU</div>
- <div class="muted">CRM / FINANCE</div>
+
+<div class="app">
+<aside class="side" id="side">
+ <div class="brand">
+  <div class="logo">♛</div>
+  <div><b>DJIGIT TAU</b><small>STUDIO CRM</small></div>
+ </div>
+ <div class="nav" id="nav"></div>
+ <div class="sub" style="padding:20px 10px">● DJIGIT TAU · CRM</div>
+</aside>
+
+<main class="main">
+<header class="top">
+ <button class="hamb" onclick="side.classList.toggle('open')">☰</button>
+ <div class="crumb">DJIGIT TAU › <b id="crumb">Главная</b></div>
+ <div class="topright">
+  <span class="sub" id="whoami"></span>
+  <select class="field" style="width:auto" id="branchFilter" onchange="render()">
+   <option value="all">Все филиалы</option>
+  </select>
+  <button class="btn secondary" onclick="exportData()">Экспорт</button>
+  <button class="btn secondary" onclick="logout()">Выйти</button>
+ </div>
 </header>
 
-<div class="layout">
-<nav>
- <button class="active" data-tab="dashboard">◈ Главная</button>
- <button data-tab="operations">⇄ Операции</button>
- <button data-tab="students">♙ Ученики</button>
- <button data-tab="branches">⌂ Филиалы</button>
- <button data-tab="cashflow">▤ ДДС</button>
- <button data-tab="profit">▥ ОПУ</button>
- <button data-tab="balances">▣ Баланс</button>
- <button data-tab="reports">▤ Отчёты</button>
-</nav>
-
-<main>
-<section id="dashboard" class="section active">
- <h2>Главная панель</h2>
- <div class="muted" id="today"></div>
- <div class="cards" style="margin-top:18px">
-  <div class="card"><small>Общий доход</small><strong class="green" id="income">0 ₸</strong></div>
-  <div class="card"><small>Общие расходы</small><strong class="red" id="expense">0 ₸</strong></div>
-  <div class="card"><small>Чистая прибыль</small><strong class="gold" id="profitValue">0 ₸</strong></div>
-  <div class="card"><small>Учеников</small><strong id="studentCount">0</strong></div>
- </div>
- <div class="grid2">
-  <div class="panel">
-   <h3>Финансовый результат</h3>
-   <div id="financeSummary"></div>
+<div class="page">
+ <div class="heading">
+  <div>
+   <div class="eyebrow">УПРАВЛЕНИЕ СТУДИЕЙ</div>
+   <h1 id="title">Главная</h1>
+   <div class="sub" id="subtitle"></div>
   </div>
-  <div class="panel">
-   <h3>Последние операции</h3>
-   <div class="table-wrap"><table><thead>
-    <tr><th>Дата</th><th>Статья</th><th>Сумма</th></tr>
-   </thead><tbody id="recent"></tbody></table></div>
-  </div>
+  <button class="btn" id="primary" onclick="openCreate()">＋ Добавить</button>
  </div>
-</section>
-
-<section id="operations" class="section">
- <h2>Операции</h2>
- <div class="actions">
-  <button class="primary" onclick="openOperation()">+ Добавить операцию</button>
-  <button class="secondary" onclick="exportCSV()">Экспорт CSV</button>
-  <button class="secondary" onclick="document.getElementById('importFile').click()">Импорт CSV</button>
-  <input type="file" id="importFile" accept=".csv" hidden onchange="importCSV(event)">
- </div>
- <div class="panel">
-  <div class="formgrid">
-   <div><label>Тип операции</label><select id="filterType" onchange="render()">
-    <option value="">Все операции</option><option>ДОХОД</option>
-    <option>РАСХОД</option><option>ПЕРЕВОД</option>
-   </select></div>
-   <div><label>Филиал</label><select id="filterBranch" onchange="render()">
-    <option value="">Все филиалы</option></select></div>
-  </div>
-  <div class="table-wrap" style="margin-top:18px">
-   <table><thead><tr><th>Дата</th><th>Тип</th><th>Статья</th>
-   <th>Счёт</th><th>Филиал</th><th>Сумма</th><th></th></tr></thead>
-   <tbody id="operationsList"></tbody></table>
-  </div>
- </div>
-</section>
-
-<section id="students" class="section">
- <h2>Ученики и проекты</h2>
- <div class="actions">
-  <button class="primary" onclick="openStudent()">+ Добавить ученика</button>
- </div>
- <div class="panel table-wrap">
-  <table><thead><tr><th>Ученик</th><th>Родитель</th><th>Телефон</th>
-  <th>Тренер</th><th>Филиал</th><th>Расписание</th><th>Оплата</th>
-  <th></th></tr></thead><tbody id="studentsList"></tbody></table>
- </div>
-</section>
-
-<section id="branches" class="section">
- <h2>Филиалы DJIGIT TAU</h2>
- <div class="panel table-wrap">
-  <table><thead><tr><th>Филиал</th><th>Доход</th><th>Расход</th>
-  <th>Прибыль</th><th>Ученики</th></tr></thead>
-  <tbody id="branchesList"></tbody></table>
- </div>
-</section>
-
-<section id="cashflow" class="section">
- <h2>ДДС — движение денежных средств</h2>
- <div class="cards">
-  <div class="card"><small>Поступления</small><strong class="green" id="cashIncome">0 ₸</strong></div>
-  <div class="card"><small>Выплаты</small><strong class="red" id="cashExpense">0 ₸</strong></div>
-  <div class="card"><small>Денежный поток</small><strong class="gold" id="cashNet">0 ₸</strong></div>
-  <div class="card"><small>Переводы</small><strong id="transfers">0 ₸</strong></div>
- </div>
- <div class="panel">
-  <h3>Движение по счетам</h3>
-  <div id="cashAccounts"></div>
- </div>
-</section>
-
-<section id="profit" class="section">
- <h2>ОПУ — доходы и расходы</h2>
- <div class="panel">
-  <h3>Финансовый отчёт</h3>
-  <div class="table-wrap"><table>
-   <thead><tr><th>Показатель</th><th>Сумма</th></tr></thead>
-   <tbody id="profitReport"></tbody>
-  </table></div>
- </div>
- <div class="panel" style="margin-top:15px">
-  <h3>Доходность по категориям</h3>
-  <div id="categoryReport"></div>
- </div>
-</section>
-
-<section id="balances" class="section">
- <h2>Баланс денежных средств</h2>
- <div class="panel">
-  <div id="balanceList"></div>
- </div>
-</section>
-
-<section id="reports" class="section">
- <h2>Отчёты руководителя</h2>
- <div class="actions">
-  <button class="primary" onclick="window.print()">Печать отчёта</button>
-  <button class="secondary" onclick="exportCSV()">Скачать операции</button>
- </div>
- <div class="panel">
-  <h3>Сводка по филиалам</h3>
-  <div id="managementReport"></div>
- </div>
-</section>
+ <div id="content"></div>
+</div>
 </main>
 </div>
 
-<div class="modal" id="operationModal">
- <div class="modalbox">
-  <div class="modalhead"><h3>Новая операция</h3>
-   <button class="close" onclick="closeModal('operationModal')">×</button></div>
-  <form id="operationForm">
-   <div class="formgrid">
-    <div><label>Дата</label><input type="date" id="opDate" required></div>
-    <div><label>Тип</label><select id="opType">
-     <option>ДОХОД</option><option>РАСХОД</option><option>ПЕРЕВОД</option>
-    </select></div>
-    <div><label>Статья</label><input id="opCategory" required placeholder="Например: Продажи групповые"></div>
-    <div><label>Счёт</label><select id="opAccount">
-     <option>Kaspi</option><option>Kaspi Pay</option><option>Halyk</option>
-     <option>Наличные</option><option>Другой</option>
-    </select></div>
-    <div><label>Сумма, ₸</label><input id="opAmount" type="number" min="0.01" step=".01" required></div>
-    <div><label>Филиал</label><select id="opBranch"></select></div>
-    <div><label>Отправитель / получатель</label><input id="opPerson"></div>
-    <div><label>Комментарий</label><input id="opComment"></div>
-   </div>
-   <div class="actions"><button class="primary" type="submit">Сохранить</button>
-    <button type="button" class="secondary" onclick="closeModal('operationModal')">Отмена</button></div>
-  </form>
- </div>
+<div class="modalbg" id="modalbg" onclick="if(event.target===this)closeModal()">
+ <form class="modal" id="editForm" onsubmit="saveForm(event)">
+  <h2 id="modalTitle">Добавить</h2>
+  <div id="formFields"></div>
+  <div class="modalfoot">
+   <button type="button" class="btn secondary" onclick="closeModal()">Отмена</button>
+   <button class="btn" type="submit">Сохранить</button>
+  </div>
+ </form>
 </div>
 
-<div class="modal" id="studentModal">
- <div class="modalbox">
-  <div class="modalhead"><h3>Новый ученик</h3>
-   <button class="close" onclick="closeModal('studentModal')">×</button></div>
-  <form id="studentForm">
-   <div class="formgrid">
-    <div><label>Имя ученика</label><input id="stName" required></div>
-    <div><label>Родитель</label><input id="stParent"></div>
-    <div><label>Телефон</label><input id="stPhone"></div>
-    <div><label>Тренер</label><input id="stTeacher"></div>
-    <div><label>Филиал</label><select id="stBranch"></select></div>
-    <div><label>Расписание</label><input id="stSchedule" placeholder="Пн.Ср.Пт"></div>
-    <div><label>Стоимость, ₸</label><input id="stPrice" type="number" min="0"></div>
-    <div><label>Оплачено, ₸</label><input id="stPaid" type="number" min="0"></div>
-   </div>
-   <div class="actions"><button class="primary" type="submit">Сохранить ученика</button></div>
-  </form>
- </div>
-</div>
+<div id="toast" class="toast" style="display:none"></div>
 
 <script>
+/* =========================
+   DJIGIT TAU CRM
+========================= */
+
+const $=id=>document.getElementById(id);
+const KEY="djigit_tau_crm_v3";
+const SESSION="djigit_tau_session_v3";
+
+const STAGES=[
+ "Новая заявка",
+ "Связались",
+ "Пробное занятие",
+ "Купили абонемент"
+];
+
+const ROLES={
+ "Руководитель":null,
+ "Администратор":["Ученики","Посещаемость","Расписание","Группы","Тренеры","Абонементы","Финансы","Проекты"],
+ "Тренер":["Ученики","Посещаемость","Расписание","Группы"],
+ "Отдел продаж":["Заявки и воронка","Ученики","Абонементы"]
+};
+
+const NAV=[
+ ["РАБОТА С КЛИЕНТАМИ",["Главная","Заявки и воронка","Ученики","Посещаемость"]],
+ ["СТУДИЯ",["Расписание","Группы","Тренеры","Абонементы"]],
+ ["ПРОЕКТЫ",["Проекты"]],
+ ["УПРАВЛЕНИЕ",["Финансы","ДДС","ОПУ","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
+];
+
+const ICON={
+ "Главная":"▦","Заявки и воронка":"◫","Ученики":"♙",
+ "Посещаемость":"✓","Расписание":"▦","Группы":"♧",
+ "Тренеры":"♙","Абонементы":"▤","Проекты":"◈",
+ "Финансы":"₸","ДДС":"₸","ОПУ":"▥","Филиалы":"⌂",
+ "Аналитика":"◷","Команда":"♟","Журнал":"☰","Настройки":"⚙"
+};
+
 const BRANCHES=[
 "Айнабулак 3 101а",
 "Мкр Грэсс, Гагарина 11",
 "Мкр Алатау (ияф), Ибрагимова 12",
-"Аксай 1, дом 10",
+"Аксай 1, дом 10, 3-3 подъезд",
 "Орбита 3, дом 4а",
 "Достык, 105а/1",
 "Халык Арена",
-"Талгар, ТД Адимак",
-"Абая, 115",
+"Талгар, тд Адимак 4 этаж",
+"Абая, 115 4 этаж",
 "Конаев, Мкр4 16/1",
-"Ауэзова 5"
+"Ауэзова 5",
+"Водник",
+"Асыл Арман",
+"Алматы Арена",
+"Астана Левый берег",
+"Астана Правый берег",
+"Тастак",
+"Каскелен",
+"Узнагаш",
+"Пятилетка",
+"Карабулак",
+"Чилик",
+"Иссык"
 ];
 
-const ACCOUNTS=["Kaspi","Kaspi Pay","Halyk","Наличные","Другой"];
-const KEY="djigit_tau_finance_v1";
-let db=JSON.parse(localStorage.getItem(KEY)||'{"operations":[],"students":[]}');
+const DEMO_USERS=[
+ {phone:"70000000001",pass:"1111",name:"Камран",role:"Руководитель"},
+ {phone:"70000000002",pass:"2222",name:"Администратор",role:"Администратор"},
+ {phone:"70000000003",pass:"3333",name:"Вугар",role:"Тренер"},
+ {phone:"70000000004",pass:"4444",name:"Менеджер",role:"Отдел продаж"}
+];
 
+let db={
+ branches:BRANCHES.map((name,i)=>({id:i+1,name,address:name})),
+ students:[],leads:[],groups:[],teachers:[],
+ memberships:[],attendance:[],payments:[],
+ lessons:[],projects:[],log:[],balances:[],
+ users:DEMO_USERS.map(x=>({...x}))
+};
+
+let current="Главная";
+let role="Руководитель";
+let me=null;
+let editing=null;
+let formType="";
+
+const MAP={
+ student:"students",lead:"leads",group:"groups",
+ teacher:"teachers",branch:"branches",
+ membership:"memberships",payment:"payments",
+ attendance:"attendance",lesson:"lessons",
+ project:"projects"
+};
+
+const NAMES={
+ student:"ученика",lead:"заявку",group:"группу",
+ teacher:"тренера",branch:"филиал",
+ membership:"абонемент",payment:"операцию",
+ attendance:"посещение",lesson:"занятие",
+ project:"проект"
+};
+
+const SUBS={
+ "Главная":"Общая картина работы сети студий",
+ "Заявки и воронка":"От первого обращения до покупки",
+ "Ученики":"Единая база учеников всех филиалов",
+ "Посещаемость":"Посещения и пропуски",
+ "Расписание":"Расписание занятий",
+ "Группы":"Группы и распределение",
+ "Тренеры":"Команда тренеров",
+ "Абонементы":"Продажи и остатки занятий",
+ "Проекты":"Индивидуальные постановки и заказы",
+ "Финансы":"Доходы и расходы",
+ "ДДС":"Движение денежных средств",
+ "ОПУ":"Отчёт о прибылях и убытках",
+ "Филиалы":"Управление филиалами",
+ "Аналитика":"Показатели студии",
+ "Команда":"Пользователи и роли",
+ "Журнал":"История действий",
+ "Настройки":"Импорт и резервное копирование"
+};
+
+function esc(v){
+ return String(v??"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+function id(){return Date.now()*1000+Math.floor(Math.random()*1000)}
+function money(v){return Number(v||0).toLocaleString("ru-RU")+" ₸"}
+function toast(t){
+ $("toast").textContent=t;
+ $("toast").style.display="block";
+ setTimeout(()=>$("toast").style.display="none",2800);
+}
 function save(){
- localStorage.setItem(KEY,JSON.stringify(db));
+ try{localStorage.setItem(KEY,JSON.stringify(db))}
+ catch(e){toast("Недостаточно памяти. Сделайте резервную копию.")}
+}
+function load(){
+ try{
+  const x=JSON.parse(localStorage.getItem(KEY));
+  if(x)db={...db,...x};
+ }catch(e){}
+}
+function logAct(t){
+ db.log.unshift({
+  id:id(),text:t,role,
+  date:new Date().toLocaleString("ru-RU")
+ });
+ db.log=db.log.slice(0,500);
+}
+function branchName(n){
+ return db.branches.find(x=>x.id==n)?.name||"—";
+}
+function inBranch(x){
+ const f=$("branchFilter").value;
+ return f==="all"||String(x.branch)===f;
+}
+function allowed(n){
+ return !ROLES[role]||ROLES[role].includes(n);
+}
+function isBoss(){return role==="Руководитель"}
+
+function status(s){
+ let c="";
+ if(["Нужна оплата","Отсутствовал","Расход","Просрочен"].includes(s))c="warn";
+ if(["Пробное","На проверке","Опоздал"].includes(s))c="blue";
+ if(["Архив","Отменён"].includes(s))c="red";
+ return `<span class="tag ${c}">${esc(s)}</span>`;
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+function normPhone(v){
+ let s=String(v).replace(/\D/g,"");
+ if(s.startsWith("8"))s="7"+s.slice(1);
+ return s;
+}
+function loginScreen(){
+ const d=document.createElement("div");
+ d.id="login";
+ d.style.cssText="position:fixed;inset:0;background:#101010;z-index:100;display:grid;place-items:center;padding:15px";
+ d.innerHTML=`
+ <div class="modal">
+  <h2>♛ DJIGIT TAU CRM</h2>
+  <div class="eyebrow">АВТОРИЗАЦИЯ</div>
+  <div class="formfield" style="margin-top:20px">
+   <label>Номер телефона</label>
+   <input class="field" id="lgPhone" placeholder="+7..." inputmode="tel">
+  </div>
+  <div class="formfield">
+   <label>Пароль</label>
+   <input class="field" id="lgPass" type="password" placeholder="Пароль">
+  </div>
+  <button class="btn" style="width:100%;margin-top:8px" onclick="doLogin()">Войти</button>
+  <div class="notice" style="margin-top:16px">
+   Демо-доступы для проверки. Перед реальной эксплуатацией подключите серверную авторизацию.
+  </div>
+  ${DEMO_USERS.map(u=>`
+   <div class="row">
+    <b>${esc(u.role)}</b>
+    <button class="mini" onclick="fillLogin('${u.phone}','${u.pass}')">${u.phone} / ${u.pass}</button>
+   </div>`).join("")}
+ </div>`;
+ document.body.append(d);
+}
+function fillLogin(p,w){
+ $("lgPhone").value="+"+p;
+ $("lgPass").value=w;
+}
+function doLogin(){
+ const p=normPhone($("lgPhone").value);
+ const w=$("lgPass").value;
+ const u=db.users.find(x=>normPhone(x.phone)===p&&x.pass===w);
+ if(!u){toast("Неверный номер или пароль");return}
+ enter(u);
+}
+function enter(u){
+ me=u;
+ role=u.role;
+ sessionStorage.setItem(SESSION,u.phone);
+ $("login")?.remove();
+ $("whoami").textContent=u.name+" · "+u.role;
+ init();
+}
+function logout(){
+ sessionStorage.removeItem(SESSION);
+ location.reload();
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function init(){
+ $("nav").innerHTML=NAV.map(g=>{
+  const items=g[1].filter(allowed);
+  if(!items.length)return "";
+  return `<div class="navgroup">
+   <div class="navtitle">${g[0]}</div>
+   ${items.map(n=>`
+    <button data-page="${n}" onclick="go('${n}')">
+     <span class="ico">${ICON[n]}</span>${n}
+    </button>`).join("")}
+  </div>`;
+ }).join("");
+
+ const old=$("branchFilter").value||"all";
+ $("branchFilter").innerHTML='<option value="all">Все филиалы</option>'+
+ db.branches.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("");
+ $("branchFilter").value=old;
+ if(!allowed(current))current=NAV.flatMap(g=>g[1]).find(allowed);
  render();
 }
-function money(n){
- return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2})
- .format(Number(n)||0)+" ₸";
-}
-function esc(s){
- return String(s??"").replace(/[&<>"']/g,c=>({
- "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
- })[c]);
-}
-function sum(type){
- return db.operations.filter(x=>x.type===type)
- .reduce((a,x)=>a+Number(x.amount),0);
-}
-function selectOptions(){
- ["filterBranch","opBranch","stBranch"].forEach(id=>{
-  const el=document.getElementById(id);
-  const current=el.value;
-  el.innerHTML=(id==="filterBranch"?'<option value="">Все филиалы</option>':'')+
-   BRANCHES.map(b=>`<option>${esc(b)}</option>`).join("");
-  el.value=current;
- });
-}
-function openOperation(){
- document.getElementById("opDate").value=new Date().toISOString().slice(0,10);
- document.getElementById("operationModal").classList.add("show");
-}
-function openStudent(){
- document.getElementById("studentModal").classList.add("show");
-}
-function closeModal(id){document.getElementById(id).classList.remove("show")}
-
-document.getElementById("operationForm").onsubmit=e=>{
- e.preventDefault();
- db.operations.unshift({
-  id:crypto.randomUUID(),date:opDate.value,type:opType.value,
-  category:opCategory.value.trim(),account:opAccount.value,
-  amount:Number(opAmount.value),branch:opBranch.value,
-  person:opPerson.value,comment:opComment.value
- });
- e.target.reset();closeModal("operationModal");save();
-};
-document.getElementById("studentForm").onsubmit=e=>{
- e.preventDefault();
- db.students.push({
-  id:crypto.randomUUID(),name:stName.value,parent:stParent.value,
-  phone:stPhone.value,teacher:stTeacher.value,branch:stBranch.value,
-  schedule:stSchedule.value,price:Number(stPrice.value||0),
-  paid:Number(stPaid.value||0)
- });
- e.target.reset();closeModal("studentModal");save();
-};
-document.querySelectorAll("nav button").forEach(b=>{
- b.onclick=()=>{
-  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-  document.getElementById(b.dataset.tab).classList.add("active");
-  render();
- };
-});
-function removeOperation(id){
- if(confirm("Удалить эту операцию?")){
-  db.operations=db.operations.filter(x=>x.id!==id);save();
- }
-}
-function removeStudent(id){
- if(confirm("Удалить ученика?")){
-  db.students=db.students.filter(x=>x.id!==id);save();
- }
+function go(n){
+ current=n;
+ $("side").classList.remove("open");
+ render();
 }
 function render(){
- const inc=sum("ДОХОД"),out=sum("РАСХОД"),transfer=sum("ПЕРЕВОД");
- const net=inc-out;
- income.textContent=money(inc);
- expense.textContent=money(out);
- profitValue.textContent=money(net);
- studentCount.textContent=db.students.length;
- today.textContent=new Date().toLocaleDateString("ru-RU");
- financeSummary.innerHTML=`
-  <p>Доходы: <b class="green">${money(inc)}</b></p>
-  <p>Расходы: <b class="red">${money(out)}</b></p>
-  <p>Прибыль: <b class="gold">${money(net)}</b></p>`;
- recent.innerHTML=db.operations.slice(0,7).map(x=>`
-  <tr><td>${esc(x.date)}</td><td>${esc(x.category)}</td>
-  <td>${money(x.amount)}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Операций пока нет</td></tr>';
- let ops=db.operations;
- const ft=filterType.value,fb=filterBranch.value;
- if(ft)ops=ops.filter(x=>x.type===ft);
- if(fb)ops=ops.filter(x=>x.branch===fb);
- operationsList.innerHTML=ops.map(x=>`
- <tr><td>${esc(x.date)}</td>
- <td><span class="tag ${x.type==="ДОХОД"?"in":x.type==="РАСХОД"?"out":""}">${esc(x.type)}</span></td>
- <td>${esc(x.category)}</td><td>${esc(x.account)}</td>
- <td>${esc(x.branch)}</td><td>${money(x.amount)}</td>
- <td><button class="danger" onclick="removeOperation('${x.id}')">×</button></td></tr>
- `).join("")||'<tr><td colspan="7" class="empty">Нет операций</td></tr>';
- studentsList.innerHTML=db.students.map(s=>`
- <tr><td>${esc(s.name)}</td><td>${esc(s.parent)}</td>
- <td>${esc(s.phone)}</td><td>${esc(s.teacher)}</td>
- <td>${esc(s.branch)}</td><td>${esc(s.schedule)}</td>
- <td>${money(s.paid)} / ${money(s.price)}</td>
- <td><button class="danger" onclick="removeStudent('${s.id}')">×</button></td></tr>
- `).join("")||'<tr><td colspan="8" class="empty">Нет учеников</td></tr>';
- let branchHTML="";
- BRANCHES.forEach(b=>{
-  const list=db.operations.filter(x=>x.branch===b);
-  const bi=list.filter(x=>x.type==="ДОХОД").reduce((a,x)=>a+x.amount,0);
-  const bo=list.filter(x=>x.type==="РАСХОД").reduce((a,x)=>a+x.amount,0);
-  const count=db.students.filter(x=>x.branch===b).length;
-  branchHTML+=`<tr><td>${esc(b)}</td><td class="green">${money(bi)}</td>
-  <td class="red">${money(bo)}</td><td>${money(bi-bo)}</td><td>${count}</td></tr>`;
+ $("title").textContent=current;
+ $("crumb").textContent=current;
+ $("subtitle").textContent=SUBS[current]||"";
+ document.querySelectorAll("[data-page]").forEach(b=>{
+  b.classList.toggle("active",b.dataset.page===current);
  });
- branchesList.innerHTML=branchHTML;
- cashIncome.textContent=money(inc);cashExpense.textContent=money(out);
- cashNet.textContent=money(net);transfers.textContent=money(transfer);
- let accounts={};
- ACCOUNTS.forEach(a=>accounts[a]=0);
- db.operations.forEach(x=>{
-  if(!(x.account in accounts))accounts[x.account]=0;
-  if(x.type==="ДОХОД")accounts[x.account]+=x.amount;
-  if(x.type==="РАСХОД")accounts[x.account]-=x.amount;
- });
- cashAccounts.innerHTML=Object.entries(accounts).map(([a,v])=>
-  `<p>${esc(a)} <b style="float:right">${money(v)}</b></p>`
- ).join("");
- balanceList.innerHTML=Object.entries(accounts).map(([a,v])=>
-  `<p>${esc(a)} <b style="float:right">${money(v)}</b></p>`
- ).join("")+`<hr><h3>Итого: ${money(Object.values(accounts).reduce((a,b)=>a+b,0))}</h3>`;
- profitReport.innerHTML=`
- <tr><td>Доходы</td><td class="green">${money(inc)}</td></tr>
- <tr><td>Расходы</td><td class="red">${money(out)}</td></tr>
- <tr><td><b>Чистая прибыль</b></td><td class="gold"><b>${money(net)}</b></td></tr>`;
- let categories={};
- db.operations.filter(x=>x.type==="ДОХОД").forEach(x=>{
-  categories[x.category]=(categories[x.category]||0)+x.amount;
- });
- categoryReport.innerHTML=Object.entries(categories).sort((a,b)=>b[1]-a[1])
- .map(([k,v])=>`<p>${esc(k)} <b style="float:right">${money(v)}</b></p>`)
- .join("")||"Пока нет данных";
- managementReport.innerHTML=`<p>Всего учеников: <b>${db.students.length}</b></p>
- <p>Общий доход: <b class="green">${money(inc)}</b></p>
- <p>Общие расходы: <b class="red">${money(out)}</b></p>
- <p>Чистая прибыль: <b class="gold">${money(net)}</b></p>
- <div class="table-wrap"><table><thead><tr><th>Филиал</th>
- <th>Доход</th><th>Расход</th><th>Прибыль</th></tr></thead>
- <tbody>${branchHTML}</tbody></table></div>`;
+ $("primary").style.display=[
+ "Главная","Аналитика","ДДС","ОПУ","Журнал","Настройки","Команда"
+ ].includes(current)?"none":"inline-block";
+ $("content").innerHTML=(views[current]||views["Главная"])();
 }
-function exportCSV(){
- const rows=[["Дата","Тип","Статья","Счёт","Сумма","Филиал","Отправитель","Комментарий"],
- ...db.operations.map(x=>[x.date,x.type,x.category,x.account,x.amount,x.branch,x.person,x.comment])];
- const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+
+/* =========================
+   STATISTICS
+========================= */
+
+function stat(l,v,n){
+ return `<div class="stat">
+ <label>${l}</label><strong>${v}</strong><small>${n}</small>
+ </div>`;
+}
+function total(type){
+ return db.payments.filter(inBranch).filter(x=>x.type===type)
+ .reduce((s,x)=>s+Number(x.amount||0),0);
+}
+function bars(rows){
+ const max=Math.max(1,...rows.map(x=>x[1]));
+ return rows.map(x=>`
+ <div class="row">
+  <span>${esc(x[0])}</span>
+  <div class="bar"><i style="width:${x[1]/max*100}%"></i></div>
+  <b>${x[1]}</b>
+ </div>`).join("");
+}
+function groupBy(arr,key){
+ const obj={};
+ arr.forEach(x=>{
+  const k=x[key]||"Не указано";
+  obj[k]=(obj[k]||0)+Number(x.amount||0);
+ });
+ return Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+}
+
+/* =========================
+   PAGES
+========================= */
+
+const views={
+
+"Главная":()=>{
+ const s=db.students.filter(inBranch);
+ const l=db.leads.filter(inBranch);
+ const g=db.groups.filter(inBranch);
+ const inc=total("Доход"),exp=total("Расход");
+ return `
+ <div class="stats">
+ ${stat("УЧЕНИКИ",s.length,"В выбранных филиалах")}
+ ${stat("ЗАЯВКИ",l.length,"В воронке")}
+ ${stat("ГРУППЫ",g.length,"Всего групп")}
+ ${stat("ДОХОДЫ",money(inc),"Финансовые операции")}
+ </div>
+ <div class="grid2">
+  <div class="card">
+   <h3>Ученики по филиалам</h3>
+   <div class="hint">Количество учеников</div>
+   ${bars(db.branches.map(b=>[
+    b.name,db.students.filter(s=>s.branch===b.id).length
+   ]))}
+  </div>
+  <div class="card">
+   <h3>Финансовый баланс</h3>
+   <div class="hint">По выбранным филиалам</div>
+   <div class="row"><b>Доходы</b><span>${money(inc)}</span></div>
+   <div class="row"><b>Расходы</b><span>${money(exp)}</span></div>
+   <div class="row"><b>Баланс</b><span>${money(inc-exp)}</span></div>
+  </div>
+ </div>
+ <div class="grid2">
+  <div class="card">
+   <h3>Последние заявки</h3>
+   ${db.leads.filter(inBranch).slice(-5).reverse().map(x=>`
+    <div class="row"><b>${esc(x.name)}</b><span>${esc(x.stage)}</span></div>
+   `).join("")||'<div class="empty">Заявок пока нет</div>'}
+  </div>
+  <div class="card">
+   <h3>Ближайшие занятия</h3>
+   ${db.lessons.filter(inBranch).slice(0,6).map(x=>`
+    <div class="row"><b>${esc(x.date)} · ${esc(x.time)}</b><span>${esc(x.group)}</span></div>
+   `).join("")||'<div class="empty">Занятий пока нет</div>'}
+  </div>
+ </div>`;
+},
+
+"Ученики":()=>tablePage("students",
+ ["Ученик","Телефон","Филиал","Группа","Тренер","Статус"],
+ x=>[
+  `<b>${esc(x.name)}</b>`,
+  esc(x.phone),
+  esc(branchName(x.branch)),
+  esc(x.group),
+  esc(x.teacher),
+  status(x.status)
+ ]),
+
+"Заявки и воронка":()=>`
+ <div class="columns">
+ ${STAGES.map(st=>{
+  const arr=db.leads.filter(inBranch).filter(x=>x.stage===st);
+  return `<div class="col">
+   <div class="colhead">${st}<span>${arr.length}</span></div>
+   ${arr.map(x=>`
+    <div class="lead">
+     <b>${esc(x.name)}</b>
+     <small>${esc(x.phone)} · ${esc(branchName(x.branch))}</small>
+     <small>${esc(x.source||"")}</small>
+     <div class="actions">
+      <button class="mini" onclick="advanceLead(${x.id})">Далее →</button>
+      <button class="mini" onclick="editItem('leads',${x.id})">Изменить</button>
+     </div>
+    </div>`).join("")||'<div class="empty">Нет заявок</div>'}
+  </div>`;
+ }).join("")}
+ </div>`,
+
+"Группы":()=>tablePage("groups",
+ ["Группа","Вид танца","Филиал","Возраст","Тренер","Дни","Время"],
+ x=>[
+ `<b>${esc(x.name)}</b>`,esc(x.dance),esc(branchName(x.branch)),
+ esc(x.age),esc(x.teacher),esc(x.days),esc(x.time)
+ ]),
+
+"Тренеры":()=>tablePage("teachers",
+ ["Тренер","Телефон","Филиал","Роль"],
+ x=>[
+ `<b>${esc(x.name)}</b>`,esc(x.phone),
+ esc(branchName(x.branch)),esc(x.role)
+ ]),
+
+"Филиалы":()=>tablePage("branches",
+ ["Филиал","Адрес","Ученики","Тренеры"],
+ x=>[
+ `<b>${esc(x.name)}</b>`,esc(x.address),
+ db.students.filter(s=>s.branch===x.id).length,
+ db.teachers.filter(t=>t.branch===x.id).length
+ ]),
+
+"Абонементы":()=>tablePage("memberships",
+ ["Ученик","Абонемент","Занятия","Цена","До"],
+ x=>[
+ esc(db.students.find(s=>s.id===x.student)?.name||"—"),
+ `<b>${esc(x.title)}</b>`,
+ `${x.used||0}/${x.total||0}`,
+ money(x.price),esc(x.expires)
+ ]),
+
+"Проекты":()=>tablePage("projects",
+ ["Клиент","Телефон","Филиал","Тренер","Период","Оплачено","Долг","Расходы"],
+ x=>[
+ `<b>${esc(x.name)}</b>`,esc(x.phone),
+ esc(branchName(x.branch)),esc(x.teacher),
+ esc(x.period),money(x.paid),money(x.debt),money(x.expenses)
+ ]),
+
+"Посещаемость":()=>`
+ <div class="notice">Здесь хранятся отметки посещения. Отметить ученика можно через кнопку в таблице учеников.</div>
+ ${tablePage("attendance",
+ ["Дата","Ученик","Группа","Филиал","Статус"],
+ x=>[
+ esc(x.date),
+ esc(db.students.find(s=>s.id===x.student)?.name||"—"),
+ esc(x.group),esc(branchName(x.branch)),status(x.status)
+ ])}`,
+
+"Расписание":()=>`
+ <div class="card">
+  <h3>Расписание занятий</h3>
+  ${db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))
+  .map(x=>`
+   <div class="row">
+    <b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b>
+    <span>${esc(x.teacher)} · ${esc(branchName(x.branch))}</span>
+   </div>`).join("")||'<div class="empty">Занятий пока нет</div>'}
+ </div>`,
+
+"Финансы":()=>`
+ <div class="stats">
+ ${stat("ДОХОДЫ",money(total("Доход")),"Поступления")}
+ ${stat("РАСХОДЫ",money(total("Расход")),"Расходы")}
+ ${stat("БАЛАНС",money(total("Доход")-total("Расход")),"Доход минус расход")}
+ ${stat("ОПЕРАЦИИ",db.payments.filter(inBranch).length,"Записей")}
+ </div>
+ ${tablePage("payments",
+ ["Дата","Тип","Статья","Категория","Тренер","Сумма","Филиал"],
+ x=>[
+ esc(x.date),status(x.type),esc(x.description),
+ esc(x.category),esc(x.teacher),money(x.amount),
+ esc(branchName(x.branch))
+ ])}`,
+
+"ДДС":()=>{
+ const months={};
+ db.payments.filter(inBranch).forEach(x=>{
+  const m=(x.date||"Без даты").slice(0,7);
+  if(!months[m])months[m]={i:0,e:0};
+  months[m][x.type==="Доход"?"i":"e"]+=Number(x.amount||0);
+ });
+ return `
+ <div class="stats">
+ ${stat("ПРИХОД",money(total("Доход")),"Движение денег")}
+ ${stat("РАСХОД",money(total("Расход")),"Движение денег")}
+ ${stat("ЧИСТЫЙ ПОТОК",money(total("Доход")-total("Расход")),"Итог")}
+ ${stat("ОПЕРАЦИИ",db.payments.filter(inBranch).length,"Все записи")}
+ </div>
+ <div class="grid2">
+  <div class="card">
+   <h3>Остатки по счетам</h3>
+   ${(db.balances||[]).map(x=>`
+    <div class="row"><b>${esc(x.account)}</b><span>${money(x.balance)}</span></div>
+   `).join("")||'<div class="empty">Остатки не импортированы</div>'}
+  </div>
+  <div class="card">
+   <h3>Движение по месяцам</h3>
+   ${Object.entries(months).sort((a,b)=>b[0].localeCompare(a[0])).map(([m,x])=>`
+    <div class="row"><b>${esc(m)}</b>
+    <span>+${money(x.i)} / -${money(x.e)}</span></div>
+   `).join("")||'<div class="empty">Нет данных</div>'}
+  </div>
+ </div>`;
+},
+
+"ОПУ":()=>{
+ const inc=db.payments.filter(x=>inBranch(x)&&x.type==="Доход");
+ const exp=db.payments.filter(x=>inBranch(x)&&x.type==="Расход");
+ const branches=db.branches.map(b=>{
+  const a=db.payments.filter(x=>x.branch===b.id);
+  const i=a.filter(x=>x.type==="Доход").reduce((s,x)=>s+Number(x.amount||0),0);
+  const e=a.filter(x=>x.type==="Расход").reduce((s,x)=>s+Number(x.amount||0),0);
+  return {name:b.name,i,e,p:i-e};
+ }).filter(x=>x.i||x.e);
+ return `
+ <div class="stats">
+ ${stat("ВЫРУЧКА",money(total("Доход")),"Доходы")}
+ ${stat("РАСХОДЫ",money(total("Расход")),"Расходы")}
+ ${stat("РЕЗУЛЬТАТ",money(total("Доход")-total("Расход")),"Доход минус расход")}
+ ${stat("ОПЕРАЦИИ",db.payments.filter(inBranch).length,"Учёт")}
+ </div>
+ <div class="grid2">
+  <div class="card">
+   <h3>Доходы по категориям</h3>
+   ${groupBy(inc,"category").map(([k,v])=>`
+    <div class="row"><b>${esc(k)}</b><span>${money(v)}</span></div>
+   `).join("")||'<div class="empty">Нет данных</div>'}
+  </div>
+  <div class="card">
+   <h3>Расходы по статьям</h3>
+   ${groupBy(exp,"action").map(([k,v])=>`
+    <div class="row"><b>${esc(k)}</b><span>${money(v)}</span></div>
+   `).join("")||'<div class="empty">Нет данных</div>'}
+  </div>
+ </div>
+ <div class="card">
+  <h3>Результат по филиалам</h3>
+  <div class="tablewrap"><table class="table">
+   <thead><tr><th>Филиал</th><th>Доходы</th><th>Расходы</th><th>Результат</th></tr></thead>
+   <tbody>${branches.map(x=>`
+    <tr><td><b>${esc(x.name)}</b></td><td>${money(x.i)}</td>
+    <td>${money(x.e)}</td><td>${money(x.p)}</td></tr>
+   `).join("")}</tbody>
+  </table></div>
+ </div>`;
+},
+
+"Аналитика":()=>{
+ const s=db.students.filter(inBranch);
+ const l=db.leads.filter(inBranch);
+ return `
+ <div class="grid2">
+  <div class="card">
+   <h3>Воронка продаж</h3>
+   ${bars(STAGES.map(st=>[
+    st,l.filter(x=>x.stage===st).length
+   ]))}
+  </div>
+  <div class="card">
+   <h3>Статусы учеников</h3>
+   ${bars(["Активен","Пробное","Нужна оплата","Пауза","Архив","На проверке"].map(st=>[
+    st,s.filter(x=>x.status===st).length
+   ]))}
+  </div>
+ </div>
+ <div class="stats">
+ ${stat("УЧЕНИКИ",s.length,"В базе")}
+ ${stat("АКТИВНЫЕ",s.filter(x=>x.status==="Активен").length,"Статус активен")}
+ ${stat("ДОЛЖНИКИ",s.filter(x=>x.status==="Нужна оплата").length,"Нужна оплата")}
+ ${stat("ПРОЕКТЫ",db.projects.filter(inBranch).length,"В базе")}
+ </div>`;
+},
+
+"Команда":()=>`
+ <div class="notice">Создание сотрудника в этой демонстрационной версии не создаёт отдельную защищённую учётную запись на сервере. Пароли хранятся локально.</div>
+ <div class="card">
+  <h3>Добавить сотрудника</h3>
+  <div class="formgrid">
+   <input class="field" id="nuName" placeholder="Имя">
+   <input class="field" id="nuPhone" placeholder="Номер телефона">
+   <input class="field" id="nuPass" placeholder="Пароль">
+   <select class="field" id="nuRole">
+    ${Object.keys(ROLES).filter(x=>x!=="Руководитель").map(x=>`<option>${x}</option>`).join("")}
+   </select>
+  </div>
+  <div class="modalfoot"><button class="btn" onclick="addUser()">Добавить сотрудника</button></div>
+ </div>
+ <div class="card" style="margin-top:14px">
+  <h3>Сотрудники</h3>
+  ${db.users.map((u,i)=>`
+   <div class="row">
+    <b>${esc(u.name)}</b>
+    <span>${esc(u.role)} · ${esc(u.phone)}
+    <button class="mini" onclick="removeUser(${i})">Удалить</button></span>
+   </div>
+  `).join("")}
+ </div>`,
+
+"Журнал":()=>`
+ <div class="card">
+  <h3>История действий</h3>
+  ${db.log.map(x=>`
+   <div class="row"><b>${esc(x.text)}</b><span>${esc(x.role)} · ${esc(x.date)}</span></div>
+  `).join("")||'<div class="empty">История пуста</div>'}
+ </div>`,
+
+"Настройки":()=>`
+ <div class="card">
+  <h3>Импорт Excel</h3>
+  <div class="hint">Загрузка книги Камран. Поддерживаются листы «ст», «ОПЕРАЦИИ», «ПРОЕКТЫ», «БАЛАНС» и «Лист17».</div>
+  <div class="notice">
+   Сначала сделай резервную копию. Импорт заменит соответствующие разделы текущей CRM.
+   После импорта проверь статусы учеников и соответствие филиалов.
+  </div>
+  <input class="field" id="excelFile" type="file" accept=".xlsx,.xls">
+  <div class="actions">
+   <button class="btn" onclick="importExcel()">Загрузить Excel</button>
+   <button class="btn secondary" onclick="exportData()">Скачать резервную копию</button>
+  </div>
+  <div id="importStatus" class="sub" style="margin-top:12px"></div>
+ </div>
+ <div class="card" style="margin-top:14px">
+  <h3>Состояние CRM</h3>
+  ${[
+   ["Ученики",db.students.length],
+   ["Филиалы",db.branches.length],
+   ["Тренеры",db.teachers.length],
+   ["Проекты",db.projects.length],
+   ["Финансовые операции",db.payments.length],
+   ["Посещения",db.attendance.length],
+   ["Заявки",db.leads.length]
+  ].map(x=>`<div class="row"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}
+ </div>
+ <div class="card" style="margin-top:14px">
+  <h3>Управление данными</h3>
+  <button class="btn secondary" onclick="exportData()">Экспорт JSON</button>
+  <input type="file" id="backupFile" accept=".json" class="field" style="margin-top:12px">
+  <button class="btn" style="margin-top:10px" onclick="importBackup()">Восстановить копию</button>
+ </div>`
+};
+
+/* =========================
+   TABLES
+========================= */
+
+function tablePage(key,heads,mapper){
+ const arr=(db[key]||[]).filter(inBranch);
+ return `<div class="card">
+ <div class="toolbar">
+  <input class="field" id="filterTable" placeholder="Поиск..." oninput="filterRows()">
+  <span class="sub">${arr.length} записей</span>
+ </div>
+ <div class="tablewrap">
+ <table class="table" id="dataTable">
+ <thead><tr>${heads.map(x=>`<th>${x}</th>`).join("")}<th>Действия</th></tr></thead>
+ <tbody>
+ ${arr.map(x=>`
+  <tr data-search="${esc(JSON.stringify(x).toLowerCase())}">
+   ${mapper(x).map(v=>`<td>${v}</td>`).join("")}
+   <td>
+    ${key==="students"?`<button class="mini" onclick="profile(${x.id})">Профиль</button>`:""}
+    <button class="mini" onclick="editItem('${key}',${x.id})">Изменить</button>
+    ${key==="students"?`<button class="mini" onclick="quickAttendance(${x.id})">Отметить</button>`:""}
+    ${isBoss()?`<button class="mini" onclick="deleteItem('${key}',${x.id})">Удалить</button>`:""}
+   </td>
+  </tr>`).join("")||`<tr><td colspan="${heads.length+1}" class="empty">Записей пока нет</td></tr>`}
+ </tbody>
+ </table>
+ </div>
+ </div>`;
+}
+function filterRows(){
+ const q=$("filterTable").value.toLowerCase();
+ document.querySelectorAll("#dataTable tbody tr").forEach(r=>{
+  r.style.display=(r.dataset.search||"").includes(q)?"":"none";
+ });
+}
+
+/* =========================
+   FORMS
+========================= */
+
+const FORMS={
+ student:[
+ ["name","ФИО ученика","text",1],
+ ["phone","Телефон","text",1],
+ ["branch","Филиал","branch",1],
+ ["group","Группа","group"],
+ ["teacher","Тренер","text"],
+ ["kind","Тип","select:Новенький|Действующий"],
+ ["birth","Дата рождения","date"],
+ ["since","Занимается с","date"],
+ ["status","Статус","select:Активен|Пробное|Нужна оплата|Пауза|Архив|На проверке"]
+ ],
+ lead:[
+ ["name","Имя клиента","text",1],
+ ["phone","Телефон","text",1],
+ ["branch","Филиал","branch",1],
+ ["stage","Этап","select:"+STAGES.join("|")],
+ ["source","Источник","text"],
+ ["manager","Менеджер","text"]
+ ],
+ group:[
+ ["name","Название группы","text",1],
+ ["branch","Филиал","branch",1],
+ ["age","Возраст","text"],
+ ["teacher","Тренер","text"],
+ ["dance","Вид танца","select:Лезгинка|Игра на барабане|Индивидуальные"],
+ ["days","Дни","text"],
+ ["time","Время","time"]
+ ],
+ teacher:[
+ ["name","ФИО тренера","text",1],
+ ["phone","Телефон","text"],
+ ["branch","Филиал","branch",1],
+ ["role","Роль","text"]
+ ],
+ branch:[
+ ["name","Название филиала","text",1],
+ ["address","Адрес","text"]
+ ],
+ membership:[
+ ["student","Ученик","student",1],
+ ["title","Название абонемента","text",1],
+ ["total","Всего занятий","number",1],
+ ["used","Использовано","number"],
+ ["price","Цена, ₸","number",1],
+ ["branch","Филиал","branch",1],
+ ["expires","Действует до","date"]
+ ],
+ payment:[
+ ["date","Дата","date",1],
+ ["type","Тип","select:Доход|Расход",1],
+ ["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],
+ ["category","Категория","text"],
+ ["description","Описание","text",1],
+ ["amount","Сумма, ₸","number",1],
+ ["branch","Филиал","branch",1],
+ ["teacher","Тренер","text"]
+ ],
+ attendance:[
+ ["student","Ученик","student",1],
+ ["date","Дата","date",1],
+ ["group","Группа","group"],
+ ["branch","Филиал","branch",1],
+ ["status","Статус","select:Присутствовал|Отсутствовал|Опоздал|Уважительная причина",1]
+ ],
+ lesson:[
+ ["date","Дата","date",1],
+ ["time","Время","time",1],
+ ["group","Группа","text",1],
+ ["teacher","Тренер","text"],
+ ["branch","Филиал","branch",1],
+ ["room","Зал","text"]
+ ],
+ project:[
+ ["date","Дата","date"],
+ ["name","Клиент","text",1],
+ ["period","Период оплат","text"],
+ ["teacher","Тренер","text"],
+ ["parent","Родитель","text"],
+ ["phone","Телефон","text"],
+ ["branch","Филиал","branch",1],
+ ["schedule","Расписание","text"],
+ ["time","Время","time"],
+ ["status","Статус","text"],
+ ["comment","Комментарий","text"],
+ ["paid","Оплачено, ₸","number"],
+ ["debt","Долг, ₸","number"],
+ ["expenses","Расходы, ₸","number"],
+ ["margin","Маржа, ₸","number"],
+ ["profitability","Рентабельность, %","number"]
+ ]
+};
+
+function openCreate(){
+ const map={
+ "Ученики":"student",
+ "Заявки и воронка":"lead",
+ "Группы":"group",
+ "Тренеры":"teacher",
+ "Филиалы":"branch",
+ "Абонементы":"membership",
+ "Финансы":"payment",
+ "Посещаемость":"attendance",
+ "Расписание":"lesson",
+ "Проекты":"project"
+ };
+ formType=map[current];
+ if(!formType)return;
+ editing=null;
+ showForm();
+}
+function editItem(key,id){
+ formType=Object.keys(MAP).find(k=>MAP[k]===key);
+ editing={key,id};
+ showForm();
+}
+function showForm(){
+ const key=MAP[formType];
+ const old=editing?db[key].find(x=>x.id===editing.id):{};
+ $("modalTitle").textContent=(editing?"Изменить: ":"Добавить: ")+NAMES[formType];
+ $("formFields").innerHTML=`<div class="formgrid">
+ ${FORMS[formType].map(([name,label,type,req])=>{
+  const value=old?.[name]??"";
+  let input="";
+  if(type.startsWith("select:")){
+   input=`<select class="field" name="${name}" ${req?"required":""}>
+    ${type.slice(7).split("|").map(v=>`<option value="${esc(v)}" ${v===value?"selected":""}>${esc(v)}</option>`).join("")}
+   </select>`;
+  }else if(type==="branch"){
+   input=`<select class="field" name="${name}" required>
+    ${db.branches.map(b=>`<option value="${b.id}" ${b.id==value?"selected":""}>${esc(b.name)}</option>`).join("")}
+   </select>`;
+  }else if(type==="student"){
+   input=`<select class="field" name="${name}">
+    ${db.students.map(s=>`<option value="${s.id}" ${s.id==value?"selected":""}>${esc(s.name)}</option>`).join("")}
+   </select>`;
+  }else if(type==="group"){
+   input=`<select class="field" name="${name}">
+    <option value="">Не выбрано</option>
+    ${db.groups.map(g=>`<option ${g.name===value?"selected":""}>${esc(g.name)}</option>`).join("")}
+   </select>`;
+  }else{
+   input=`<input class="field" name="${name}" type="${type}" value="${esc(value)}" ${req?"required":""}>`;
+  }
+  return `<div class="formfield ${["name","description","comment"].includes(name)?"full":""}">
+   <label>${label}</label>${input}</div>`;
+ }).join("")}
+ </div>`;
+ $("modalbg").style.display="grid";
+}
+function closeModal(){$("modalbg").style.display="none"}
+function saveForm(e){
+ e.preventDefault();
+ const key=MAP[formType];
+ const obj={};
+ new FormData(e.target).forEach((v,k)=>obj[k]=v);
+ ["branch","student","total","used","price","amount","paid","debt","expenses","margin","profitability"].forEach(k=>{
+  if(obj[k]!==undefined)obj[k]=Number(obj[k]||0);
+ });
+ if(editing){
+  const i=db[key].findIndex(x=>x.id===editing.id);
+  db[key][i]={...db[key][i],...obj};
+ }else{
+  obj.id=id();
+  db[key].push(obj);
+ }
+ logAct((editing?"Изменено: ":"Добавлено: ")+NAMES[formType]);
+ save();
+ closeModal();
+ init();
+ toast("Сохранено");
+}
+function deleteItem(key,idv){
+ if(!isBoss())return;
+ if(!confirm("Удалить запись?"))return;
+ db[key]=db[key].filter(x=>x.id!==idv);
+ logAct("Удалена запись из "+key);
+ save();render();toast("Удалено");
+}
+
+/* =========================
+   STUDENT PROFILE
+========================= */
+
+function profile(idv){
+ const s=db.students.find(x=>x.id===idv);
+ if(!s)return;
+ const att=db.attendance.filter(x=>x.student===idv);
+ const mem=db.memberships.filter(x=>x.student===idv);
+ const d=document.createElement("div");
+ d.className="modalbg";d.style.display="grid";
+ d.onclick=e=>{if(e.target===d)d.remove()};
+ d.innerHTML=`<div class="modal">
+ <h2>${esc(s.name)}</h2>
+ <div class="card">
+  <div class="row"><b>Телефон</b><span>${esc(s.phone)}</span></div>
+  <div class="row"><b>Филиал</b><span>${esc(branchName(s.branch))}</span></div>
+  <div class="row"><b>Группа</b><span>${esc(s.group)}</span></div>
+  <div class="row"><b>Тренер</b><span>${esc(s.teacher)}</span></div>
+  <div class="row"><b>Статус</b><span>${status(s.status)}</span></div>
+  <div class="row"><b>Дата рождения</b><span>${esc(s.birth)}</span></div>
+ </div>
+ <div class="card" style="margin-top:12px">
+  <h3>Абонементы</h3>
+  ${mem.map(m=>`<div class="row"><b>${esc(m.title)}</b><span>${m.used||0}/${m.total||0} · ${money(m.price)}</span></div>`).join("")||'<div class="empty">Нет абонементов</div>'}
+ </div>
+ <div class="card" style="margin-top:12px">
+  <h3>Посещения</h3>
+  ${att.map(a=>`<div class="row"><b>${esc(a.date)}</b><span>${status(a.status)}</span></div>`).join("")||'<div class="empty">Нет отметок</div>'}
+ </div>
+ <div class="modalfoot"><button class="btn secondary" onclick="this.closest('.modalbg').remove()">Закрыть</button></div>
+ </div>`;
+ document.body.append(d);
+}
+function quickAttendance(idv){
+ const s=db.students.find(x=>x.id===idv);
+ if(!s)return;
+ db.attendance.push({
+  id:id(),student:idv,date:new Date().toISOString().slice(0,10),
+  group:s.group,branch:s.branch,status:"Присутствовал"
+ });
+ logAct("Отмечено посещение: "+s.name);
+ save();go("Посещаемость");toast("Посещение отмечено");
+}
+function advanceLead(idv){
+ const x=db.leads.find(i=>i.id===idv);
+ if(!x)return;
+ x.stage=STAGES[Math.min(STAGES.indexOf(x.stage)+1,3)];
+ if(x.stage==="Купили абонемент"&&!db.students.some(s=>s.phone===x.phone)){
+  db.students.push({
+   id:id(),name:x.name,phone:x.phone,branch:x.branch,
+   group:"",status:"Активен",kind:"Новенький"
+  });
+ }
+ logAct("Обновлён этап заявки: "+x.name);
+ save();render();toast("Этап обновлён");
+}
+
+/* =========================
+   TEAM
+========================= */
+
+function addUser(){
+ const name=$("nuName").value.trim();
+ const phone=normPhone($("nuPhone").value);
+ const pass=$("nuPass").value;
+ const r=$("nuRole").value;
+ if(!name||!phone||!pass){toast("Заполните все поля");return}
+ if(db.users.some(x=>normPhone(x.phone)===phone)){toast("Номер уже используется");return}
+ db.users.push({name,phone,pass,role:r});
+ logAct("Добавлен сотрудник: "+name);
+ save();render();toast("Сотрудник добавлен");
+}
+function removeUser(i){
+ if(!isBoss())return;
+ if(!confirm("Удалить сотрудника?"))return;
+ db.users.splice(i,1);
+ save();render();toast("Сотрудник удалён");
+}
+
+/* =========================
+   EXCEL IMPORT
+========================= */
+
+function findBranch(value){
+ const s=String(value??"").trim().toLowerCase();
+ if(!s)return 0;
+ const i=db.branches.findIndex(b=>b.name.toLowerCase()===s);
+ if(i>=0)return db.branches[i].id;
+ const aliases=[
+  ["айнабулак","Айнабулак"],
+  ["грэс","Грэсс"],
+  ["алатау","Алатау"],
+  ["аксай","Аксай"],
+  ["орбита","Орбита"],
+  ["достык","Достык"],
+  ["талгар","Талгар"],
+  ["конаев","Конаев"]
+ ];
+ const a=aliases.find(x=>s.includes(x[0]));
+ if(a){
+  const j=db.branches.findIndex(b=>b.name.toLowerCase().includes(a[1].toLowerCase()));
+  if(j>=0)return db.branches[j].id;
+ }
+ return 0;
+}
+function val(r,i){return r?.[i]??""}
+function dateVal(v){
+ if(v instanceof Date)return v.toISOString().slice(0,10);
+ if(typeof v==="number"){
+  const d=XLSX.SSF.parse_date_code(v);
+  if(d)return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
+ }
+ return String(v||"").slice(0,10);
+}
+function rowsOf(wb,name){
+ const ws=wb.Sheets[name];
+ return ws?XLSX.utils.sheet_to_json(ws,{header:1,defval:""}):[];
+}
+function uniqueTeachers(names){
+ const out=[];
+ names.forEach(n=>{
+  const s=String(n||"").trim();
+  if(s&&!out.some(x=>x.name===s)){
+   out.push({id:id(),name:s,phone:"",branch:0,role:"Тренер"});
+  }
+ });
+ return out;
+}
+async function importExcel(){
+ if(!isBoss()){toast("Импорт доступен руководителю");return}
+ if(!window.XLSX){toast("Не загрузилась библиотека Excel");return}
+ const file=$("excelFile").files[0];
+ if(!file){toast("Выбери Excel-файл");return}
+ if(!confirm("Заменить импортируемые разделы текущей CRM? Сначала скачай резервную копию."))return;
+ $("importStatus").textContent="Чтение Excel...";
+ try{
+  const buffer=await file.arrayBuffer();
+  const wb=XLSX.read(buffer,{type:"array",cellDates:true});
+
+  const sr=rowsOf(wb,"ст");
+  const pr=rowsOf(wb,"ПРОЕКТЫ");
+  const op=rowsOf(wb,"ОПЕРАЦИИ");
+  const br=rowsOf(wb,"Лист17");
+  const bal=rowsOf(wb,"БАЛАНС");
+
+  const students=[];
+  const seen=new Set();
+  const teacherNames=[];
+
+  /* Ученики */
+  sr.slice(1).forEach(r=>{
+   const name=String(val(r,1)||"").trim();
+   if(!name||name==="НЕ УДАЛЯТЬ")return;
+   const phone=String(val(r,5)||"").trim();
+   const branch=findBranch(val(r,6));
+   const key=phone.replace(/\D/g,"")||name+"_"+branch;
+   if(seen.has(key))return;
+   seen.add(key);
+   const teacher=String(val(r,3)||"").trim();
+   if(teacher)teacherNames.push(teacher);
+   students.push({
+    id:id(),name,phone,branch,group:"",
+    teacher,status:"На проверке",kind:"Действующий",
+    birth:"",since:"",
+    excelPeriod:String(val(r,2)||""),
+    schedule:String(val(r,7)||""),
+    time:String(val(r,8)||""),
+    monthlyPrice:Number(val(r,9)||0),
+    notes:[{
+     t:"Родитель: "+String(val(r,4)||""),
+     role:"Импорт Excel",
+     at:new Date().toLocaleDateString("ru-RU")
+    }]
+   });
+  });
+
+  /* Филиалы */
+  const branchNames=[...BRANCHES];
+  br.slice(1).forEach(r=>{
+   const n=String(val(r,3)||"").trim();
+   if(n&&!branchNames.some(x=>x.toLowerCase()===n.toLowerCase())){
+    branchNames.push(n);
+   }
+  });
+  db.branches=branchNames.map((n,i)=>({id:i+1,name:n,address:n}));
+
+  /* Повторное сопоставление филиалов после загрузки */
+  students.forEach(s=>{
+   const original=sr.find(r=>String(val(r,1)||"").trim()===s.name);
+   if(original)s.branch=findBranch(val(original,6));
+  });
+
+  /* Проекты */
+  const projects=[];
+  pr.slice(4).forEach(r=>{
+   const name=String(val(r,1)||"").trim();
+   if(!name)return;
+   const teacher=String(val(r,3)||"").trim();
+   if(teacher)teacherNames.push(teacher);
+   projects.push({
+    id:id(),date:dateVal(val(r,0)),name,
+    period:String(val(r,2)||""),
+    teacher,
+    parent:String(val(r,4)||""),
+    phone:String(val(r,5)||""),
+    branch:findBranch(val(r,6)),
+    schedule:String(val(r,7)||""),
+    time:String(val(r,8)||""),
+    status:String(val(r,32)||""),
+    comment:String(val(r,33)||""),
+    paid:Number(val(r,34)||0),
+    debt:Number(val(r,35)||0),
+    expenses:Number(val(r,36)||0),
+    margin:Number(val(r,37)||0),
+    profitability:Number(val(r,38)||0)
+   });
+  });
+
+  /* Финансовые операции */
+  const payments=[];
+  op.slice(2).forEach(r=>{
+   const amount=Number(val(r,4)||0);
+   const dt=val(r,0);
+   if(!dt||!amount)return;
+   const article=String(val(r,2)||"");
+   let type=String(val(r,18)||"").toUpperCase();
+   if(type!=="ДОХОД"&&type!=="РАСХОД"){
+    type=article.toUpperCase().includes("ДОХОД")?"ДОХОД":
+         article.toUpperCase().includes("РАСХОД")?"РАСХОД":
+         amount>=0?"ДОХОД":"РАСХОД";
+   }
+   const teacher=String(val(r,10)||"").trim();
+   if(teacher)teacherNames.push(teacher);
+   payments.push({
+    id:id(),date:dateVal(dt),
+    type:type==="ДОХОД"?"Доход":"Расход",
+    amount:Math.abs(amount),
+    description:article,
+    account:String(val(r,3)||""),
+    project:String(val(r,5)||""),
+    sender:String(val(r,7)||""),
+    comment:String(val(r,8)||""),
+    branch:findBranch(val(r,9)),
+    teacher,
+    dance:String(val(r,11)||""),
+    category:String(val(r,12)||""),
+    studentType:String(val(r,13)||""),
+    action:String(val(r,14)||""),
+    month:String(val(r,15)||""),
+    year:String(val(r,16)||"")
+   });
+  });
+
+  /* Остатки */
+  const balances=bal.slice(1).filter(r=>val(r,0)!=="").map(r=>({
+   account:String(val(r,0)),
+   balance:Number(val(r,1)||0)
+  }));
+
+  db.students=students;
+  db.projects=projects;
+  db.payments=payments;
+  db.teachers=uniqueTeachers(teacherNames);
+  db.balances=balances;
+
+  /* Другие разделы не заполняются вымышленными данными */
+  db.groups=[];
+  db.memberships=[];
+  db.attendance=[];
+  db.lessons=[];
+  db.leads=[];
+
+  logAct("Импорт Excel: "+students.length+" учеников, "+
+   projects.length+" проектов, "+payments.length+" операций");
+  save();
+  init();
+
+  $("importStatus").textContent=
+   "Готово: учеников "+students.length+
+   ", проектов "+projects.length+
+   ", операций "+payments.length+
+   ", тренеров "+db.teachers.length+
+   ", филиалов "+db.branches.length;
+  toast("Импорт завершён");
+ }catch(e){
+  console.error(e);
+  $("importStatus").textContent="Ошибка чтения Excel: "+e.message;
+  toast("Не удалось прочитать книгу");
+ }
+}
+
+/* =========================
+   BACKUP
+========================= */
+
+function exportData(){
+ if(!isBoss()){toast("Экспорт доступен руководителю");return}
+ const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
  const a=document.createElement("a");
- a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
- a.download="djigit-tau-operations.csv";a.click();
+ a.href=URL.createObjectURL(blob);
+ a.download="djigit-tau-backup.json";
+ a.click();
  URL.revokeObjectURL(a.href);
 }
-function importCSV(event){
- const file=event.target.files[0];if(!file)return;
- const reader=new FileReader();
- reader.onload=()=>{
-  const lines=reader.result.replace(/^\uFEFF/,"").split(/\r?\n/).slice(1);
-  lines.forEach(line=>{
-   if(!line.trim())return;
-   const cols=line.split(";").map(v=>v.replace(/^"|"$/g,"").replace(/""/g,'"'));
-   if(cols.length<5)return;
-   db.operations.push({id:crypto.randomUUID(),date:cols[0],
-    type:cols[1],category:cols[2],account:cols[3],
-    amount:Number(cols[4].replace(/\s/g,"").replace(",","."))||0,
-    branch:cols[5]||"",person:cols[6]||"",comment:cols[7]||""});
-  });
-  save();alert("Импорт завершён");
+function importBackup(){
+ if(!isBoss())return;
+ const f=$("backupFile").files[0];
+ if(!f){toast("Выбери файл JSON");return}
+ const r=new FileReader();
+ r.onload=()=>{
+  try{
+   const d=JSON.parse(r.result);
+   if(!d.students||!d.branches)throw Error();
+   db={...db,...d};
+   save();init();toast("Резервная копия восстановлена");
+  }catch(e){toast("Неверный файл копии")}
  };
- reader.readAsText(file,"UTF-8");event.target.value="";
+ r.readAsText(f);
 }
-selectOptions();
-render();
+
+/* =========================
+   INITIAL START
+========================= */
+
+load();
+
+const session=sessionStorage.getItem(SESSION);
+const logged=db.users.find(x=>x.phone===session);
+
+if(logged){
+ enter(logged);
+}else{
+ loginScreen();
+}
 </script>
 </body>
 </html>
