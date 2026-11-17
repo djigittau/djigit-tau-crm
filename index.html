@@ -3,513 +3,341 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#101010">
-<title>DJIGIT TAU CRM · ДЕМО</title>
+<meta name="theme-color" content="#ffffff">
+<title>DJIGIT TAU CRM</title>
 <style>
-:root{color-scheme:dark;--bg:#101010;--panel:#191919;--line:#302e29;--text:#f3f0e9;--muted:#918b80;--gold:#c7a35b;--gold2:#e0c17b;--green:#83ae83;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:14px Inter,Arial,sans-serif}
-button,input,select{font:inherit}button{cursor:pointer}
-.app{display:flex;min-height:100vh}
-.side{width:245px;background:#151515;border-right:1px solid var(--line);padding:20px 14px;position:fixed;top:env(safe-area-inset-top,0px);bottom:0;left:0;overflow:auto;z-index:10}
-.brand{display:flex;align-items:center;gap:12px;padding:0 8px 22px;border-bottom:1px solid var(--line)}
-.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(140deg,var(--gold2),#8a6732);display:grid;place-items:center;color:#17130b;font-size:22px}
-.brand b{letter-spacing:1.5px}.brand small{display:block;color:var(--gold);font-size:9px;letter-spacing:2px;margin-top:4px}
-.navgroup{margin-top:22px}
-.navtitle{font-size:9px;color:#777168;letter-spacing:1.4px;padding:0 10px 8px;font-weight:bold}
-.nav button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;color:#b8b2a7;padding:11px 10px;border-radius:8px;text-align:left;font-size:12px;margin:2px 0}
-.nav button:hover,.nav button.active{background:#332b1e;color:var(--gold2)}
-.nav .ico{width:18px;text-align:center;font-size:16px}
-.sidefoot{margin-top:24px;color:#827c70;font-size:10px;padding:10px}
-.main{margin-left:245px;width:calc(100% - 245px);min-width:0}
-.top{min-height:66px;background:#151515;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:8px 28px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;gap:8px}
-.crumb{font-size:12px;color:var(--muted)}.crumb b{color:#eee}
-.topright{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-.select{background:#211f1b;border:1px solid #49402e;color:#e7d8b8;border-radius:8px;padding:9px 11px;font-size:11px}
-.page{max-width:1500px;margin:auto;padding:28px}
-.heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
-.eyebrow{font-size:9px;color:var(--gold);letter-spacing:1.8px;font-weight:bold}
-.heading h1{font-size:26px;margin:7px 0 5px}.sub{font-size:11px;color:var(--muted)}
-.btn{border:0;border-radius:8px;padding:10px 14px;background:linear-gradient(135deg,var(--gold2),#a47b3b);color:#17130b;font-weight:bold;font-size:11px}
-.btn.secondary{background:#2a2823;color:#e8d8b5;border:1px solid #4a402e}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:14px}
-.stat,.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px}
-.stat label{color:#aaa397;font-size:11px}.stat strong{display:block;font-size:25px;margin:10px 0 5px}.stat small{color:var(--green);font-size:10px}
-.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-bottom:14px}
-.card h3{font-size:13px;margin:0 0 6px}.card .hint{font-size:10px;color:var(--muted);margin-bottom:15px}
-.barrow{display:grid;grid-template-columns:130px 1fr 30px;gap:9px;align-items:center;margin:13px 0;font-size:10px;color:#bcb5a8}
-.bar{height:7px;background:#333029;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold);border-radius:9px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:11px}
-.row span{color:#aaa397;text-align:right}
-.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:720px}
-.table th{text-align:left;color:#827c72;font-size:9px;padding:12px;border-bottom:1px solid var(--line)}
-.table td{padding:13px 12px;border-bottom:1px solid #292722;font-size:10px;color:#c8c1b5}.table td b{color:#f1ece2}
-.tag{display:inline-block;padding:5px 8px;border-radius:20px;background:#292f25;color:#9bc293;font-size:9px}
-.tag.warn{background:#382d1e;color:#e0ba73}.tag.blue{background:#202c36;color:#9dbad2}
-.toolbar{display:flex;gap:9px;justify-content:space-between;align-items:center;margin-bottom:14px}.toolbar input{max-width:350px;flex:1}
-.field{width:100%;padding:11px;background:#111;border:1px solid #403c33;color:#fff;border-radius:7px;font-size:11px;outline:none}.field:focus{border-color:var(--gold)}
-.empty{padding:30px;text-align:center;color:var(--muted)}
-.columns{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:11px;overflow:auto}
-.col{background:#181818;border:1px solid var(--line);border-radius:10px;padding:11px;min-width:180px}
-.colhead{font-size:11px;font-weight:bold;padding:5px 2px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
-.lead{background:#24221e;border:1px solid #39352d;border-radius:8px;padding:11px;margin-top:9px}
-.lead b{font-size:11px}.lead small{display:block;color:var(--muted);font-size:9px;margin-top:6px}
-.actions{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
-.mini{border:1px solid #51452e;background:#30291e;color:#d9bb7a;border-radius:6px;padding:5px 7px;font-size:9px}
-.modalbg{position:fixed;inset:0;background:#000b;display:none;place-items:center;z-index:30;padding:14px}
-.modal{width:min(460px,100%);background:#1c1b18;border:1px solid #55462e;border-radius:13px;padding:20px;max-height:90vh;overflow:auto}
-.modal h2{font-size:18px;margin:0 0 18px}
-.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.formfield{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}.formfield label{font-size:10px;color:#bdb5a8}.formfield.full{grid-column:1/-1}
-.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-.toast{position:fixed;bottom:18px;right:18px;background:#2a281f;border:1px solid #76603a;color:#f0ddb2;padding:12px 16px;border-radius:8px;z-index:50;font-size:11px}
-.hamb{display:none;background:none;color:#fff;border:0;font-size:20px}
-.notice{background:#29251d;border:1px solid #55452b;color:#d8c397;border-radius:8px;padding:12px;font-size:10px;line-height:1.6;margin-bottom:14px}
-@media(max-width:950px){.side{width:210px}.main{margin-left:210px;width:calc(100% - 210px)}.stats{grid-template-columns:repeat(2,1fr)}.page{padding:20px}.grid2{grid-template-columns:1fr}}
+:root{--bg:#f7f7f5;--white:#fff;--text:#282720;--muted:#898477;--line:#e9e5dc;--gold:#b28b43;--gold2:#dfc995;--pale:#f6f0e3;--green:#36835b;--red:#b34c48}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}
+.sidebar{position:fixed;inset:0 auto 0 0;width:245px;background:#fff;border-right:1px solid var(--line);padding:20px 14px;overflow:auto;z-index:20;transition:.2s}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px 20px;border-bottom:1px solid var(--line)}
+.logo{width:43px;height:43px;border-radius:13px;background:linear-gradient(140deg,#e6d3a5,#b28b43);display:grid;place-items:center;color:#fff;font-size:23px}
+.brand b{letter-spacing:1.3px}.brand small{display:block;color:var(--gold);font-size:9px;letter-spacing:2px;margin-top:4px}
+.navgroup{margin-top:20px}.navtitle{font-size:9px;color:#aaa397;letter-spacing:1.4px;padding:0 10px 8px;font-weight:bold}
+.nav button{display:flex;gap:11px;align-items:center;width:100%;border:0;background:none;color:#716d64;padding:11px 10px;border-radius:9px;text-align:left;font-size:12px;margin:2px 0}
+.nav button.active,.nav button:hover{background:var(--pale);color:#89672d}.ico{width:18px;text-align:center;font-size:16px}
+.sidefoot{padding:20px 9px;color:#aaa397;font-size:10px}
+.main{margin-left:245px;min-height:100vh}.top{height:66px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:8px 25px;position:sticky;top:0;z-index:10;gap:8px}
+.crumb{font-size:12px;color:var(--muted)}.crumb b{color:var(--text)}.right{display:flex;align-items:center;gap:8px}
+.select,.field{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--text);min-width:0;outline:none;width:100%}
+.select{width:auto}.field:focus,.select:focus{border-color:var(--gold)}
+.page{max-width:1500px;margin:auto;padding:26px}.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.eyebrow{font-size:9px;color:var(--gold);letter-spacing:1.7px;font-weight:bold}.heading h1{font-size:25px;margin:7px 0 5px}.sub{font-size:11px;color:var(--muted)}
+.btn{border:0;border-radius:8px;padding:11px 15px;background:linear-gradient(135deg,#d9c18b,#b28b43);color:#fff;font-size:11px;font-weight:bold}
+.btn.secondary{background:#fff;color:#86652e;border:1px solid #dfd2b5}.btn.danger{background:#fff;color:var(--red);border:1px solid #efd6d4}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stat,.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 7px 25px #30271408}
+.stat label{color:var(--muted);font-size:11px}.stat strong{display:block;font-size:25px;margin:10px 0 5px}.stat small{color:var(--green);font-size:10px}
+.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:13px;margin-bottom:13px}
+.card h3{font-size:13px;margin:0 0 6px}.hint{font-size:10px;color:var(--muted);margin-bottom:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:11px}.row span{color:var(--muted);text-align:right}
+.barrow{display:grid;grid-template-columns:125px 1fr 25px;gap:9px;align-items:center;margin:13px 0;font-size:10px;color:#777166}
+.bar{height:8px;background:#f0ede7;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#dec995,#ae843c)}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:680px}
+.table th{text-align:left;color:#999286;font-size:9px;padding:12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.table td{padding:12px;border-bottom:1px solid #f0ede8;font-size:10px;color:#625e55}.table td b{color:var(--text)}
+.tag{display:inline-block;padding:5px 8px;border-radius:20px;background:#eaf4ed;color:#3c8055;font-size:9px;white-space:nowrap}
+.tag.warn{background:#fbf1df;color:#9b712d}.tag.blue{background:#edf2f7;color:#55738e}.tag.red{background:#faeceb;color:#a84d49}
+.toolbar{display:flex;gap:9px;justify-content:space-between;align-items:center;margin-bottom:13px}.toolbar input{max-width:350px;flex:1}
+.columns{display:grid;grid-template-columns:repeat(4,minmax(185px,1fr));gap:10px;overflow:auto}
+.kcol{background:#f0eee9;border:1px solid var(--line);border-radius:10px;padding:10px;min-width:185px}
+.colhead{font-size:11px;font-weight:bold;padding:5px 2px 12px;border-bottom:1px solid #e3ded3;display:flex;justify-content:space-between}
+.lead{background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:9px}.lead b{font-size:11px}.lead small{display:block;color:var(--muted);font-size:9px;margin-top:6px}
+.mini{border:1px solid #e4d8bd;background:#faf7f0;color:#87672f;border-radius:6px;padding:6px 8px;font-size:9px;margin:4px 3px 0 0}
+.empty{text-align:center;color:#aaa397;padding:25px;font-size:11px}
+.notice{background:#faf6ed;border:1px solid #eadfc8;color:#8c713e;border-radius:8px;padding:12px;font-size:10px;line-height:1.6;margin-bottom:13px}
+.modalbg{position:fixed;inset:0;background:#1e1b1590;display:none;place-items:center;z-index:40;padding:14px}
+.modal{width:min(500px,100%);background:#fff;border:1px solid #e3d6b8;border-radius:14px;padding:20px;max-height:90vh;overflow:auto}
+.modal h2{font-size:18px;margin:0 0 17px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.formfield{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}.formfield label{font-size:10px;color:#777166}
+.full{grid-column:1/-1}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.toast{position:fixed;bottom:18px;right:18px;background:#fff;border:1px solid #dfd2b5;color:#765a2a;padding:12px 16px;border-radius:8px;z-index:60;font-size:11px;box-shadow:0 5px 20px #0001}
+.hamb{display:none;background:none;border:0;font-size:22px}.mobilebar{display:none}
+.profilegrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.pbox{background:#faf9f6;border:1px solid var(--line);padding:11px;border-radius:8px}
+.pbox small{display:block;color:var(--muted);font-size:9px;margin-bottom:5px}.pbox b{font-size:12px}
+@media(max-width:950px){.sidebar{width:215px}.main{margin-left:215px}.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.page{padding:20px}}
 @media(max-width:680px){
-.side{transform:translateX(-100%);transition:.2s;width:250px}.side.open{transform:none}
-.main{margin-left:0;width:100%}.top{padding:8px 12px}.hamb{display:block}.crumb{flex:1}
-.page{padding:18px 12px}.heading h1{font-size:22px}
-.heading .btn{font-size:0;padding:10px}.heading .btn:after{content:"+";font-size:18px}
-.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}.grid2{gap:9px}
-.formgrid{grid-template-columns:1fr}.formfield.full{grid-column:auto}
-.toolbar input{max-width:none}}
+.sidebar{width:260px;transform:translateX(-105%);box-shadow:10px 0 30px #0001}.sidebar.open{transform:none}
+.main{margin-left:0}.top{height:60px;padding:8px 12px}.hamb{display:block}.crumb{flex:1}
+.right .select{max-width:115px;font-size:10px;padding:8px 5px}.right #export{display:none}
+.page{padding:17px 12px 82px}.heading h1{font-size:22px}.heading .btn{padding:10px 12px}
+.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}.barrow{grid-template-columns:95px 1fr 22px}
+.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.toolbar input{max-width:none}
+.columns{grid-template-columns:repeat(4,205px)}
+.mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:7px 3px calc(7px + env(safe-area-inset-bottom));z-index:15;justify-content:space-around}
+.mobilebar button{border:0;background:none;color:#827b6d;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;min-width:48px}
+.mobilebar button span{font-size:17px}.mobilebar button.active{color:#9b742e;font-weight:bold}
+.toast{left:12px;right:12px;bottom:74px;text-align:center}.profilegrid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
-<div class="app">
-<aside class="side" id="side">
-<div class="brand"><div class="logo">♛</div><div><b>DJIGIT TAU</b><small>STUDIO CRM</small></div></div>
-<div class="nav" id="nav"></div>
-<div class="sidefoot">● ДЕМО · данные в этом браузере</div>
+<aside class="sidebar" id="side">
+ <div class="brand"><div class="logo">♛</div><div><b>DJIGIT TAU</b><small>STUDIO CRM</small></div></div>
+ <div class="nav" id="nav"></div>
+ <div class="sidefoot">● ДЕМО · данные в этом браузере</div>
 </aside>
 <main class="main">
-<header class="top">
-<button class="hamb" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
-<div class="crumb">DJIGIT TAU　›　<b id="crumb">Главная</b></div>
-<div class="topright">
-<span class="sub" id="whoami"></span>
-<select class="select" id="branchFilter" onchange="render()"></select>
-<button class="btn secondary" id="expBtn" onclick="exportData()">Экспорт</button>
-</div>
-</header>
-<div class="page">
-<div class="heading">
-<div><div class="eyebrow" id="eyebrow">УПРАВЛЕНИЕ СТУДИЕЙ</div><h1 id="title">Главная</h1><div class="sub" id="subtitle"></div></div>
-<button class="btn" id="primary" onclick="openCreate()">＋ Добавить</button>
-</div>
-<div id="content"></div>
-</div>
+ <header class="top">
+  <button class="hamb" onclick="menu()">☰</button>
+  <div class="crumb">DJIGIT TAU　›　<b id="crumb">Главная</b></div>
+  <div class="right"><span class="sub" id="who"></span><select class="select" id="branchFilter" onchange="render()"></select><button class="btn secondary" id="export" onclick="backup()">Экспорт</button><button class="btn secondary" onclick="logout()">Выйти</button></div>
+ </header>
+ <div class="page">
+  <div class="heading"><div><div class="eyebrow" id="eyebrow">УПРАВЛЕНИЕ СТУДИЕЙ</div><h1 id="title">Главная</h1><div class="sub" id="subtitle"></div></div><button class="btn" id="add" onclick="create()">＋ Добавить</button></div>
+  <div id="content"></div>
+ </div>
 </main>
-</div>
+<nav class="mobilebar" id="mobilebar"></nav>
 <div class="modalbg" id="modalbg" onclick="if(event.target===this)closeModal()">
-<form class="modal" onsubmit="saveForm(event)">
-<h2 id="modalTitle">Добавить</h2>
-<div id="formFields"></div>
-<div class="modalfoot"><button type="button" class="btn secondary" onclick="closeModal()">Отмена</button><button class="btn" type="submit">Сохранить</button></div>
-</form>
+ <form class="modal" onsubmit="saveForm(event)"><h2 id="modalTitle">Добавить</h2><div id="fields"></div><div class="modalfoot"><button type="button" class="btn secondary" onclick="closeModal()">Отмена</button><button class="btn">Сохранить</button></div></form>
 </div>
 <div id="toast" class="toast" style="display:none"></div>
+<div id="login" style="position:fixed;inset:0;background:#f7f7f5;z-index:100;display:grid;place-items:center;padding:16px">
+ <div class="modal" style="width:min(390px,100%);max-height:none">
+  <div class="brand" style="padding:0 0 16px"><div class="logo">♛</div><div><b>DJIGIT TAU</b><small>STUDIO CRM</small></div></div>
+  <h2>Вход в систему</h2><div class="sub">Демо-аккаунты для просмотра</div>
+  <div class="formfield"><label>Телефон</label><input class="field" id="lp" placeholder="+7 000 000 00 01"></div>
+  <div class="formfield"><label>Пароль</label><input class="field" id="lw" type="password" placeholder="Пароль"></div>
+  <button class="btn" style="width:100%" onclick="login()">Войти</button>
+  <div id="demo" style="margin-top:14px"></div>
+  <div class="notice" style="margin-top:14px">Демо-режим: пароли и данные хранятся только в этом браузере. Это не защищённая авторизация.</div>
+ </div>
+</div>
 <script>
-const sections=[
-["РАБОТА С КЛИЕНТАМИ",["Главная","Заявки и воронка","Ученики","Посещаемость"]],
-["СТУДИЯ",["Расписание","Группы","Тренеры","Абонементы"]],
-["УПРАВЛЕНИЕ",["Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
-];
-const icons={"Главная":"▦","Заявки и воронка":"◫","Ученики":"♙","Посещаемость":"✓","Расписание":"▦","Группы":"♧","Тренеры":"♙","Абонементы":"▤","Финансы":"₸","Филиалы":"⌂","Аналитика":"◷","Журнал":"☰","Команда":"♟","Настройки":"⚙"};
-/* Какие разделы видит каждая роль. null = всё. */
+const KEY='jt_whitegold_v1',SESS='jt_session_v1';
+const STAGES=['Новая заявка','Связались','Пробное занятие','Купили абонемент'];
 const ROLES={
-"Руководитель":null,
-"Администратор":["Ученики","Посещаемость","Расписание","Группы","Абонементы","Финансы"],
-"Тренер":["Посещаемость","Расписание","Группы","Ученики"],
-"Отдел продаж":["Заявки и воронка","Ученики","Абонементы"]
+ 'Руководитель':null,
+ 'Администратор':['Главная','Ученики','Посещаемость','Расписание','Группы','Тренеры','Абонементы','Финансы'],
+ 'Тренер':['Главная','Посещаемость','Расписание','Группы','Ученики'],
+ 'Отдел продаж':['Главная','Заявки и воронка','Ученики','Абонементы']
 };
-const STAGES=["Новая заявка","Связались","Пробное занятие","Купили абонемент"];
+const DEMO=[
+ {phone:'70000000001',pass:'1111',name:'Камран',role:'Руководитель'},
+ {phone:'70000000002',pass:'2222',name:'Администратор',role:'Администратор'},
+ {phone:'70000000003',pass:'3333',name:'Вугар',role:'Тренер'},
+ {phone:'70000000004',pass:'4444',name:'Менеджер',role:'Отдел продаж'}
+];
+const sections=[
+ ['КЛИЕНТЫ',['Главная','Заявки и воронка','Ученики','Посещаемость']],
+ ['СТУДИЯ',['Расписание','Группы','Тренеры','Абонементы']],
+ ['УПРАВЛЕНИЕ',['Финансы','Филиалы','Аналитика','Команда','Журнал','Настройки']]
+];
+const icons={'Главная':'▦','Заявки и воронка':'◫','Ученики':'♙','Посещаемость':'✓','Расписание':'▦','Группы':'♧','Тренеры':'♙','Абонементы':'▤','Финансы':'₸','Филиалы':'⌂','Аналитика':'◷','Команда':'♟','Журнал':'☰','Настройки':'⚙'};
+const today=()=>new Date().toISOString().slice(0,10);
+const uid=()=>Date.now()*100+Math.floor(Math.random()*99);
+const clone=x=>JSON.parse(JSON.stringify(x));
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const seed={
-branches:[{id:1,name:"Алматы · Центр",address:""},{id:2,name:"Алматы · Восток",address:""},{id:3,name:"Алматы · Запад",address:""}],
-students:[
-{id:1,name:"Алиев Тимур",phone:"+7 707 123-45-67",branch:1,group:"Младшая группа",status:"Активен",birth:"2016-04-12"},
-{id:2,name:"Мамедова Амина",phone:"+7 701 222-18-40",branch:2,group:"Средняя группа",status:"Активен",birth:"2013-08-22"},
-{id:3,name:"Гусейнов Рамиль",phone:"+7 777 555-09-11",branch:1,group:"Старшая группа",status:"Нужна оплата",birth:"2010-01-18"},
-{id:4,name:"Керимова Лейла",phone:"+7 705 100-22-31",branch:3,group:"Начинающие",status:"Пробное",birth:"2015-11-02"}],
-leads:[
-{id:1,name:"Алиева Сабина",phone:"+7 777 111-22-33",branch:1,stage:"Новая заявка",source:"Instagram",manager:""},
-{id:2,name:"Мурадов Эмиль",phone:"+7 701 555-44-33",branch:2,stage:"Связались",source:"Звонок",manager:""},
-{id:3,name:"Гасанова Лана",phone:"+7 705 444-22-11",branch:1,stage:"Пробное занятие",source:"Instagram",manager:""}],
-groups:[
-{id:1,name:"Младшая группа",branch:1,teacher:"Камран",age:"6–9 лет",days:"Пн, Ср, Пт",time:"17:00"},
-{id:2,name:"Средняя группа",branch:2,teacher:"Вугар",age:"10–13 лет",days:"Вт, Чт, Сб",time:"18:30"},
-{id:3,name:"Старшая группа",branch:1,teacher:"Эльман",age:"14+",days:"Пн, Ср, Пт",time:"20:00"}],
-teachers:[
-{id:1,name:"Камран",phone:"",branch:1,role:"Главный тренер"},
-{id:2,name:"Вугар",phone:"",branch:2,role:"Тренер"},
-{id:3,name:"Эльман",phone:"",branch:1,role:"Тренер"}],
-memberships:[
-{id:1,student:1,title:"12 занятий",total:12,used:4,price:30000,expires:"2026-11-28",branch:1},
-{id:2,student:2,title:"8 занятий",total:8,used:2,price:24000,expires:"2026-12-02",branch:2}],
-attendance:[],
-payments:[
-{id:1,branch:1,amount:30000,type:"Доход",description:"Абонемент Алиев Тимур",date:"2026-11-10"},
-{id:2,branch:2,amount:24000,type:"Доход",description:"Абонемент Мамедова Амина",date:"2026-11-12"}],
-lessons:[
-{id:1,branch:1,group:"Младшая группа",teacher:"Камран",date:"2026-11-16",time:"17:00",room:"Зал 1"},
-{id:2,branch:2,group:"Средняя группа",teacher:"Вугар",date:"2026-11-16",time:"18:30",room:"Зал 1"},
-{id:3,branch:1,group:"Старшая группа",teacher:"Эльман",date:"2026-11-16",time:"20:00",room:"Зал 1"}],
-log:[]
+ branches:[{id:1,name:'Айнабулак 3 101а',address:'Алматы'},{id:2,name:'Гагарина 11',address:'Алматы'},{id:3,name:'Алматы Арена',address:'Алматы'}],
+ students:[
+  {id:1,name:'Алиев Тимур',phone:'+7 707 123-45-67',branch:1,group:'Лезгинка · дети',status:'Активен',kind:'Действующий',birth:'2016-04-12',since:'2026-09-01'},
+  {id:2,name:'Мамедова Амина',phone:'+7 701 222-18-40',branch:2,group:'Лезгинка · подростки',status:'Активен',kind:'Действующий',birth:'2013-08-22',since:'2026-10-01'},
+  {id:3,name:'Гусейнов Рамиль',phone:'+7 777 555-09-11',branch:1,group:'Индивидуально',status:'Нужна оплата',kind:'Действующий',birth:'2010-01-18'},
+  {id:4,name:'Керимова Лейла',phone:'+7 705 100-22-31',branch:3,group:'Барабан · начинающие',status:'Пробное',kind:'Новенький',birth:'2015-11-02'}
+ ],
+ leads:[
+  {id:1,name:'Алиева Сабина',phone:'+7 777 111-22-33',branch:1,stage:STAGES[0],source:'Instagram'},
+  {id:2,name:'Мурадов Эмиль',phone:'+7 701 555-44-33',branch:2,stage:STAGES[1],source:'Звонок'},
+  {id:3,name:'Гасанова Лана',phone:'+7 705 444-22-11',branch:1,stage:STAGES[2],source:'Instagram'}
+ ],
+ groups:[
+  {id:1,name:'Лезгинка · дети',dance:'Лезгинка',branch:1,teacher:'Камран',age:'6–9 лет',days:'Пн, Ср, Пт',time:'17:00'},
+  {id:2,name:'Лезгинка · подростки',dance:'Лезгинка',branch:2,teacher:'Вугар',age:'10–13 лет',days:'Вт, Чт, Сб',time:'18:30'},
+  {id:3,name:'Барабан · начинающие',dance:'Барабан',branch:3,teacher:'Эльман',age:'8+',days:'Пн, Ср',time:'19:00'}
+ ],
+ teachers:[{id:1,name:'Камран',phone:'',branch:1,role:'Главный тренер'},{id:2,name:'Вугар',phone:'',branch:2,role:'Тренер'}],
+ memberships:[
+  {id:1,student:1,title:'12 занятий',total:12,used:4,price:30000,expires:'2026-12-10',branch:1},
+  {id:2,student:2,title:'8 занятий',total:8,used:2,price:24000,expires:'2026-12-02',branch:2}
+ ],
+ attendance:[],
+ payments:[
+  {id:1,branch:1,amount:30000,type:'Доход',action:'Продажи',category:'Групповые',description:'Абонемент Алиев Тимур',date:'2026-11-10'},
+  {id:2,branch:2,amount:24000,type:'Доход',action:'Продажи',category:'Групповые',description:'Абонемент Мамедова Амина',date:'2026-11-12'},
+  {id:3,branch:1,amount:5000,type:'Расход',action:'Возвраты',category:'Групповые',description:'Возврат',date:'2026-11-13'}
+ ],
+ lessons:[
+  {id:1,branch:1,group:'Лезгинка · дети',teacher:'Камран',date:today(),time:'17:00',room:'Зал 1'},
+  {id:2,branch:2,group:'Лезгинка · подростки',teacher:'Вугар',date:today(),time:'18:30',room:'Зал 1'}
+ ],
+ log:[]
 };
-const COLS=["branches","students","leads","groups","teachers","memberships","attendance","payments","lessons","log"];
-let db={},role=null,current="Главная",editing=null,formType="";
-COLS.forEach(k=>db[k]=[]);
-let DB=null,U=null,ME=null,BOSS=false,roleMap={},last={},ready=false;
-const fail=()=>toast("Не удалось сохранить: нет прав или связи");
-/* Каждая запись — отдельный документ общей базы, поэтому два сотрудника не затирают друг другу правки. */
-function persist(){
-if(!DB)return;
-COLS.forEach(k=>{
-const cur={};db[k].forEach(x=>cur[x.id]=JSON.stringify(x));
-const prev=last[k]||{};
-Object.keys(cur).forEach(id=>{if(cur[id]!==prev[id])DB.doc("crm_"+k+"/"+id).set(JSON.parse(cur[id])).catch(fail)});
-Object.keys(prev).forEach(id=>{if(!(id in cur))DB.doc("crm_"+k+"/"+id).delete().catch(fail)});
-last[k]=cur;
-});
+let db,users,role='Руководитель',current='Главная',formType=null,editing=null;
+function load(){
+ try{const x=JSON.parse(localStorage.getItem(KEY));db=x?.db||clone(seed);users=x?.users||clone(DEMO)}
+ catch(e){db=clone(seed);users=clone(DEMO)}
 }
-function calcRole(){role=BOSS?"Руководитель":(roleMap[ME]||null)}
-function showMsg(t){document.getElementById("content").innerHTML=`<div class="notice">${esc(t)}</div>`}
-function refresh(){
-if(!ready)return;
-calcRole();
-if(!role){document.getElementById("nav").innerHTML="";document.getElementById("whoami").textContent="";showMsg("Доступ ещё не назначен. Попросите руководителя назначить вам роль в разделе «Команда».");return}
-init();
-}
-async function seedOnce(){
-if(!BOSS)return;
-try{const m=await DB.doc("meta/init").get();if(m.exists)return;await DB.doc("meta/init").set({at:Date.now()});if(!db.branches.length){db.branches=seed.branches.map(b=>({...b}));persist();refresh()}}catch(e){}
-}
-async function boot(){
-showMsg("Загрузка…");
-try{U=await claude.use("user");DB=await claude.use("db")}catch(e){}
-if(!U||!DB){showMsg("Откройте страницу в Claude и войдите в аккаунт, чтобы работать с CRM.");return}
-BOSS=await U.isOwner();ME=(await U.me()).id;
-const tm=setTimeout(()=>{if(!ready)showMsg("Не удалось загрузить данные. Обновите страницу.")},10000);
-const loaded={};
-const check=()=>{if(!ready&&loaded.roles&&COLS.every(c=>loaded[c])){ready=true;clearTimeout(tm);seedOnce()}};
-COLS.forEach(k=>DB.collection("crm_"+k).onSnapshot(s=>{
-db[k]=s.docs.map(d=>d.data()).sort((a,b)=>k==="log"?b.id-a.id:a.id-b.id);
-last[k]=Object.fromEntries(db[k].map(x=>[x.id,JSON.stringify(x)]));
-loaded[k]=true;check();refresh();
-},()=>showMsg("Нет доступа к данным.")));
-DB.collection("roles").onSnapshot(s=>{roleMap={};s.docs.forEach(d=>roleMap[d.id]=d.data().role);loaded.roles=true;check();refresh()},()=>{loaded.roles=true;check()});
-}
-function fillTeam(){document.querySelectorAll("[data-uid]").forEach(async el=>{const id=el.dataset.uid;const p=(await U.profiles([id]))[id];el.textContent=p?.name||"Сотрудник"})}
-async function teamSearch(q){
-const box=document.getElementById("tres");box.textContent="";
-if(!q.trim())return;
-const hits=await U.search(q);
-hits.slice(0,6).forEach(h=>{
-const row=document.createElement("div");row.className="row";
-const n=document.createElement("b");n.textContent=h.name||"Сотрудник";
-const sel=document.createElement("select");sel.className="select";
-Object.keys(ROLES).filter(r=>r!=="Руководитель").forEach(r=>sel.add(new Option(r,r)));
-const b=document.createElement("button");b.className="mini";b.textContent="Назначить";
-b.onclick=()=>assignRole(h.id,sel.value);
-const w=document.createElement("span");w.append(sel," ",b);row.append(n,w);box.append(row);
-});
-}
-async function assignRole(id,r){try{await DB.doc("roles/"+id).set({role:r});logAct("Роль назначена: "+r);persist();toast("Роль назначена")}catch(e){toast("Нет прав назначать роли")}}
-async function removeRole(id){try{await DB.doc("roles/"+id).delete();logAct("Роль снята");persist();toast("Роль снята")}catch(e){toast("Нет прав")}}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function branchName(id){return db.branches.find(b=>b.id==id)?.name||"—"}
-function inBranch(x){const v=document.getElementById("branchFilter").value;return v==="all"||String(x.branch)===v}
-function toast(s){const t=document.getElementById("toast");t.textContent=s;t.style.display="block";setTimeout(()=>t.style.display="none",2800)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({db,users}))}catch(e){toast('Не удалось сохранить данные в браузере')}}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(window._toast);window._toast=setTimeout(()=>e.style.display='none',2500)}
+function boss(){return role==='Руководитель'}
 function allowed(n){return !ROLES[role]||ROLES[role].includes(n)}
-function isBoss(){return role==="Руководитель"}
-function nid(k){return Date.now()*1000+Math.floor(Math.random()*1000)}
-function logAct(t){db.log.unshift({id:nid("log"),t,role,at:new Date().toLocaleString("ru-RU")});db.log=db.log.slice(0,300)}
-function money(n){return Number(n||0).toLocaleString("ru-RU")+" ₸"}
-function status(s){const c=(s==="Активен"||s==="Присутствовал"||s==="Доход")?"":(s==="Нужна оплата"||s==="Отсутствовал"||s==="Расход")?"warn":"blue";return `<span class="tag ${c}">${esc(s)}</span>`}
-
+function branchName(n){return db.branches.find(b=>b.id==n)?.name||'—'}
+function money(n){return Number(n||0).toLocaleString('ru-RU')+' ₸'}
+function inBranch(x){const v=document.getElementById('branchFilter')?.value||'all';return v==='all'||String(x.branch)===v}
+function logAct(t){db.log.unshift({id:uid(),t,role,at:new Date().toLocaleString('ru-RU')});db.log=db.log.slice(0,300)}
+function sum(type){return db.payments.filter(inBranch).filter(x=>x.type===type).reduce((a,x)=>a+Number(x.amount||0),0)}
+function tag(s){
+ const c=['Активен','Присутствовал','Доход'].includes(s)?'':['Нужна оплата','Отсутствовал','Расход'].includes(s)?'warn':['Архив','Просрочен'].includes(s)?'red':'blue';
+ return `<i class="tag ${c}" style="font-style:normal">${esc(s||'—')}</i>`;
+}
+function menu(){document.getElementById('side').classList.toggle('open')}
+function go(n){if(!allowed(n))return;current=n;document.getElementById('side').classList.remove('open');render()}
 function init(){
-document.getElementById("whoami").textContent=role;
-document.getElementById("nav").innerHTML=sections.map(g=>{
-const items=g[1].filter(allowed);
-return items.length?`<div class="navgroup"><div class="navtitle">${g[0]}</div>${items.map(n=>`<button data-page="${n}" onclick="go('${n}')"><span class="ico">${icons[n]}</span>${n}</button>`).join("")}</div>`:"";
-}).join("");
-const cur=document.getElementById("branchFilter").value||"all";
-document.getElementById("branchFilter").innerHTML='<option value="all">Все филиалы</option>'+db.branches.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("");
-document.getElementById("branchFilter").value=cur;
-document.getElementById("expBtn").style.display=isBoss()?"":"none";
-if(!allowed(current))current=sections.flatMap(g=>g[1]).find(allowed);
-render();
+ document.getElementById('nav').innerHTML=sections.map(g=>{
+  const a=g[1].filter(allowed);
+  return a.length?`<div class="navgroup"><div class="navtitle">${g[0]}</div>${a.map(n=>`<button data-page="${n}" onclick="go('${n}')"><span class="ico">${icons[n]}</span>${n}</button>`).join('')}</div>`:'';
+ }).join('');
+ const sel=document.getElementById('branchFilter'),v=sel.value||'all';
+ sel.innerHTML='<option value="all">Все филиалы</option>'+db.branches.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join('');
+ sel.value=[...sel.options].some(o=>o.value===v)?v:'all';
+ render();
 }
-function go(n){current=n;document.getElementById("side").classList.remove("open");render()}
-const subs={"Главная":"Общая картина работы сети студий","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж и посещаемость","Журнал":"Кто и что менял в системе","Команда":"Сотрудники и их роли","Настройки":"Резервная копия и параметры"};
+function stat(l,v,n){return `<div class="stat"><label>${l}</label><strong>${v}</strong><small>${n}</small></div>`}
+function bars(a,m){return a.map(([l,n])=>`<div class="barrow"><span>${esc(l)}</span><div class="bar"><i style="width:${Math.min(100,n/Math.max(1,m)*100)}%"></i></div><b>${n}</b></div>`).join('')}
 function render(){
-document.getElementById("title").textContent=current;
-document.getElementById("crumb").textContent=current;
-document.getElementById("eyebrow").textContent="РОЛЬ: "+role.toUpperCase();
-document.getElementById("subtitle").textContent=subs[current]||"";
-document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===current));
-document.getElementById("primary").style.display=["Главная","Аналитика","Настройки","Журнал"].includes(current)?"none":"inline-block";
-document.getElementById("content").innerHTML=views[current]();
-if(current==="Команда")fillTeam();
+ document.getElementById('title').textContent=current;
+ document.getElementById('crumb').textContent=current;
+ document.getElementById('eyebrow').textContent='РОЛЬ: '+role.toUpperCase();
+ document.getElementById('subtitle').textContent=({
+  'Главная':'Общая картина работы студии','Заявки и воронка':'От первого обращения до покупки абонемента',
+  'Ученики':'Единая база учеников','Посещаемость':'Контроль занятий','Расписание':'Занятия по филиалам',
+  'Группы':'Составы и расписание','Тренеры':'Команда преподавателей','Абонементы':'Продажи и остатки занятий',
+  'Финансы':'Доходы и расходы','Филиалы':'Управление площадками','Аналитика':'Воронка продаж и посещаемость',
+  'Команда':'Демо-аккаунты','Журнал':'История действий','Настройки':'Резервная копия'
+ })[current]||'';
+ document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===current));
+ document.getElementById('add').style.display=['Главная','Аналитика','Настройки','Журнал'].includes(current)?'none':'inline-block';
+ document.getElementById('content').innerHTML=views[current]();
+ document.getElementById('who').textContent=role;
+ document.getElementById('mobilebar').innerHTML=['Главная','Заявки и воронка','Ученики','Расписание','Финансы'].filter(allowed).map(n=>`<button class="${current===n?'active':''}" onclick="go('${n}')"><span>${icons[n]}</span>${n==='Заявки и воронка'?'Заявки':n}</button>`).join('');
 }
-function statsCard(l,v,n){return `<div class="stat"><label>${l}</label><strong>${v}</strong><small>${n}</small></div>`}
-function sum(t){return db.payments.filter(inBranch).filter(x=>x.type===t).reduce((a,x)=>a+Number(x.amount),0)}
-function bars(rows,max){return rows.map(([l,n])=>`<div class="barrow"><span>${esc(l)}</span><div class="bar"><i style="width:${Math.min(100,n/Math.max(1,max)*100)}%"></i></div><b>${n}</b></div>`).join("")}
+function table(k,heads,fn){
+ const a=db[k].filter(inBranch);
+ return `<div class="card"><div class="toolbar"><input class="field" id="q" placeholder="Поиск..." oninput="filterRows()"><span class="sub">${a.length} записей</span></div><div class="tablewrap"><table class="table" id="tbl"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}<th>Действия</th></tr></thead><tbody>
+ ${a.map(x=>`<tr data-q="${esc(JSON.stringify(x).toLowerCase())}">${fn(x).map(v=>`<td>${v}</td>`).join('')}<td>${k==='students'?`<button class="mini" onclick="profile(${x.id})">Профиль</button>`:''}<button class="mini" onclick="edit('${k}',${x.id})">Изменить</button>${boss()?`<button class="mini" onclick="del('${k}',${x.id})">Удалить</button>`:''}${k==='students'&&allowed('Посещаемость')?`<button class="mini" onclick="attend(${x.id})">Отметить</button>`:''}</td></tr>`).join('')||`<tr><td class="empty" colspan="${heads.length+1}">Нет записей</td></tr>`}
+ </tbody></table></div></div>`;
+}
+function filterRows(){const q=document.getElementById('q').value.toLowerCase();document.querySelectorAll('#tbl tbody tr').forEach(r=>r.style.display=r.dataset.q.includes(q)?'':'none')}
 const views={
-"Главная":()=>{
-const s=db.students.filter(inBranch),l=db.leads.filter(inBranch),g=db.groups.filter(inBranch),m=db.memberships.filter(inBranch);
-const inc=sum("Доход"),exp=sum("Расход");
-return `<div class="stats">${statsCard("Всего учеников",s.length,"В выбранных филиалах")}${statsCard("Заявки",l.length,"В воронке")}${statsCard("Активные группы",g.length,"Группы студии")}${statsCard("Доходы",money(inc),"Учтённые поступления")}</div>
-<div class="grid2"><div class="card"><h3>Ученики по филиалам</h3><div class="hint">Количество учеников в каждом филиале</div>${bars(db.branches.map(b=>[b.name,db.students.filter(s=>s.branch===b.id).length]),db.students.length)}</div>
-<div class="card"><h3>Финансовый баланс</h3><div class="hint">По выбранным филиалам</div><div class="row"><span>Доходы</span><b>${money(inc)}</b></div><div class="row"><span>Расходы</span><b>${money(exp)}</b></div><div class="row"><span>Итого</span><b style="color:var(--gold)">${money(inc-exp)}</b></div></div></div>
-<div class="grid2"><div class="card"><h3>Ближайшие занятия</h3><div class="hint">Расписание студии</div>${db.lessons.filter(inBranch).slice(0,6).map(x=>`<div class="row"><b>${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher)}</span></div>`).join("")||'<div class="empty">Занятий пока нет</div>'}</div>
-<div class="card"><h3>Контроль абонементов</h3><div class="hint">Остаток занятий</div>${m.map(x=>`<div class="row"><b>${esc(db.students.find(s=>s.id===x.student)?.name||"Ученик")}</b><span>${Math.max(0,x.total-x.used)} из ${x.total} · ${esc(x.expires||"")}</span></div>`).join("")||'<div class="empty">Абонементов пока нет</div>'}</div></div>`;
-},
-"Аналитика":()=>{
-const l=db.leads.filter(inBranch),a=db.attendance.filter(inBranch);
-const gs=[...new Set(db.groups.filter(inBranch).map(g=>g.name))];
-return `<div class="grid2"><div class="card"><h3>Воронка продаж</h3><div class="hint">Заявки по этапам</div>${bars(STAGES.map(s=>[s,l.filter(x=>x.stage===s).length]),l.length)}</div>
-<div class="card"><h3>Посещения по группам</h3><div class="hint">Отметки «Присутствовал»</div>${bars(gs.map(g=>[g,a.filter(x=>x.group===g&&x.status==="Присутствовал").length]),a.length)||""}</div></div>`;
-},
-"Ученики":()=>tablePage("students",["Ученик","Тип","Телефон","Филиал","Группа","Статус","LTV"],x=>[`<b>${esc(x.name)}</b>`,esc(x.kind||"—"),esc(x.phone),esc(branchName(x.branch)),esc(x.group),status(x.status),canLtv()?money(ltv(x.id)):"—"]),
-"Заявки и воронка":()=>`<div class="columns">${STAGES.map(st=>{const arr=db.leads.filter(inBranch).filter(x=>x.stage===st);
-return `<div class="col"><div class="colhead">${st}<span>${arr.length}</span></div>${arr.map(x=>`<div class="lead"><b>${esc(x.name)}</b><small>${esc(x.phone)} · ${esc(branchName(x.branch))}${x.manager?" · "+esc(x.manager):""}</small><div class="actions">${st!=="Купили абонемент"?`<button class="mini" onclick="advanceLead(${x.id})">Следующий этап →</button>`:""}<button class="mini" onclick="editItem('leads',${x.id})">Изменить</button></div></div>`).join("")||'<div class="empty">Нет заявок</div>'}</div>`}).join("")}</div>`,
-"Группы":()=>tablePage("groups",["Название","Вид танца","Филиал","Возраст","Тренер","Дни","Время"],x=>[`<b>${esc(x.name)}</b>`,esc(x.dance||"—"),esc(branchName(x.branch)),esc(x.age),esc(x.teacher),esc(x.days),esc(x.time)]),
-"Тренеры":()=>tablePage("teachers",["Тренер","Телефон","Филиал","Роль"],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone),esc(branchName(x.branch)),esc(x.role)]),
-"Абонементы":()=>tablePage("memberships",["Ученик","Абонемент","Занятия","Цена","Филиал","До"],x=>[esc(db.students.find(s=>s.id===x.student)?.name||"—"),`<b>${esc(x.title)}</b>`,`${x.used}/${x.total}`,money(x.price),esc(branchName(x.branch)),esc(x.expires)]),
-"Филиалы":()=>tablePage("branches",["Филиал","Адрес","Учеников","Групп"],x=>[`<b>${esc(x.name)}</b>`,esc(x.address||"—"),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
-"Финансы":()=>`<div class="stats">${statsCard("Доходы",money(sum("Доход")),"Поступления")}${statsCard("Расходы",money(sum("Расход")),"Расходные операции")}${statsCard("Баланс",money(sum("Доход")-sum("Расход")),"Доход минус расходы")}${statsCard("Операции",db.payments.filter(inBranch).length,"Всего записей")}</div>${tablePage("payments",["Дата","Тип","Действие","Категория","Описание","Сумма","Филиал"],x=>[esc(x.date),status(x.type),esc(x.action||"—"),esc(x.category||"—"),esc(x.description),money(x.amount),esc(branchName(x.branch))])}`,
-"Посещаемость":()=>`<div class="notice">Отметь присутствие ученика: в разделе «Ученики» кнопка «Отметить» или кнопка «＋» здесь. Автоматическое списание абонемента можно включить после проверки правил студии.</div>${tablePage("attendance",["Дата","Ученик","Группа","Филиал","Статус"],x=>[esc(x.date),esc(db.students.find(s=>s.id===x.student)?.name||"—"),esc(x.group),esc(branchName(x.branch)),status(x.status)])}`,
-"Расписание":()=>`<div class="card"><h3>Занятия</h3><div class="hint">Добавляй занятия кнопкой сверху</div>${db.lessons.filter(inBranch).map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher)} · ${esc(x.room)}</span></div>`).join("")||'<div class="empty">Занятий пока нет</div>'}</div>`,
-"Команда":()=>`<div class="notice">Сначала откройте доступ человеку через «Поделиться» (уровень Contributor), затем найдите его здесь и назначьте роль. Без роли он ничего не увидит.</div><div class="card"><h3>Назначить роль</h3><div class="hint">Поиск среди сотрудников вашей организации</div><input class="field" placeholder="Имя сотрудника..." oninput="teamSearch(this.value)"><div id="tres"></div></div><div class="card" style="margin-top:14px"><h3>Команда</h3><div class="hint">Назначенные роли</div>${Object.entries(roleMap).map(([id,r])=>`<div class="row"><b data-uid="${esc(id)}">…</b><span><select class="select" onchange="assignRole('${esc(id)}',this.value)">${Object.keys(ROLES).filter(x=>x!=="Руководитель").map(x=>`<option ${x===r?"selected":""}>${x}</option>`).join("")}</select> <button class="mini" onclick="removeRole('${esc(id)}')">Убрать</button></span></div>`).join("")||'<div class="empty">Пока никого</div>'}</div>`,
-"Журнал":()=>`<div class="card"><h3>Действия сотрудников</h3><div class="hint">Последние 300 записей. Видит только руководитель.</div>${db.log.map(x=>`<div class="row"><b>${esc(x.t)}</b><span>${esc(x.role)} · ${esc(x.at)}</span></div>`).join("")||'<div class="empty">Пока ничего не менялось</div>'}</div>`,
-"Настройки":()=>`<div class="notice">Данные общие для всей студии и обновляются у всех сразу. Вход идёт через аккаунт Claude. Раздел меню зависит от роли, но база не различает роли: сотрудник с доступом к странице технически может изменить чужие данные. Давайте доступ только тем, кому доверяете.</div>
-<div class="card"><h3>Резервная копия</h3><p class="sub">Сохрани все записи в JSON-файл или восстанови из ранее скачанной копии.</p>
-<div class="actions"><button class="btn" onclick="exportData()">Скачать копию</button></div>
-<div class="row"><span>Учеников</span><b>${db.students.length}</b></div><div class="row"><span>Филиалов</span><b>${db.branches.length}</b></div><div class="row"><span>Заявок</span><b>${db.leads.length}</b></div></div>`
+'Главная':()=>`<div class="stats">
+ ${stat('Всего учеников',db.students.filter(inBranch).length,'В выбранных филиалах')}
+ ${stat('Заявки',db.leads.filter(inBranch).length,'В воронке')}
+ ${stat('Группы',db.groups.filter(inBranch).length,'Активные группы')}
+ ${stat('Доходы',money(sum('Доход')),'Поступления')}
+ </div><div class="grid2">
+ <div class="card"><h3>Ученики по филиалам</h3><div class="hint">Количество учеников</div>${bars(db.branches.map(b=>[b.name,db.students.filter(s=>s.branch===b.id).length]),db.students.length)}</div>
+ <div class="card"><h3>Финансовый баланс</h3><div class="hint">По выбранным филиалам</div><div class="row">Доходы <b>${money(sum('Доход'))}</b></div><div class="row">Расходы <b>${money(sum('Расход'))}</b></div><div class="row">Баланс <b>${money(sum('Доход')-sum('Расход'))}</b></div></div></div>
+ <div class="grid2"><div class="card"><h3>Ближайшие занятия</h3>${db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher)}</span></div>`).join('')||'<div class="empty">Занятий нет</div>'}</div>
+ <div class="card"><h3>Абонементы</h3>${db.memberships.filter(inBranch).map(x=>`<div class="row"><b>${esc(db.students.find(s=>s.id==x.student)?.name||'Ученик')}</b><span>${x.total-x.used} из ${x.total} · ${esc(x.expires)}</span></div>`).join('')||'<div class="empty">Абонементов нет</div>'}</div></div>`,
+'Ученики':()=>table('students',['Ученик','Тип','Телефон','Филиал','Группа','Статус'],x=>[`<b>${esc(x.name)}</b>`,esc(x.kind||'—'),esc(x.phone),esc(branchName(x.branch)),esc(x.group),tag(x.status)]),
+'Заявки и воронка':()=>`<div class="columns">${STAGES.map(s=>{const a=db.leads.filter(inBranch).filter(x=>x.stage===s);return `<div class="kcol"><div class="colhead">${s}<span>${a.length}</span></div>${a.map(x=>`<div class="lead"><b>${esc(x.name)}</b><small>${esc(x.phone)} · ${esc(branchName(x.branch))}<br>${esc(x.source)}</small><div>${s!==STAGES[3]?`<button class="mini" onclick="advance(${x.id})">Следующий этап →</button>`:''}<button class="mini" onclick="edit('leads',${x.id})">Изменить</button></div></div>`).join('')||'<div class="empty">Нет заявок</div>'}</div>`}).join('')}</div>`,
+'Группы':()=>table('groups',['Название','Танец','Филиал','Возраст','Тренер','Дни','Время'],x=>[`<b>${esc(x.name)}</b>`,esc(x.dance),esc(branchName(x.branch)),esc(x.age),esc(x.teacher),esc(x.days),esc(x.time)]),
+'Тренеры':()=>table('teachers',['Тренер','Телефон','Филиал','Роль'],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone),esc(branchName(x.branch)),esc(x.role)]),
+'Филиалы':()=>table('branches',['Филиал','Адрес','Учеников','Групп'],x=>[`<b>${esc(x.name)}</b>`,esc(x.address),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
+'Абонементы':()=>table('memberships',['Ученик','Абонемент','Занятия','Цена','Филиал','До'],x=>[esc(db.students.find(s=>s.id==x.student)?.name||'—'),`<b>${esc(x.title)}</b>`,`${x.used}/${x.total}`,money(x.price),esc(branchName(x.branch)),esc(x.expires)]),
+'Финансы':()=>`<div class="stats">${stat('Доходы',money(sum('Доход')),'Поступления')}${stat('Расходы',money(sum('Расход')),'Расходы')}${stat('Баланс',money(sum('Доход')-sum('Расход')),'Доход минус расход')}${stat('Операции',db.payments.filter(inBranch).length,'Записей')}</div>${table('payments',['Дата','Тип','Действие','Категория','Описание','Сумма','Филиал'],x=>[esc(x.date),tag(x.type),esc(x.action),esc(x.category),esc(x.description),money(x.amount),esc(branchName(x.branch))])}`,
+'Посещаемость':()=>`<div class="notice">Отмечайте присутствие в таблице учеников кнопкой «Отметить» или добавьте запись вручную.</div>${table('attendance',['Дата','Ученик','Группа','Филиал','Статус'],x=>[esc(x.date),esc(db.students.find(s=>s.id==x.student)?.name||'—'),esc(x.group),esc(branchName(x.branch)),tag(x.status)])}`,
+'Расписание':()=>`<div class="card"><h3>Занятия</h3>${db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher)} · ${esc(x.room)}</span></div>`).join('')||'<div class="empty">Занятий нет</div>'}</div>`,
+'Аналитика':()=>`<div class="grid2"><div class="card"><h3>Воронка продаж</h3>${bars(STAGES.map(s=>[s,db.leads.filter(inBranch).filter(x=>x.stage===s).length]),db.leads.length)}</div><div class="card"><h3>Посещения по группам</h3>${bars([...new Set(db.groups.map(g=>g.name))].map(g=>[g,db.attendance.filter(a=>a.group===g&&a.status==='Присутствовал').length]),db.attendance.length)}</div></div>`,
+'Команда':()=>`<div class="notice">Демо-аккаунты предназначены для предварительного просмотра. Это не настоящая система авторизации.</div><div class="card"><h3>Сотрудники</h3>${users.map(u=>`<div class="row"><b>${esc(u.name)}</b><span>${esc(u.role)} · +${esc(u.phone)}</span></div>`).join('')}</div>`,
+'Журнал':()=>`<div class="card"><h3>История действий</h3>${db.log.map(x=>`<div class="row"><b>${esc(x.t)}</b><span>${esc(x.role)} · ${esc(x.at)}</span></div>`).join('')||'<div class="empty">Записей нет</div>'}`,
+'Настройки':()=>`<div class="notice">Пока это автономная версия для GitHub Pages. Записи сохраняются в браузере, в котором ты работаешь. Между телефоном и ПК синхронизации пока нет. Для этого позже подключим облачную базу и защищённую авторизацию.</div><div class="card"><h3>Резервная копия</h3><p class="sub">Скачай JSON-файл, чтобы сохранить данные или перенести их вручную.</p><div><button class="btn" onclick="backup()">Скачать копию</button> <label class="btn secondary">Восстановить копию<input type="file" accept="application/json" hidden onchange="restore(event)"></label> <button class="btn danger" onclick="reset()">Сбросить демо</button></div><div class="row">Учеников <b>${db.students.length}</b></div><div class="row">Филиалов <b>${db.branches.length}</b></div><div class="row">Заявок <b>${db.leads.length}</b></div></div>`
 };
-function tablePage(key,heads,mapper){
-const arr=db[key].filter(inBranch);
-return `<div class="card"><div class="toolbar"><input class="field" id="filterTable" placeholder="Поиск по таблице..." oninput="filterRows()"><span class="sub">${arr.length} записей</span></div>
-<div class="tablewrap"><table class="table" id="dataTable"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join("")}<th>Действия</th></tr></thead><tbody>
-${arr.map(x=>`<tr data-search="${esc(JSON.stringify(x).toLowerCase())}">${mapper(x).map(v=>`<td>${v}</td>`).join("")}<td>${key==="students"?`<button class="mini" onclick="openProfile(${x.id})">Профиль</button> `:""}<button class="mini" onclick="editItem('${key}',${x.id})">Изменить</button>${isBoss()?` <button class="mini" onclick="deleteItem('${key}',${x.id})">Удалить</button>`:""}${key==="students"&&allowed("Посещаемость")?` <button class="mini" onclick="quickAttendance(${x.id})">Отметить</button>`:""}</td></tr>`).join("")||`<tr><td colspan="${heads.length+1}" class="empty">Записей пока нет</td></tr>`}
-</tbody></table></div></div>`;
-}
-function filterRows(){const q=document.getElementById("filterTable").value.toLowerCase();document.querySelectorAll("#dataTable tbody tr").forEach(r=>r.style.display=(r.dataset.search||"").includes(q)?"":"none")}
-const forms={
-student:[["name","ФИО ученика","text",1],["phone","Телефон","text",1],["branch","Филиал","branch",1],["group","Группа","group"],["kind","Тип","select:Новенький|Действующий"],["since","Занимается с","date"],["birth","Дата рождения","date"],["status","Статус","select:Активен|Пробное|Нужна оплата|Пауза|Архив"]],
-lead:[["name","Имя клиента","text",1],["phone","Телефон","text",1],["branch","Филиал","branch",1],["stage","Этап","select:"+STAGES.join("|")],["source","Источник заявки","text"],["manager","Менеджер","text"]],
-group:[["name","Название группы","text",1],["branch","Филиал","branch",1],["age","Возраст","text"],["teacher","Тренер","text"],["dance","Вид танца","select:Лезгинка|Игра на барабане|Индивидуальные"],["days","Дни занятий","text"],["time","Время","time"]],
-teacher:[["name","ФИО тренера","text",1],["phone","Телефон","text"],["branch","Филиал","branch",1],["role","Роль","text"]],
-branch:[["name","Название филиала","text",1],["address","Адрес","text"]],
-membership:[["student","Ученик","student",1],["title","Название абонемента","text",1],["total","Всего занятий","number",1],["used","Использовано","number"],["price","Цена, ₸","number",1],["branch","Филиал","branch",1],["expires","Действует до","date"]],
-payment:[["date","Дата","date",1],["type","Тип операции","select:Доход|Расход",1],["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],["category","Категория","select:Групповые|Индивидуальные|Мини группа|Семейный Тариф|Постановка Танца"],["description","Описание","text",1],["amount","Сумма, ₸","number",1],["branch","Филиал","branch",1]],
-attendance:[["student","Ученик","student",1],["date","Дата","date",1],["group","Группа","group"],["branch","Филиал","branch",1],["status","Статус","select:Присутствовал|Отсутствовал|Опоздал|Уважительная причина",1]],
-lesson:[["date","Дата","date",1],["time","Время","time",1],["group","Группа","text",1],["teacher","Тренер","text"],["branch","Филиал","branch",1],["room","Зал","text"]]
+const F={
+ student:[['name','ФИО ученика','text',1],['phone','Телефон','tel',1],['branch','Филиал','branch',1],['group','Группа','group'],['kind','Тип','select:Новенький|Действующий'],['since','Занимается с','date'],['birth','Дата рождения','date'],['status','Статус','select:Активен|Пробное|Нужна оплата|Пауза|Архив']],
+ lead:[['name','Имя клиента','text',1],['phone','Телефон','tel',1],['branch','Филиал','branch',1],['stage','Этап','select:'+STAGES.join('|')],['source','Источник','text'],['manager','Менеджер','text']],
+ group:[['name','Название группы','text',1],['branch','Филиал','branch',1],['age','Возраст','text'],['teacher','Тренер','text'],['dance','Вид танца','select:Лезгинка|Игра на барабане|Индивидуальные'],['days','Дни','text'],['time','Время','time']],
+ teacher:[['name','ФИО тренера','text',1],['phone','Телефон','tel'],['branch','Филиал','branch',1],['role','Роль','text']],
+ branch:[['name','Название филиала','text',1],['address','Адрес','text']],
+ membership:[['student','Ученик','student',1],['title','Абонемент','text',1],['total','Всего занятий','number',1],['used','Использовано','number'],['price','Цена, ₸','number',1],['branch','Филиал','branch',1],['expires','Действует до','date']],
+ payment:[['date','Дата','date',1],['type','Тип','select:Доход|Расход',1],['action','Действие','select:Продажи|Возвраты|Скидки|Себестоимость'],['category','Категория','select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца'],['description','Описание','text',1],['amount','Сумма, ₸','number',1],['branch','Филиал','branch',1]],
+ attendance:[['student','Ученик','student',1],['date','Дата','date',1],['group','Группа','group'],['branch','Филиал','branch',1],['status','Статус','select:Присутствовал|Отсутствовал|Опоздал|Уважительная причина',1]],
+ lesson:[['date','Дата','date',1],['time','Время','time',1],['group','Группа','group',1],['teacher','Тренер','text'],['branch','Филиал','branch',1],['room','Зал','text']]
 };
-const T2K={student:"students",lead:"leads",group:"groups",teacher:"teachers",branch:"branches",membership:"memberships",payment:"payments",attendance:"attendance",lesson:"lessons"};
-const K2T=Object.fromEntries(Object.entries(T2K).map(([a,b])=>[b,a]));
-const NAMES={student:"ученика",lead:"заявку",group:"группу",teacher:"тренера",branch:"филиал",membership:"абонемент",payment:"операцию",attendance:"посещение",lesson:"занятие"};
-function openCreate(){
-const map={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson"};
-formType=map[current];
-if(!formType){toast("Для этого раздела действие не требуется");return}
-editing=null;showForm();
+const MAP={student:'students',lead:'leads',group:'groups',teacher:'teachers',branch:'branches',membership:'memberships',payment:'payments',attendance:'attendance',lesson:'lessons'};
+const REV=Object.fromEntries(Object.entries(MAP).map(([a,b])=>[b,a]));
+const N={student:'ученика',lead:'заявку',group:'группу',teacher:'тренера',branch:'филиал',membership:'абонемент',payment:'операцию',attendance:'посещение',lesson:'занятие'};
+function create(){
+ formType=({'Ученики':'student','Заявки и воронка':'lead','Группы':'group','Тренеры':'teacher','Филиалы':'branch','Абонементы':'membership','Финансы':'payment','Посещаемость':'attendance','Расписание':'lesson'})[current];
+ if(!formType)return;editing=null;showForm();
 }
-function editItem(key,id){formType=K2T[key];editing={key,id};showForm()}
+function edit(k,i){formType=REV[k];editing={k,i};showForm()}
 function showForm(){
-const key=T2K[formType],old=editing?db[key].find(x=>x.id===editing.id):{};
-document.getElementById("modalTitle").textContent=(editing?"Изменить: ":"Добавить: ")+NAMES[formType];
-document.getElementById("formFields").innerHTML=`<div class="formgrid">${forms[formType].map(([name,label,type,req])=>{
-const val=old?.[name]??(type==="date"?new Date().toISOString().slice(0,10):"");
-let input;
-if(type.startsWith("select:"))input=`<select class="field" name="${name}">${type.slice(7).split("|").map(v=>`<option ${v===val?"selected":""}>${v}</option>`).join("")}</select>`;
-else if(type==="branch")input=`<select class="field" name="${name}">${db.branches.map(b=>`<option value="${b.id}" ${b.id==val?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`;
-else if(type==="student")input=`<select class="field" name="${name}">${db.students.map(s=>`<option value="${s.id}" ${s.id==val?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`;
-else if(type==="group")input=`<select class="field" name="${name}">${db.groups.map(g=>`<option ${g.name===val?"selected":""}>${esc(g.name)}</option>`).join("")}</select>`;
-else input=`<input class="field" name="${name}" type="${type}" value="${esc(val)}" ${req?"required":""}>`;
-return `<div class="formfield ${["name","description"].includes(name)?"full":""}"><label>${label}</label>${input}</div>`}).join("")}</div>`;
-document.getElementById("modalbg").style.display="grid";
+ const k=MAP[formType],old=editing?db[k].find(x=>x.id===editing.i):{};
+ document.getElementById('modalTitle').textContent=(editing?'Изменить: ':'Добавить: ')+N[formType];
+ document.getElementById('fields').innerHTML='<div class="formgrid">'+F[formType].map(([n,l,t,r])=>{
+  const v=old?.[n]??(t==='date'?today():'');let el;
+  if(t.startsWith('select:'))el=`<select class="field" name="${n}">${t.slice(7).split('|').map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
+  else if(t==='branch')el=`<select class="field" name="${n}" required>${db.branches.map(x=>`<option value="${x.id}" ${x.id==v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+  else if(t==='student')el=`<select class="field" name="${n}" required>${db.students.map(x=>`<option value="${x.id}" ${x.id==v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+  else if(t==='group')el=`<select class="field" name="${n}"><option value="">—</option>${db.groups.map(x=>`<option ${x.name===v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+  else el=`<input class="field" name="${n}" type="${t}" value="${esc(v)}" ${r?'required':''}>`;
+  return `<div class="formfield ${['name','description'].includes(n)?'full':''}"><label>${l}</label>${el}</div>`;
+ }).join('')+'</div>';
+ document.getElementById('modalbg').style.display='grid';
 }
-function closeModal(){document.getElementById("modalbg").style.display="none"}
+function closeModal(){document.getElementById('modalbg').style.display='none'}
 function saveForm(e){
-e.preventDefault();
-const key=T2K[formType],obj={};
-new FormData(e.target).forEach((v,k)=>obj[k]=v);
-["branch","student","total","used","price","amount"].forEach(k=>{if(obj[k]!==undefined)obj[k]=Number(obj[k])});
-if(editing){const i=db[key].findIndex(x=>x.id===editing.id);db[key][i]={...db[key][i],...obj}}
-else{obj.id=nid(key);db[key].push(obj)}
-logAct((editing?"Изменено: ":"Добавлено: ")+NAMES[formType]+(obj.name?" «"+obj.name+"»":""));
-persist();closeModal();init();toast("Сохранено");
+ e.preventDefault();const k=MAP[formType],o={};new FormData(e.target).forEach((v,n)=>o[n]=v);
+ ['branch','student','total','used','price','amount'].forEach(n=>{if(o[n]!==undefined)o[n]=Number(o[n])});
+ if(editing){const i=db[k].findIndex(x=>x.id===editing.i);db[k][i]={...db[k][i],...o}}
+ else{o.id=uid();db[k].push(o)}
+ logAct((editing?'Изменено: ':'Добавлено: ')+N[formType]);save();closeModal();init();toast('Сохранено');
 }
-function deleteItem(key,id){
-if(!isBoss())return;
-if(!confirm("Удалить запись? Это действие нельзя отменить."))return;
-const x=db[key].find(i=>i.id===id);
-db[key]=db[key].filter(i=>i.id!==id);
-logAct("Удалено: "+NAMES[K2T[key]]+(x?.name?" «"+x.name+"»":""));
-persist();render();toast("Запись удалена");
+function del(k,i){
+ if(!boss()||!confirm('Удалить запись?'))return;
+ db[k]=db[k].filter(x=>x.id!==i);logAct('Удалена запись: '+k);save();render();toast('Удалено');
 }
-function advanceLead(id){
-const x=db.leads.find(i=>i.id===id);
-x.stage=STAGES[Math.min(STAGES.indexOf(x.stage)+1,3)];
-logAct("Заявка «"+x.name+"» → "+x.stage);
-let msg="Этап заявки обновлён";
-if(x.stage==="Купили абонемент"&&!db.students.some(s=>s.phone===x.phone)){
-db.students.push({id:nid("students"),name:x.name,phone:x.phone,branch:x.branch,group:"",status:"Активен",birth:"",kind:"Новенький",since:new Date().toISOString().slice(0,10)});
-logAct("Ученик «"+x.name+"» добавлен в базу из воронки");
-msg="Ученик добавлен в базу студии";
+function advance(i){
+ const x=db.leads.find(x=>x.id===i);x.stage=STAGES[Math.min(STAGES.indexOf(x.stage)+1,3)];
+ logAct('Заявка '+x.name+' → '+x.stage);
+ if(x.stage===STAGES[3]&&!db.students.some(s=>s.phone===x.phone)){
+  db.students.push({id:uid(),name:x.name,phone:x.phone,branch:x.branch,kind:'Новенький',status:'Активен'});
+  toast('Клиент добавлен в базу учеников');
+ }else toast('Этап обновлён');
+ save();render();
 }
-persist();render();toast(msg);
+function attend(i){
+ const s=db.students.find(x=>x.id===i);
+ db.attendance.push({id:uid(),student:i,date:today(),group:s.group,branch:s.branch,status:'Присутствовал'});
+ logAct('Посещение: '+s.name);save();toast('Посещение отмечено');go('Посещаемость');
 }
-function quickAttendance(id){
-const s=db.students.find(x=>x.id===id);
-db.attendance.push({id:nid("attendance"),student:id,date:new Date().toISOString().slice(0,10),group:s.group,branch:s.branch,status:"Присутствовал"});
-logAct("Посещение: "+s.name);
-persist();toast("Посещение отмечено");go("Посещаемость");
+function profile(i){
+ const s=db.students.find(x=>x.id===i),a=db.attendance.filter(x=>x.student===i).sort((x,y)=>y.date.localeCompare(x.date)),m=db.memberships.filter(x=>x.student===i);
+ const d=document.createElement('div');d.className='modalbg';d.style.display='grid';d.id='prof';
+ d.onclick=e=>{if(e.target===d)d.remove()};
+ d.innerHTML=`<div class="modal"><h2>${esc(s.name)}</h2>
+ <div class="profilegrid">${[['Телефон',s.phone],['Статус',s.status],['Филиал',branchName(s.branch)],['Группа',s.group],['Дата рождения',s.birth],['Занимается с',s.since]].map(([a,b])=>`<div class="pbox"><small>${a}</small><b>${esc(b||'—')}</b></div>`).join('')}</div>
+ <div class="card" style="margin-top:12px"><h3>Посещения (${a.length})</h3>${a.slice(0,10).map(x=>`<div class="row">${esc(x.date)} · ${esc(x.group)} ${tag(x.status)}</div>`).join('')||'<div class="empty">Посещений нет</div>'}</div>
+ <div class="card" style="margin-top:12px"><h3>Абонементы</h3>${m.map(x=>`<div class="row"><b>${esc(x.title)}</b><span>${x.used}/${x.total} · ${money(x.price)}</span></div>`).join('')||'<div class="empty">Абонементов нет</div>'}</div>
+ <div class="modalfoot"><button class="btn secondary" onclick="document.getElementById('prof').remove();edit('students',${i})">Изменить</button><button class="btn" onclick="document.getElementById('prof').remove();attend(${i})">Отметить посещение</button></div></div>`;
+ document.body.append(d);
 }
-function exportData(){
-if(!isBoss())return;
-const a=document.createElement("a");
-a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));
-a.download="djigit-tau-backup.json";a.click();URL.revokeObjectURL(a.href);
+function backup(){
+ if(!boss()){toast('Экспорт доступен руководителю');return}
+ const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({db,users},null,2)],{type:'application/json'}));
+ a.href=u;a.download='djigit-tau-crm-backup.json';a.click();URL.revokeObjectURL(u);
 }
-function importData(e){
-const f=e.target.files[0];if(!f)return;
-const r=new FileReader();
-r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.branches||!d.students)throw Error();d.log=d.log||[];db=d;persist();init();toast("Резервная копия восстановлена")}catch(err){toast("Неверный файл резервной копии")}};
-r.readAsText(f);
+function restore(e){
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const x=JSON.parse(r.result);db=x.db||x;if(!db.students||!db.branches)throw 0;users=x.users||users;save();init();toast('Копия восстановлена')}catch(_){toast('Неверный файл')}};
+ r.readAsText(f);
 }
-function resetDemo(){
-if(confirm("Заменить текущие данные демонстрационными?")){db=JSON.parse(JSON.stringify(seed));persist();init();toast("Демо-данные восстановлены")}
-}
-</script>
-<script>
-/* ДЕМО: вход по номеру и паролю. Данные и пароли лежат в этом браузере и НЕ защищены. */
-const UKEY="djigit_demo_v1",SKEY="djigit_demo_sess";
-let users=[];
-const DEMO_USERS=[
-{phone:"70000000001",pass:"1111",name:"Камран",role:"Руководитель"},
-{phone:"70000000002",pass:"2222",name:"Администратор",role:"Администратор"},
-{phone:"70000000003",pass:"3333",name:"Вугар",role:"Тренер"},
-{phone:"70000000004",pass:"4444",name:"Менеджер",role:"Отдел продаж"}];
-const nd=v=>{let d=String(v).replace(/\D/g,"");if(d[0]==="8")d="7"+d.slice(1);return d};
-function demoSeed(){
-const B=["Айнабулак 3 101а","Мкр Грэсс, Гагарина 11","Мкр Алатау (ияф), Ибрагимова 12","Аксай 1, дом 10, 3-3 подъезд","Орбита 3, дом 4а","Достык, 105а/1","Халык Арена","Талгар, тд Адимак 4 этаж","Абая, 115 4 этаж","Конаев, Мкр4 16/1","Ауэзова 5","Водник","Асыл Арман","Алматы Арена","Астана Левый берег","Астана Правый берег","Тастак","Каскелен","Узнагаш","Пятилетка","Карабулак","Чилик","Иссык"];
-const T=["Рахимова С.И.","Халилов К.Г.","Ибрагимова Э.А.","Арбудо К.Ф.","Рафатов Э.Н.","Абдукадиров Р.К.","Зибзибадзе М.Д.","Асильбаев А.Н.","Федченко К.","Аубакирова Ф.Б.","Насибов Р.Р.","Айдарбек","Кемаль Рафикович","Вугар Илгарович","Анна","Шадияна"];
-db.branches=B.map((n,i)=>({id:i+1,name:n,address:""}));
-db.teachers=T.map((n,i)=>({id:i+1,name:n,phone:"",branch:i+1,role:"Тренер"}));
-db.groups=[
-{id:1,name:"Лезгинка · дети",dance:"Лезгинка",branch:1,teacher:T[0],age:"6–9 лет",days:"Пн, Ср, Пт",time:"17:00"},
-{id:2,name:"Лезгинка · подростки",dance:"Лезгинка",branch:2,teacher:T[1],age:"10–13 лет",days:"Вт, Чт, Сб",time:"18:30"},
-{id:3,name:"Барабан · начинающие",dance:"Игра на барабане",branch:3,teacher:T[2],age:"8+",days:"Пн, Ср",time:"19:00"},
-{id:4,name:"Индивидуально",dance:"Индивидуальные",branch:1,teacher:T[13],age:"любой",days:"по записи",time:"—"}];
-db.students=[
-{id:1,name:"Алиев Тимур",kind:"Действующий",phone:"+7 707 123-45-67",branch:1,group:"Лезгинка · дети",status:"Активен",birth:"2016-04-12"},
-{id:2,name:"Мамедова Амина",kind:"Действующий",phone:"+7 701 222-18-40",branch:2,group:"Лезгинка · подростки",status:"Активен",birth:"2013-08-22"},
-{id:3,name:"Гусейнов Рамиль",kind:"Действующий",phone:"+7 777 555-09-11",branch:1,group:"Индивидуально",status:"Нужна оплата",birth:"2010-01-18"},
-{id:4,name:"Керимова Лейла",kind:"Новенький",phone:"+7 705 100-22-31",branch:3,group:"Барабан · начинающие",status:"Пробное",birth:"2015-11-02"}];
-db.leads=[
-{id:1,name:"Алиева Сабина",phone:"+7 777 111-22-33",branch:1,stage:"Новая заявка",source:"Instagram",manager:"Менеджер"},
-{id:2,name:"Мурадов Эмиль",phone:"+7 701 555-44-33",branch:2,stage:"Связались",source:"Звонок",manager:"Менеджер"},
-{id:3,name:"Гасанова Лана",phone:"+7 705 444-22-11",branch:1,stage:"Пробное занятие",source:"Instagram",manager:"Менеджер"}];
-db.memberships=[
-{id:1,student:1,title:"12 занятий",total:12,used:4,price:30000,expires:"2026-12-10",branch:1},
-{id:2,student:2,title:"8 занятий",total:8,used:2,price:24000,expires:"2026-12-02",branch:2}];
-db.payments=[
-{id:1,branch:1,amount:30000,type:"Доход",action:"Продажи",category:"Групповые",description:"Абонемент Алиев Тимур",date:"2026-11-10"},
-{id:2,branch:2,amount:24000,type:"Доход",action:"Продажи",category:"Групповые",description:"Абонемент Мамедова Амина",date:"2026-11-12"},
-{id:3,branch:1,amount:5000,type:"Расход",action:"Возвраты",category:"Групповые",description:"Возврат за пропуск",date:"2026-11-13"},
-{id:4,branch:1,amount:15000,type:"Расход",action:"Себестоимость",category:"Индивидуальные",description:"Оплата тренера",date:"2026-11-14"}];
-db.lessons=[
-{id:1,branch:1,group:"Лезгинка · дети",teacher:T[0],date:"2026-11-17",time:"17:00",room:"Зал 1"},
-{id:2,branch:2,group:"Лезгинка · подростки",teacher:T[1],date:"2026-11-17",time:"18:30",room:"Зал 1"}];
-db.attendance=[];db.log=[];
-}
-function persist(){try{localStorage.setItem(UKEY,JSON.stringify({db,users}))}catch(e){}}
-function fillTeam(){}
-function ltv(id){return db.memberships.filter(m=>m.student===id).reduce((a,m)=>a+Number(m.price||0),0)}
-function canLtv(){return allowed("Финансы")||allowed("Абонементы")}
-function ltvCard(){
-const st=db.students.filter(inBranch),v=st.map(s=>ltv(s.id)),tot=v.reduce((a,b)=>a+b,0),pay=v.filter(x=>x>0).length;
-const top=[...st].filter(s=>ltv(s.id)>0).sort((a,b)=>ltv(b.id)-ltv(a.id)).slice(0,5);
-return `<div class="card" style="margin-top:14px"><h3>LTV учеников</h3><div class="hint">Сумма купленных абонементов на одного ученика</div><div class="row"><b>Средний LTV (платящие)</b><span>${money(pay?tot/pay:0)}</span></div><div class="row"><b>Общий LTV</b><span>${money(tot)}</span></div><div class="row"><b>Платящих учеников</b><span>${pay} из ${st.length}</span></div>${top.map(s=>`<div class="row"><b>${esc(s.name)}</b><span>${money(ltv(s.id))}</span></div>`).join("")}</div>`;
-}
-const _an=views["Аналитика"];views["Аналитика"]=()=>_an()+ltvCard();
-function closeProfile(){document.getElementById("prof")?.remove()}
-function ageOf(b){if(!b)return"—";const d=new Date(b),n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a}
-function dur(s){if(!s)return"—";const days=Math.max(0,Math.floor((Date.now()-new Date(s))/864e5)),m=Math.floor(days/30.4);return (m>=1?m+" мес. ":"")+"("+days+" дн.)"}
-function setPhoto(id,inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),k=Math.min(1,320/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);const s=db.students.find(x=>x.id===id);s.photo=c.toDataURL("image/jpeg",.7);logAct("Фото ученика: "+s.name);persist();openProfile(id);toast("Фото сохранено")};im.src=r.result};r.readAsDataURL(f)}
-function addNote(id){const v=document.getElementById("pnote").value.trim();if(!v)return;const s=db.students.find(x=>x.id===id);(s.notes=s.notes||[]).unshift({t:v,role,at:new Date().toLocaleString("ru-RU")});logAct("Заметка: "+s.name);persist();openProfile(id)}
-function openProfile(id){
-const s=db.students.find(x=>x.id===id);if(!s)return;
-closeProfile();
-const today=new Date().toISOString().slice(0,10);
-const att=db.attendance.filter(a=>a.student===id).sort((a,b)=>b.date.localeCompare(a.date));
-const pres=att.filter(a=>a.status==="Присутствовал"||a.status==="Опоздал");
-const miss=att.filter(a=>a.status==="Отсутствовал"||a.status==="Уважительная причина");
-const last=pres[0]?.date||"";
-const since=s.since||(att.length?att[att.length-1].date:"");
-const nl=db.lessons.filter(l=>l.group===s.group&&l.date>=today).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0];
-const ms=db.memberships.filter(m=>m.student===id).sort((a,b)=>(b.expires||"").localeCompare(a.expires||""));
-const act=ms.find(m=>m.total-m.used>0&&(!m.expires||m.expires>=today));
-const R=(a,b)=>`<div class="row"><b>${a}</b><span>${b}</span></div>`;
-const ini=esc((s.name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join(""));
-const d=document.createElement("div");d.id="prof";d.className="modalbg";d.style.display="grid";
-d.onclick=e=>{if(e.target===d)closeProfile()};
-d.innerHTML=`<div class="modal" style="width:min(560px,100%)">
-<div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">${s.photo?`<img alt="" src="${s.photo}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)">`:`<div class="logo" style="width:84px;height:84px;border-radius:50%;font-size:28px">${ini}</div>`}<div><h2 style="margin:0 0 8px">${esc(s.name)}</h2>${status(s.status)} <span class="tag blue">${esc(s.kind||"—")}</span></div></div>
-<label class="btn secondary" style="display:inline-block;margin-bottom:12px">${s.photo?"Заменить фото":"Загрузить фото"}<input type="file" accept="image/*" hidden onchange="setPhoto(${id},this)"></label>
-<div class="card"><h3>О ученике</h3>${R("Телефон",esc(s.phone))}${R("Возраст",ageOf(s.birth))}${R("Дата рождения",esc(s.birth||"—"))}${R("Филиал",esc(branchName(s.branch)))}${R("Группа",esc(s.group||"—"))}${R("Тренер",esc(db.groups.find(g=>g.name===s.group)?.teacher||"—"))}</div>
-<div class="card" style="margin-top:12px"><h3>Занятия</h3>${R("Занимается с",esc(since||"—"))}${R("Срок занятий",dur(since))}${R("Посещено занятий",pres.length)}${R("Пропусков",miss.length)}${R("Последнее занятие",esc(last||"—"))}${R("Следующее занятие",nl?esc(nl.date+" · "+nl.time):"—")}${s.status==="Архив"?R("Закончил занятия",esc(last||"—")):""}</div>
-<div class="card" style="margin-top:12px"><h3>Абонемент</h3>${act?R("Остаток занятий",(act.total-act.used)+" из "+act.total)+R("Действует до",esc(act.expires||"—")):'<div class="empty">Нет активного абонемента</div>'}${ms.map(m=>R(esc(m.title)+" · "+money(m.price),m.used+"/"+m.total+" · до "+esc(m.expires||"—"))).join("")}</div>
-${canLtv()?`<div class="card" style="margin-top:12px"><h3>LTV</h3>${R("LTV ученика",money(ltv(id)))}${R("Покупок абонементов",ms.length)}${R("Средний чек",ms.length?money(ltv(id)/ms.length):"—")}${R("В месяц (среднее)",since?money(ltv(id)/Math.max(1,Math.floor(Math.max(0,Date.now()-new Date(since))/864e5/30.4))):"—")}</div>`:""}
-<div class="card" style="margin-top:12px"><h3>Последние посещения</h3>${att.slice(0,8).map(a=>R(esc(a.date)+" · "+esc(a.group||""),status(a.status))).join("")||'<div class="empty">Отметок пока нет</div>'}</div>
-<div class="card" style="margin-top:12px"><h3>Заметки</h3>${(s.notes||[]).map(n=>R(esc(n.t),esc(n.role)+" · "+esc(n.at))).join("")}<input class="field" id="pnote" placeholder="Новая заметка..." style="margin-top:8px"><div class="modalfoot"><button class="btn" onclick="addNote(${id})">Добавить заметку</button></div></div>
-<div class="modalfoot"><button class="btn secondary" onclick="closeProfile()">Закрыть</button></div></div>`;
-document.body.append(d);
-}
-function logout(){try{sessionStorage.removeItem(SKEY)}catch(e){}location.reload()}
-function fillLogin(p,w){document.getElementById("lg_p").value="+"+p;document.getElementById("lg_w").value=w}
-function doLogin(){
-const u=users.find(x=>x.phone===nd(document.getElementById("lg_p").value)&&x.pass===document.getElementById("lg_w").value);
-if(u)enter(u);else toast("Неверный номер или пароль");
-}
-function loginScreen(){
-const d=document.createElement("div");d.id="login";
-d.style.cssText="position:fixed;inset:0;background:#101010;z-index:60;display:grid;place-items:center;padding:16px;overflow:auto";
-d.innerHTML=`<div class="modal"><h2>♛ DJIGIT TAU · вход</h2><div class="notice">ДЕМО: пароли не защищают данные. Нажмите на аккаунт ниже, чтобы подставить номер и пароль.</div><div class="formfield"><label>Номер телефона</label><input class="field" id="lg_p" inputmode="tel" placeholder="+7 ..."></div><div class="formfield"><label>Пароль</label><input class="field" id="lg_w" type="password"></div><div class="modalfoot"><button class="btn" onclick="doLogin()">Войти</button></div><div style="margin-top:14px">${DEMO_USERS.map(u=>`<div class="row"><b>${esc(u.role)}</b><button class="mini" onclick="fillLogin('${u.phone}','${u.pass}')">+${u.phone} · ${u.pass}</button></div>`).join("")}</div></div>`;
-document.body.append(d);
+function reset(){if(!boss()||!confirm('Сбросить данные к демо?'))return;db=clone(seed);save();init();toast('Демо восстановлено')}
+function login(){
+ const p=document.getElementById('lp').value.replace(/\D/g,''),w=document.getElementById('lw').value,u=users.find(x=>x.phone===p&&x.pass===w);
+ if(!u){toast('Неверный номер или пароль');return}enter(u);
 }
 function enter(u){
-try{sessionStorage.setItem(SKEY,u.phone)}catch(e){}
-role=u.role;BOSS=role==="Руководитель";ready=true;
-document.getElementById("login")?.remove();
-if(!document.getElementById("outBtn")){const b=document.createElement("button");b.id="outBtn";b.className="btn secondary";b.textContent="Выйти";b.onclick=logout;document.querySelector(".topright").append(b)}
-current=sections.flatMap(g=>g[1]).find(allowed);
-init();
-document.getElementById("whoami").textContent=u.name+" · "+u.role;
+ role=u.role;sessionStorage.setItem(SESS,u.phone);document.getElementById('login').style.display='none';
+ current=sections.flatMap(x=>x[1]).find(allowed)||'Главная';init();
 }
-function addUser(){
-const g=id=>document.getElementById(id).value.trim();
-const phone=nd(g("nu_phone")),name=g("nu_name"),pass=g("nu_pass");
-if(!phone||!name||!pass){toast("Заполните имя, номер и пароль");return}
-if(users.some(x=>x.phone===phone)){toast("Такой номер уже есть");return}
-users.push({phone,pass,name,role:g("nu_role")});
-logAct("Добавлен сотрудник: "+name+" ("+g("nu_role")+")");persist();render();toast("Сотрудник добавлен");
-}
-views["Команда"]=()=>`<div class="notice">ДЕМО: пароли хранятся открыто в этом браузере. В рабочей версии вход проверяет сервер.</div><div class="card"><h3>Добавить сотрудника</h3><div class="formgrid"><input class="field" id="nu_name" placeholder="Имя"><input class="field" id="nu_phone" inputmode="tel" placeholder="Номер телефона"><input class="field" id="nu_pass" placeholder="Пароль"><select class="field" id="nu_role">${Object.keys(ROLES).filter(r=>r!=="Руководитель").map(r=>`<option>${r}</option>`).join("")}</select></div><div class="modalfoot"><button class="btn" onclick="addUser()">Добавить</button></div></div><div class="card" style="margin-top:14px"><h3>Сотрудники</h3>${users.map(u=>`<div class="row"><b>${esc(u.name)}</b><span>${esc(u.role)} · +${esc(u.phone)}</span></div>`).join("")}</div>`;
-function boot(){
-let st=null;try{st=JSON.parse(localStorage.getItem(UKEY))}catch(e){}
-if(st&&st.db){COLS.forEach(k=>db[k]=st.db[k]||[]);users=st.users||DEMO_USERS.map(u=>({...u}))}
-else{demoSeed();users=DEMO_USERS.map(u=>({...u}));persist()}
-let sp=null;try{sp=sessionStorage.getItem(SKEY)}catch(e){}
-const u=users.find(x=>x.phone===sp);
-if(u)enter(u);else loginScreen();
-}
-boot();
+function logout(){sessionStorage.removeItem(SESS);document.getElementById('login').style.display='grid'}
+load();
+document.getElementById('demo').innerHTML=DEMO.map(u=>`<button class="mini" onclick="document.getElementById('lp').value='+${u.phone}';document.getElementById('lw').value='${u.pass}'">${u.role}</button>`).join('');
+const session=sessionStorage.getItem(SESS),active=users.find(u=>u.phone===session);
+if(active)enter(active);else document.getElementById('login').style.display='grid';
 </script>
 </body>
 </html>
