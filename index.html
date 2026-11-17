@@ -1,343 +1,468 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
-<title>DJIGIT TAU CRM</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DJIGIT TAU CRM — Финансы</title>
 <style>
-:root{--bg:#f7f7f5;--white:#fff;--text:#282720;--muted:#898477;--line:#e9e5dc;--gold:#b28b43;--gold2:#dfc995;--pale:#f6f0e3;--green:#36835b;--red:#b34c48}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}
-.sidebar{position:fixed;inset:0 auto 0 0;width:245px;background:#fff;border-right:1px solid var(--line);padding:20px 14px;overflow:auto;z-index:20;transition:.2s}
-.brand{display:flex;align-items:center;gap:12px;padding:0 8px 20px;border-bottom:1px solid var(--line)}
-.logo{width:43px;height:43px;border-radius:13px;background:linear-gradient(140deg,#e6d3a5,#b28b43);display:grid;place-items:center;color:#fff;font-size:23px}
-.brand b{letter-spacing:1.3px}.brand small{display:block;color:var(--gold);font-size:9px;letter-spacing:2px;margin-top:4px}
-.navgroup{margin-top:20px}.navtitle{font-size:9px;color:#aaa397;letter-spacing:1.4px;padding:0 10px 8px;font-weight:bold}
-.nav button{display:flex;gap:11px;align-items:center;width:100%;border:0;background:none;color:#716d64;padding:11px 10px;border-radius:9px;text-align:left;font-size:12px;margin:2px 0}
-.nav button.active,.nav button:hover{background:var(--pale);color:#89672d}.ico{width:18px;text-align:center;font-size:16px}
-.sidefoot{padding:20px 9px;color:#aaa397;font-size:10px}
-.main{margin-left:245px;min-height:100vh}.top{height:66px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:8px 25px;position:sticky;top:0;z-index:10;gap:8px}
-.crumb{font-size:12px;color:var(--muted)}.crumb b{color:var(--text)}.right{display:flex;align-items:center;gap:8px}
-.select,.field{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--text);min-width:0;outline:none;width:100%}
-.select{width:auto}.field:focus,.select:focus{border-color:var(--gold)}
-.page{max-width:1500px;margin:auto;padding:26px}.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
-.eyebrow{font-size:9px;color:var(--gold);letter-spacing:1.7px;font-weight:bold}.heading h1{font-size:25px;margin:7px 0 5px}.sub{font-size:11px;color:var(--muted)}
-.btn{border:0;border-radius:8px;padding:11px 15px;background:linear-gradient(135deg,#d9c18b,#b28b43);color:#fff;font-size:11px;font-weight:bold}
-.btn.secondary{background:#fff;color:#86652e;border:1px solid #dfd2b5}.btn.danger{background:#fff;color:var(--red);border:1px solid #efd6d4}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
-.stat,.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 7px 25px #30271408}
-.stat label{color:var(--muted);font-size:11px}.stat strong{display:block;font-size:25px;margin:10px 0 5px}.stat small{color:var(--green);font-size:10px}
-.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:13px;margin-bottom:13px}
-.card h3{font-size:13px;margin:0 0 6px}.hint{font-size:10px;color:var(--muted);margin-bottom:14px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:11px}.row span{color:var(--muted);text-align:right}
-.barrow{display:grid;grid-template-columns:125px 1fr 25px;gap:9px;align-items:center;margin:13px 0;font-size:10px;color:#777166}
-.bar{height:8px;background:#f0ede7;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#dec995,#ae843c)}
-.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:680px}
-.table th{text-align:left;color:#999286;font-size:9px;padding:12px;border-bottom:1px solid var(--line);white-space:nowrap}
-.table td{padding:12px;border-bottom:1px solid #f0ede8;font-size:10px;color:#625e55}.table td b{color:var(--text)}
-.tag{display:inline-block;padding:5px 8px;border-radius:20px;background:#eaf4ed;color:#3c8055;font-size:9px;white-space:nowrap}
-.tag.warn{background:#fbf1df;color:#9b712d}.tag.blue{background:#edf2f7;color:#55738e}.tag.red{background:#faeceb;color:#a84d49}
-.toolbar{display:flex;gap:9px;justify-content:space-between;align-items:center;margin-bottom:13px}.toolbar input{max-width:350px;flex:1}
-.columns{display:grid;grid-template-columns:repeat(4,minmax(185px,1fr));gap:10px;overflow:auto}
-.kcol{background:#f0eee9;border:1px solid var(--line);border-radius:10px;padding:10px;min-width:185px}
-.colhead{font-size:11px;font-weight:bold;padding:5px 2px 12px;border-bottom:1px solid #e3ded3;display:flex;justify-content:space-between}
-.lead{background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:9px}.lead b{font-size:11px}.lead small{display:block;color:var(--muted);font-size:9px;margin-top:6px}
-.mini{border:1px solid #e4d8bd;background:#faf7f0;color:#87672f;border-radius:6px;padding:6px 8px;font-size:9px;margin:4px 3px 0 0}
-.empty{text-align:center;color:#aaa397;padding:25px;font-size:11px}
-.notice{background:#faf6ed;border:1px solid #eadfc8;color:#8c713e;border-radius:8px;padding:12px;font-size:10px;line-height:1.6;margin-bottom:13px}
-.modalbg{position:fixed;inset:0;background:#1e1b1590;display:none;place-items:center;z-index:40;padding:14px}
-.modal{width:min(500px,100%);background:#fff;border:1px solid #e3d6b8;border-radius:14px;padding:20px;max-height:90vh;overflow:auto}
-.modal h2{font-size:18px;margin:0 0 17px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.formfield{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}.formfield label{font-size:10px;color:#777166}
-.full{grid-column:1/-1}.modalfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-.toast{position:fixed;bottom:18px;right:18px;background:#fff;border:1px solid #dfd2b5;color:#765a2a;padding:12px 16px;border-radius:8px;z-index:60;font-size:11px;box-shadow:0 5px 20px #0001}
-.hamb{display:none;background:none;border:0;font-size:22px}.mobilebar{display:none}
-.profilegrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.pbox{background:#faf9f6;border:1px solid var(--line);padding:11px;border-radius:8px}
-.pbox small{display:block;color:var(--muted);font-size:9px;margin-bottom:5px}.pbox b{font-size:12px}
-@media(max-width:950px){.sidebar{width:215px}.main{margin-left:215px}.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.page{padding:20px}}
-@media(max-width:680px){
-.sidebar{width:260px;transform:translateX(-105%);box-shadow:10px 0 30px #0001}.sidebar.open{transform:none}
-.main{margin-left:0}.top{height:60px;padding:8px 12px}.hamb{display:block}.crumb{flex:1}
-.right .select{max-width:115px;font-size:10px;padding:8px 5px}.right #export{display:none}
-.page{padding:17px 12px 82px}.heading h1{font-size:22px}.heading .btn{padding:10px 12px}
-.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}.barrow{grid-template-columns:95px 1fr 22px}
-.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.toolbar input{max-width:none}
-.columns{grid-template-columns:repeat(4,205px)}
-.mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:7px 3px calc(7px + env(safe-area-inset-bottom));z-index:15;justify-content:space-around}
-.mobilebar button{border:0;background:none;color:#827b6d;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;min-width:48px}
-.mobilebar button span{font-size:17px}.mobilebar button.active{color:#9b742e;font-weight:bold}
-.toast{left:12px;right:12px;bottom:74px;text-align:center}.profilegrid{grid-template-columns:1fr 1fr}
+:root{
+ --bg:#101010;--panel:#191919;--panel2:#222;
+ --gold:#d5ad59;--text:#f5f5f5;--muted:#999;
+ --border:#333;--green:#49bd83;--red:#e46b6b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+ font-family:Arial,sans-serif}
+header{height:65px;background:#151515;border-bottom:1px solid var(--border);
+ display:flex;align-items:center;justify-content:space-between;
+ padding:0 22px;position:sticky;top:0;z-index:5}
+.logo{font-size:21px;font-weight:bold;color:var(--gold);letter-spacing:2px}
+.layout{display:flex;min-height:calc(100vh - 65px)}
+nav{width:230px;background:#151515;padding:18px 12px;
+ border-right:1px solid var(--border);flex-shrink:0}
+nav button{display:block;width:100%;text-align:left;
+ background:none;color:#bbb;border:0;padding:13px 14px;
+ border-radius:7px;margin-bottom:4px;cursor:pointer;font-size:14px}
+nav button.active,nav button:hover{background:#302719;color:var(--gold)}
+main{padding:24px;width:100%;min-width:0;max-width:1600px;margin:auto}
+h2{font-size:23px;margin:0 0 20px}
+h3{font-size:16px;margin:0 0 15px}
+.muted{color:var(--muted);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:13px;margin-bottom:22px}
+.card,.panel{background:var(--panel);border:1px solid var(--border);
+ border-radius:11px;padding:18px}
+.card small{color:var(--muted)}
+.card strong{display:block;font-size:24px;margin-top:12px}
+.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:12px 9px;border-bottom:1px solid var(--border);
+ text-align:left;white-space:nowrap}
+th{color:var(--gold);font-weight:600}
+.table-wrap{overflow-x:auto}
+button,.btn{cursor:pointer}
+.primary{background:var(--gold);color:#151515;border:0;
+ border-radius:7px;padding:11px 15px;font-weight:bold}
+.secondary{background:#292929;color:white;border:1px solid #444;
+ border-radius:7px;padding:10px 13px}
+.danger{background:#522727;color:white;border:0;border-radius:6px;padding:7px}
+input,select,textarea{background:#111;color:white;border:1px solid #444;
+ border-radius:6px;padding:11px;width:100%;min-width:0}
+label{font-size:12px;color:#bbb;display:block;margin-bottom:6px}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.section{display:none}.section.active{display:block}
+.tag{padding:5px 8px;border-radius:5px;background:#333;font-size:11px}
+.tag.in{color:var(--green)}.tag.out{color:var(--red)}
+.modal{display:none;position:fixed;inset:0;background:#000b;
+ z-index:10;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.modalbox{background:#1b1b1b;border:1px solid var(--gold);
+ border-radius:12px;padding:22px;width:100%;max-width:600px;
+ max-height:90vh;overflow:auto}
+.modalhead{display:flex;justify-content:space-between;margin-bottom:18px}
+.close{background:none;border:0;color:white;font-size:25px}
+.empty{text-align:center;color:var(--muted);padding:25px}
+@media(max-width:850px){
+ .layout{display:block}nav{width:100%;display:flex;overflow-x:auto;
+ padding:8px;border-right:0;border-bottom:1px solid var(--border)}
+ nav button{width:auto;white-space:nowrap;margin:0 3px}
+ main{padding:14px}
+ .cards{grid-template-columns:repeat(2,1fr)}
+ .grid2{grid-template-columns:1fr}
+}
+@media(max-width:420px){
+ .cards{grid-template-columns:1fr 1fr;gap:8px}
+ .card{padding:12px}.card strong{font-size:19px}
+ .formgrid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
-<aside class="sidebar" id="side">
- <div class="brand"><div class="logo">♛</div><div><b>DJIGIT TAU</b><small>STUDIO CRM</small></div></div>
- <div class="nav" id="nav"></div>
- <div class="sidefoot">● ДЕМО · данные в этом браузере</div>
-</aside>
-<main class="main">
- <header class="top">
-  <button class="hamb" onclick="menu()">☰</button>
-  <div class="crumb">DJIGIT TAU　›　<b id="crumb">Главная</b></div>
-  <div class="right"><span class="sub" id="who"></span><select class="select" id="branchFilter" onchange="render()"></select><button class="btn secondary" id="export" onclick="backup()">Экспорт</button><button class="btn secondary" onclick="logout()">Выйти</button></div>
- </header>
- <div class="page">
-  <div class="heading"><div><div class="eyebrow" id="eyebrow">УПРАВЛЕНИЕ СТУДИЕЙ</div><h1 id="title">Главная</h1><div class="sub" id="subtitle"></div></div><button class="btn" id="add" onclick="create()">＋ Добавить</button></div>
-  <div id="content"></div>
+<header>
+ <div class="logo">DJIGIT TAU</div>
+ <div class="muted">CRM / FINANCE</div>
+</header>
+
+<div class="layout">
+<nav>
+ <button class="active" data-tab="dashboard">◈ Главная</button>
+ <button data-tab="operations">⇄ Операции</button>
+ <button data-tab="students">♙ Ученики</button>
+ <button data-tab="branches">⌂ Филиалы</button>
+ <button data-tab="cashflow">▤ ДДС</button>
+ <button data-tab="profit">▥ ОПУ</button>
+ <button data-tab="balances">▣ Баланс</button>
+ <button data-tab="reports">▤ Отчёты</button>
+</nav>
+
+<main>
+<section id="dashboard" class="section active">
+ <h2>Главная панель</h2>
+ <div class="muted" id="today"></div>
+ <div class="cards" style="margin-top:18px">
+  <div class="card"><small>Общий доход</small><strong class="green" id="income">0 ₸</strong></div>
+  <div class="card"><small>Общие расходы</small><strong class="red" id="expense">0 ₸</strong></div>
+  <div class="card"><small>Чистая прибыль</small><strong class="gold" id="profitValue">0 ₸</strong></div>
+  <div class="card"><small>Учеников</small><strong id="studentCount">0</strong></div>
  </div>
+ <div class="grid2">
+  <div class="panel">
+   <h3>Финансовый результат</h3>
+   <div id="financeSummary"></div>
+  </div>
+  <div class="panel">
+   <h3>Последние операции</h3>
+   <div class="table-wrap"><table><thead>
+    <tr><th>Дата</th><th>Статья</th><th>Сумма</th></tr>
+   </thead><tbody id="recent"></tbody></table></div>
+  </div>
+ </div>
+</section>
+
+<section id="operations" class="section">
+ <h2>Операции</h2>
+ <div class="actions">
+  <button class="primary" onclick="openOperation()">+ Добавить операцию</button>
+  <button class="secondary" onclick="exportCSV()">Экспорт CSV</button>
+  <button class="secondary" onclick="document.getElementById('importFile').click()">Импорт CSV</button>
+  <input type="file" id="importFile" accept=".csv" hidden onchange="importCSV(event)">
+ </div>
+ <div class="panel">
+  <div class="formgrid">
+   <div><label>Тип операции</label><select id="filterType" onchange="render()">
+    <option value="">Все операции</option><option>ДОХОД</option>
+    <option>РАСХОД</option><option>ПЕРЕВОД</option>
+   </select></div>
+   <div><label>Филиал</label><select id="filterBranch" onchange="render()">
+    <option value="">Все филиалы</option></select></div>
+  </div>
+  <div class="table-wrap" style="margin-top:18px">
+   <table><thead><tr><th>Дата</th><th>Тип</th><th>Статья</th>
+   <th>Счёт</th><th>Филиал</th><th>Сумма</th><th></th></tr></thead>
+   <tbody id="operationsList"></tbody></table>
+  </div>
+ </div>
+</section>
+
+<section id="students" class="section">
+ <h2>Ученики и проекты</h2>
+ <div class="actions">
+  <button class="primary" onclick="openStudent()">+ Добавить ученика</button>
+ </div>
+ <div class="panel table-wrap">
+  <table><thead><tr><th>Ученик</th><th>Родитель</th><th>Телефон</th>
+  <th>Тренер</th><th>Филиал</th><th>Расписание</th><th>Оплата</th>
+  <th></th></tr></thead><tbody id="studentsList"></tbody></table>
+ </div>
+</section>
+
+<section id="branches" class="section">
+ <h2>Филиалы DJIGIT TAU</h2>
+ <div class="panel table-wrap">
+  <table><thead><tr><th>Филиал</th><th>Доход</th><th>Расход</th>
+  <th>Прибыль</th><th>Ученики</th></tr></thead>
+  <tbody id="branchesList"></tbody></table>
+ </div>
+</section>
+
+<section id="cashflow" class="section">
+ <h2>ДДС — движение денежных средств</h2>
+ <div class="cards">
+  <div class="card"><small>Поступления</small><strong class="green" id="cashIncome">0 ₸</strong></div>
+  <div class="card"><small>Выплаты</small><strong class="red" id="cashExpense">0 ₸</strong></div>
+  <div class="card"><small>Денежный поток</small><strong class="gold" id="cashNet">0 ₸</strong></div>
+  <div class="card"><small>Переводы</small><strong id="transfers">0 ₸</strong></div>
+ </div>
+ <div class="panel">
+  <h3>Движение по счетам</h3>
+  <div id="cashAccounts"></div>
+ </div>
+</section>
+
+<section id="profit" class="section">
+ <h2>ОПУ — доходы и расходы</h2>
+ <div class="panel">
+  <h3>Финансовый отчёт</h3>
+  <div class="table-wrap"><table>
+   <thead><tr><th>Показатель</th><th>Сумма</th></tr></thead>
+   <tbody id="profitReport"></tbody>
+  </table></div>
+ </div>
+ <div class="panel" style="margin-top:15px">
+  <h3>Доходность по категориям</h3>
+  <div id="categoryReport"></div>
+ </div>
+</section>
+
+<section id="balances" class="section">
+ <h2>Баланс денежных средств</h2>
+ <div class="panel">
+  <div id="balanceList"></div>
+ </div>
+</section>
+
+<section id="reports" class="section">
+ <h2>Отчёты руководителя</h2>
+ <div class="actions">
+  <button class="primary" onclick="window.print()">Печать отчёта</button>
+  <button class="secondary" onclick="exportCSV()">Скачать операции</button>
+ </div>
+ <div class="panel">
+  <h3>Сводка по филиалам</h3>
+  <div id="managementReport"></div>
+ </div>
+</section>
 </main>
-<nav class="mobilebar" id="mobilebar"></nav>
-<div class="modalbg" id="modalbg" onclick="if(event.target===this)closeModal()">
- <form class="modal" onsubmit="saveForm(event)"><h2 id="modalTitle">Добавить</h2><div id="fields"></div><div class="modalfoot"><button type="button" class="btn secondary" onclick="closeModal()">Отмена</button><button class="btn">Сохранить</button></div></form>
 </div>
-<div id="toast" class="toast" style="display:none"></div>
-<div id="login" style="position:fixed;inset:0;background:#f7f7f5;z-index:100;display:grid;place-items:center;padding:16px">
- <div class="modal" style="width:min(390px,100%);max-height:none">
-  <div class="brand" style="padding:0 0 16px"><div class="logo">♛</div><div><b>DJIGIT TAU</b><small>STUDIO CRM</small></div></div>
-  <h2>Вход в систему</h2><div class="sub">Демо-аккаунты для просмотра</div>
-  <div class="formfield"><label>Телефон</label><input class="field" id="lp" placeholder="+7 000 000 00 01"></div>
-  <div class="formfield"><label>Пароль</label><input class="field" id="lw" type="password" placeholder="Пароль"></div>
-  <button class="btn" style="width:100%" onclick="login()">Войти</button>
-  <div id="demo" style="margin-top:14px"></div>
-  <div class="notice" style="margin-top:14px">Демо-режим: пароли и данные хранятся только в этом браузере. Это не защищённая авторизация.</div>
+
+<div class="modal" id="operationModal">
+ <div class="modalbox">
+  <div class="modalhead"><h3>Новая операция</h3>
+   <button class="close" onclick="closeModal('operationModal')">×</button></div>
+  <form id="operationForm">
+   <div class="formgrid">
+    <div><label>Дата</label><input type="date" id="opDate" required></div>
+    <div><label>Тип</label><select id="opType">
+     <option>ДОХОД</option><option>РАСХОД</option><option>ПЕРЕВОД</option>
+    </select></div>
+    <div><label>Статья</label><input id="opCategory" required placeholder="Например: Продажи групповые"></div>
+    <div><label>Счёт</label><select id="opAccount">
+     <option>Kaspi</option><option>Kaspi Pay</option><option>Halyk</option>
+     <option>Наличные</option><option>Другой</option>
+    </select></div>
+    <div><label>Сумма, ₸</label><input id="opAmount" type="number" min="0.01" step=".01" required></div>
+    <div><label>Филиал</label><select id="opBranch"></select></div>
+    <div><label>Отправитель / получатель</label><input id="opPerson"></div>
+    <div><label>Комментарий</label><input id="opComment"></div>
+   </div>
+   <div class="actions"><button class="primary" type="submit">Сохранить</button>
+    <button type="button" class="secondary" onclick="closeModal('operationModal')">Отмена</button></div>
+  </form>
  </div>
 </div>
+
+<div class="modal" id="studentModal">
+ <div class="modalbox">
+  <div class="modalhead"><h3>Новый ученик</h3>
+   <button class="close" onclick="closeModal('studentModal')">×</button></div>
+  <form id="studentForm">
+   <div class="formgrid">
+    <div><label>Имя ученика</label><input id="stName" required></div>
+    <div><label>Родитель</label><input id="stParent"></div>
+    <div><label>Телефон</label><input id="stPhone"></div>
+    <div><label>Тренер</label><input id="stTeacher"></div>
+    <div><label>Филиал</label><select id="stBranch"></select></div>
+    <div><label>Расписание</label><input id="stSchedule" placeholder="Пн.Ср.Пт"></div>
+    <div><label>Стоимость, ₸</label><input id="stPrice" type="number" min="0"></div>
+    <div><label>Оплачено, ₸</label><input id="stPaid" type="number" min="0"></div>
+   </div>
+   <div class="actions"><button class="primary" type="submit">Сохранить ученика</button></div>
+  </form>
+ </div>
+</div>
+
 <script>
-const KEY='jt_whitegold_v1',SESS='jt_session_v1';
-const STAGES=['Новая заявка','Связались','Пробное занятие','Купили абонемент'];
-const ROLES={
- 'Руководитель':null,
- 'Администратор':['Главная','Ученики','Посещаемость','Расписание','Группы','Тренеры','Абонементы','Финансы'],
- 'Тренер':['Главная','Посещаемость','Расписание','Группы','Ученики'],
- 'Отдел продаж':['Главная','Заявки и воронка','Ученики','Абонементы']
-};
-const DEMO=[
- {phone:'70000000001',pass:'1111',name:'Камран',role:'Руководитель'},
- {phone:'70000000002',pass:'2222',name:'Администратор',role:'Администратор'},
- {phone:'70000000003',pass:'3333',name:'Вугар',role:'Тренер'},
- {phone:'70000000004',pass:'4444',name:'Менеджер',role:'Отдел продаж'}
+const BRANCHES=[
+"Айнабулак 3 101а",
+"Мкр Грэсс, Гагарина 11",
+"Мкр Алатау (ияф), Ибрагимова 12",
+"Аксай 1, дом 10",
+"Орбита 3, дом 4а",
+"Достык, 105а/1",
+"Халык Арена",
+"Талгар, ТД Адимак",
+"Абая, 115",
+"Конаев, Мкр4 16/1",
+"Ауэзова 5"
 ];
-const sections=[
- ['КЛИЕНТЫ',['Главная','Заявки и воронка','Ученики','Посещаемость']],
- ['СТУДИЯ',['Расписание','Группы','Тренеры','Абонементы']],
- ['УПРАВЛЕНИЕ',['Финансы','Филиалы','Аналитика','Команда','Журнал','Настройки']]
-];
-const icons={'Главная':'▦','Заявки и воронка':'◫','Ученики':'♙','Посещаемость':'✓','Расписание':'▦','Группы':'♧','Тренеры':'♙','Абонементы':'▤','Финансы':'₸','Филиалы':'⌂','Аналитика':'◷','Команда':'♟','Журнал':'☰','Настройки':'⚙'};
-const today=()=>new Date().toISOString().slice(0,10);
-const uid=()=>Date.now()*100+Math.floor(Math.random()*99);
-const clone=x=>JSON.parse(JSON.stringify(x));
-const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const seed={
- branches:[{id:1,name:'Айнабулак 3 101а',address:'Алматы'},{id:2,name:'Гагарина 11',address:'Алматы'},{id:3,name:'Алматы Арена',address:'Алматы'}],
- students:[
-  {id:1,name:'Алиев Тимур',phone:'+7 707 123-45-67',branch:1,group:'Лезгинка · дети',status:'Активен',kind:'Действующий',birth:'2016-04-12',since:'2026-09-01'},
-  {id:2,name:'Мамедова Амина',phone:'+7 701 222-18-40',branch:2,group:'Лезгинка · подростки',status:'Активен',kind:'Действующий',birth:'2013-08-22',since:'2026-10-01'},
-  {id:3,name:'Гусейнов Рамиль',phone:'+7 777 555-09-11',branch:1,group:'Индивидуально',status:'Нужна оплата',kind:'Действующий',birth:'2010-01-18'},
-  {id:4,name:'Керимова Лейла',phone:'+7 705 100-22-31',branch:3,group:'Барабан · начинающие',status:'Пробное',kind:'Новенький',birth:'2015-11-02'}
- ],
- leads:[
-  {id:1,name:'Алиева Сабина',phone:'+7 777 111-22-33',branch:1,stage:STAGES[0],source:'Instagram'},
-  {id:2,name:'Мурадов Эмиль',phone:'+7 701 555-44-33',branch:2,stage:STAGES[1],source:'Звонок'},
-  {id:3,name:'Гасанова Лана',phone:'+7 705 444-22-11',branch:1,stage:STAGES[2],source:'Instagram'}
- ],
- groups:[
-  {id:1,name:'Лезгинка · дети',dance:'Лезгинка',branch:1,teacher:'Камран',age:'6–9 лет',days:'Пн, Ср, Пт',time:'17:00'},
-  {id:2,name:'Лезгинка · подростки',dance:'Лезгинка',branch:2,teacher:'Вугар',age:'10–13 лет',days:'Вт, Чт, Сб',time:'18:30'},
-  {id:3,name:'Барабан · начинающие',dance:'Барабан',branch:3,teacher:'Эльман',age:'8+',days:'Пн, Ср',time:'19:00'}
- ],
- teachers:[{id:1,name:'Камран',phone:'',branch:1,role:'Главный тренер'},{id:2,name:'Вугар',phone:'',branch:2,role:'Тренер'}],
- memberships:[
-  {id:1,student:1,title:'12 занятий',total:12,used:4,price:30000,expires:'2026-12-10',branch:1},
-  {id:2,student:2,title:'8 занятий',total:8,used:2,price:24000,expires:'2026-12-02',branch:2}
- ],
- attendance:[],
- payments:[
-  {id:1,branch:1,amount:30000,type:'Доход',action:'Продажи',category:'Групповые',description:'Абонемент Алиев Тимур',date:'2026-11-10'},
-  {id:2,branch:2,amount:24000,type:'Доход',action:'Продажи',category:'Групповые',description:'Абонемент Мамедова Амина',date:'2026-11-12'},
-  {id:3,branch:1,amount:5000,type:'Расход',action:'Возвраты',category:'Групповые',description:'Возврат',date:'2026-11-13'}
- ],
- lessons:[
-  {id:1,branch:1,group:'Лезгинка · дети',teacher:'Камран',date:today(),time:'17:00',room:'Зал 1'},
-  {id:2,branch:2,group:'Лезгинка · подростки',teacher:'Вугар',date:today(),time:'18:30',room:'Зал 1'}
- ],
- log:[]
-};
-let db,users,role='Руководитель',current='Главная',formType=null,editing=null;
-function load(){
- try{const x=JSON.parse(localStorage.getItem(KEY));db=x?.db||clone(seed);users=x?.users||clone(DEMO)}
- catch(e){db=clone(seed);users=clone(DEMO)}
-}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({db,users}))}catch(e){toast('Не удалось сохранить данные в браузере')}}
-function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(window._toast);window._toast=setTimeout(()=>e.style.display='none',2500)}
-function boss(){return role==='Руководитель'}
-function allowed(n){return !ROLES[role]||ROLES[role].includes(n)}
-function branchName(n){return db.branches.find(b=>b.id==n)?.name||'—'}
-function money(n){return Number(n||0).toLocaleString('ru-RU')+' ₸'}
-function inBranch(x){const v=document.getElementById('branchFilter')?.value||'all';return v==='all'||String(x.branch)===v}
-function logAct(t){db.log.unshift({id:uid(),t,role,at:new Date().toLocaleString('ru-RU')});db.log=db.log.slice(0,300)}
-function sum(type){return db.payments.filter(inBranch).filter(x=>x.type===type).reduce((a,x)=>a+Number(x.amount||0),0)}
-function tag(s){
- const c=['Активен','Присутствовал','Доход'].includes(s)?'':['Нужна оплата','Отсутствовал','Расход'].includes(s)?'warn':['Архив','Просрочен'].includes(s)?'red':'blue';
- return `<i class="tag ${c}" style="font-style:normal">${esc(s||'—')}</i>`;
-}
-function menu(){document.getElementById('side').classList.toggle('open')}
-function go(n){if(!allowed(n))return;current=n;document.getElementById('side').classList.remove('open');render()}
-function init(){
- document.getElementById('nav').innerHTML=sections.map(g=>{
-  const a=g[1].filter(allowed);
-  return a.length?`<div class="navgroup"><div class="navtitle">${g[0]}</div>${a.map(n=>`<button data-page="${n}" onclick="go('${n}')"><span class="ico">${icons[n]}</span>${n}</button>`).join('')}</div>`:'';
- }).join('');
- const sel=document.getElementById('branchFilter'),v=sel.value||'all';
- sel.innerHTML='<option value="all">Все филиалы</option>'+db.branches.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join('');
- sel.value=[...sel.options].some(o=>o.value===v)?v:'all';
+
+const ACCOUNTS=["Kaspi","Kaspi Pay","Halyk","Наличные","Другой"];
+const KEY="djigit_tau_finance_v1";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"operations":[],"students":[]}');
+
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(db));
  render();
 }
-function stat(l,v,n){return `<div class="stat"><label>${l}</label><strong>${v}</strong><small>${n}</small></div>`}
-function bars(a,m){return a.map(([l,n])=>`<div class="barrow"><span>${esc(l)}</span><div class="bar"><i style="width:${Math.min(100,n/Math.max(1,m)*100)}%"></i></div><b>${n}</b></div>`).join('')}
+function money(n){
+ return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2})
+ .format(Number(n)||0)+" ₸";
+}
+function esc(s){
+ return String(s??"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ })[c]);
+}
+function sum(type){
+ return db.operations.filter(x=>x.type===type)
+ .reduce((a,x)=>a+Number(x.amount),0);
+}
+function selectOptions(){
+ ["filterBranch","opBranch","stBranch"].forEach(id=>{
+  const el=document.getElementById(id);
+  const current=el.value;
+  el.innerHTML=(id==="filterBranch"?'<option value="">Все филиалы</option>':'')+
+   BRANCHES.map(b=>`<option>${esc(b)}</option>`).join("");
+  el.value=current;
+ });
+}
+function openOperation(){
+ document.getElementById("opDate").value=new Date().toISOString().slice(0,10);
+ document.getElementById("operationModal").classList.add("show");
+}
+function openStudent(){
+ document.getElementById("studentModal").classList.add("show");
+}
+function closeModal(id){document.getElementById(id).classList.remove("show")}
+
+document.getElementById("operationForm").onsubmit=e=>{
+ e.preventDefault();
+ db.operations.unshift({
+  id:crypto.randomUUID(),date:opDate.value,type:opType.value,
+  category:opCategory.value.trim(),account:opAccount.value,
+  amount:Number(opAmount.value),branch:opBranch.value,
+  person:opPerson.value,comment:opComment.value
+ });
+ e.target.reset();closeModal("operationModal");save();
+};
+document.getElementById("studentForm").onsubmit=e=>{
+ e.preventDefault();
+ db.students.push({
+  id:crypto.randomUUID(),name:stName.value,parent:stParent.value,
+  phone:stPhone.value,teacher:stTeacher.value,branch:stBranch.value,
+  schedule:stSchedule.value,price:Number(stPrice.value||0),
+  paid:Number(stPaid.value||0)
+ });
+ e.target.reset();closeModal("studentModal");save();
+};
+document.querySelectorAll("nav button").forEach(b=>{
+ b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  document.getElementById(b.dataset.tab).classList.add("active");
+  render();
+ };
+});
+function removeOperation(id){
+ if(confirm("Удалить эту операцию?")){
+  db.operations=db.operations.filter(x=>x.id!==id);save();
+ }
+}
+function removeStudent(id){
+ if(confirm("Удалить ученика?")){
+  db.students=db.students.filter(x=>x.id!==id);save();
+ }
+}
 function render(){
- document.getElementById('title').textContent=current;
- document.getElementById('crumb').textContent=current;
- document.getElementById('eyebrow').textContent='РОЛЬ: '+role.toUpperCase();
- document.getElementById('subtitle').textContent=({
-  'Главная':'Общая картина работы студии','Заявки и воронка':'От первого обращения до покупки абонемента',
-  'Ученики':'Единая база учеников','Посещаемость':'Контроль занятий','Расписание':'Занятия по филиалам',
-  'Группы':'Составы и расписание','Тренеры':'Команда преподавателей','Абонементы':'Продажи и остатки занятий',
-  'Финансы':'Доходы и расходы','Филиалы':'Управление площадками','Аналитика':'Воронка продаж и посещаемость',
-  'Команда':'Демо-аккаунты','Журнал':'История действий','Настройки':'Резервная копия'
- })[current]||'';
- document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===current));
- document.getElementById('add').style.display=['Главная','Аналитика','Настройки','Журнал'].includes(current)?'none':'inline-block';
- document.getElementById('content').innerHTML=views[current]();
- document.getElementById('who').textContent=role;
- document.getElementById('mobilebar').innerHTML=['Главная','Заявки и воронка','Ученики','Расписание','Финансы'].filter(allowed).map(n=>`<button class="${current===n?'active':''}" onclick="go('${n}')"><span>${icons[n]}</span>${n==='Заявки и воронка'?'Заявки':n}</button>`).join('');
+ const inc=sum("ДОХОД"),out=sum("РАСХОД"),transfer=sum("ПЕРЕВОД");
+ const net=inc-out;
+ income.textContent=money(inc);
+ expense.textContent=money(out);
+ profitValue.textContent=money(net);
+ studentCount.textContent=db.students.length;
+ today.textContent=new Date().toLocaleDateString("ru-RU");
+ financeSummary.innerHTML=`
+  <p>Доходы: <b class="green">${money(inc)}</b></p>
+  <p>Расходы: <b class="red">${money(out)}</b></p>
+  <p>Прибыль: <b class="gold">${money(net)}</b></p>`;
+ recent.innerHTML=db.operations.slice(0,7).map(x=>`
+  <tr><td>${esc(x.date)}</td><td>${esc(x.category)}</td>
+  <td>${money(x.amount)}</td></tr>`).join("")||'<tr><td colspan="3" class="empty">Операций пока нет</td></tr>';
+ let ops=db.operations;
+ const ft=filterType.value,fb=filterBranch.value;
+ if(ft)ops=ops.filter(x=>x.type===ft);
+ if(fb)ops=ops.filter(x=>x.branch===fb);
+ operationsList.innerHTML=ops.map(x=>`
+ <tr><td>${esc(x.date)}</td>
+ <td><span class="tag ${x.type==="ДОХОД"?"in":x.type==="РАСХОД"?"out":""}">${esc(x.type)}</span></td>
+ <td>${esc(x.category)}</td><td>${esc(x.account)}</td>
+ <td>${esc(x.branch)}</td><td>${money(x.amount)}</td>
+ <td><button class="danger" onclick="removeOperation('${x.id}')">×</button></td></tr>
+ `).join("")||'<tr><td colspan="7" class="empty">Нет операций</td></tr>';
+ studentsList.innerHTML=db.students.map(s=>`
+ <tr><td>${esc(s.name)}</td><td>${esc(s.parent)}</td>
+ <td>${esc(s.phone)}</td><td>${esc(s.teacher)}</td>
+ <td>${esc(s.branch)}</td><td>${esc(s.schedule)}</td>
+ <td>${money(s.paid)} / ${money(s.price)}</td>
+ <td><button class="danger" onclick="removeStudent('${s.id}')">×</button></td></tr>
+ `).join("")||'<tr><td colspan="8" class="empty">Нет учеников</td></tr>';
+ let branchHTML="";
+ BRANCHES.forEach(b=>{
+  const list=db.operations.filter(x=>x.branch===b);
+  const bi=list.filter(x=>x.type==="ДОХОД").reduce((a,x)=>a+x.amount,0);
+  const bo=list.filter(x=>x.type==="РАСХОД").reduce((a,x)=>a+x.amount,0);
+  const count=db.students.filter(x=>x.branch===b).length;
+  branchHTML+=`<tr><td>${esc(b)}</td><td class="green">${money(bi)}</td>
+  <td class="red">${money(bo)}</td><td>${money(bi-bo)}</td><td>${count}</td></tr>`;
+ });
+ branchesList.innerHTML=branchHTML;
+ cashIncome.textContent=money(inc);cashExpense.textContent=money(out);
+ cashNet.textContent=money(net);transfers.textContent=money(transfer);
+ let accounts={};
+ ACCOUNTS.forEach(a=>accounts[a]=0);
+ db.operations.forEach(x=>{
+  if(!(x.account in accounts))accounts[x.account]=0;
+  if(x.type==="ДОХОД")accounts[x.account]+=x.amount;
+  if(x.type==="РАСХОД")accounts[x.account]-=x.amount;
+ });
+ cashAccounts.innerHTML=Object.entries(accounts).map(([a,v])=>
+  `<p>${esc(a)} <b style="float:right">${money(v)}</b></p>`
+ ).join("");
+ balanceList.innerHTML=Object.entries(accounts).map(([a,v])=>
+  `<p>${esc(a)} <b style="float:right">${money(v)}</b></p>`
+ ).join("")+`<hr><h3>Итого: ${money(Object.values(accounts).reduce((a,b)=>a+b,0))}</h3>`;
+ profitReport.innerHTML=`
+ <tr><td>Доходы</td><td class="green">${money(inc)}</td></tr>
+ <tr><td>Расходы</td><td class="red">${money(out)}</td></tr>
+ <tr><td><b>Чистая прибыль</b></td><td class="gold"><b>${money(net)}</b></td></tr>`;
+ let categories={};
+ db.operations.filter(x=>x.type==="ДОХОД").forEach(x=>{
+  categories[x.category]=(categories[x.category]||0)+x.amount;
+ });
+ categoryReport.innerHTML=Object.entries(categories).sort((a,b)=>b[1]-a[1])
+ .map(([k,v])=>`<p>${esc(k)} <b style="float:right">${money(v)}</b></p>`)
+ .join("")||"Пока нет данных";
+ managementReport.innerHTML=`<p>Всего учеников: <b>${db.students.length}</b></p>
+ <p>Общий доход: <b class="green">${money(inc)}</b></p>
+ <p>Общие расходы: <b class="red">${money(out)}</b></p>
+ <p>Чистая прибыль: <b class="gold">${money(net)}</b></p>
+ <div class="table-wrap"><table><thead><tr><th>Филиал</th>
+ <th>Доход</th><th>Расход</th><th>Прибыль</th></tr></thead>
+ <tbody>${branchHTML}</tbody></table></div>`;
 }
-function table(k,heads,fn){
- const a=db[k].filter(inBranch);
- return `<div class="card"><div class="toolbar"><input class="field" id="q" placeholder="Поиск..." oninput="filterRows()"><span class="sub">${a.length} записей</span></div><div class="tablewrap"><table class="table" id="tbl"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}<th>Действия</th></tr></thead><tbody>
- ${a.map(x=>`<tr data-q="${esc(JSON.stringify(x).toLowerCase())}">${fn(x).map(v=>`<td>${v}</td>`).join('')}<td>${k==='students'?`<button class="mini" onclick="profile(${x.id})">Профиль</button>`:''}<button class="mini" onclick="edit('${k}',${x.id})">Изменить</button>${boss()?`<button class="mini" onclick="del('${k}',${x.id})">Удалить</button>`:''}${k==='students'&&allowed('Посещаемость')?`<button class="mini" onclick="attend(${x.id})">Отметить</button>`:''}</td></tr>`).join('')||`<tr><td class="empty" colspan="${heads.length+1}">Нет записей</td></tr>`}
- </tbody></table></div></div>`;
+function exportCSV(){
+ const rows=[["Дата","Тип","Статья","Счёт","Сумма","Филиал","Отправитель","Комментарий"],
+ ...db.operations.map(x=>[x.date,x.type,x.category,x.account,x.amount,x.branch,x.person,x.comment])];
+ const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+ a.download="djigit-tau-operations.csv";a.click();
+ URL.revokeObjectURL(a.href);
 }
-function filterRows(){const q=document.getElementById('q').value.toLowerCase();document.querySelectorAll('#tbl tbody tr').forEach(r=>r.style.display=r.dataset.q.includes(q)?'':'none')}
-const views={
-'Главная':()=>`<div class="stats">
- ${stat('Всего учеников',db.students.filter(inBranch).length,'В выбранных филиалах')}
- ${stat('Заявки',db.leads.filter(inBranch).length,'В воронке')}
- ${stat('Группы',db.groups.filter(inBranch).length,'Активные группы')}
- ${stat('Доходы',money(sum('Доход')),'Поступления')}
- </div><div class="grid2">
- <div class="card"><h3>Ученики по филиалам</h3><div class="hint">Количество учеников</div>${bars(db.branches.map(b=>[b.name,db.students.filter(s=>s.branch===b.id).length]),db.students.length)}</div>
- <div class="card"><h3>Финансовый баланс</h3><div class="hint">По выбранным филиалам</div><div class="row">Доходы <b>${money(sum('Доход'))}</b></div><div class="row">Расходы <b>${money(sum('Расход'))}</b></div><div class="row">Баланс <b>${money(sum('Доход')-sum('Расход'))}</b></div></div></div>
- <div class="grid2"><div class="card"><h3>Ближайшие занятия</h3>${db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher)}</span></div>`).join('')||'<div class="empty">Занятий нет</div>'}</div>
- <div class="card"><h3>Абонементы</h3>${db.memberships.filter(inBranch).map(x=>`<div class="row"><b>${esc(db.students.find(s=>s.id==x.student)?.name||'Ученик')}</b><span>${x.total-x.used} из ${x.total} · ${esc(x.expires)}</span></div>`).join('')||'<div class="empty">Абонементов нет</div>'}</div></div>`,
-'Ученики':()=>table('students',['Ученик','Тип','Телефон','Филиал','Группа','Статус'],x=>[`<b>${esc(x.name)}</b>`,esc(x.kind||'—'),esc(x.phone),esc(branchName(x.branch)),esc(x.group),tag(x.status)]),
-'Заявки и воронка':()=>`<div class="columns">${STAGES.map(s=>{const a=db.leads.filter(inBranch).filter(x=>x.stage===s);return `<div class="kcol"><div class="colhead">${s}<span>${a.length}</span></div>${a.map(x=>`<div class="lead"><b>${esc(x.name)}</b><small>${esc(x.phone)} · ${esc(branchName(x.branch))}<br>${esc(x.source)}</small><div>${s!==STAGES[3]?`<button class="mini" onclick="advance(${x.id})">Следующий этап →</button>`:''}<button class="mini" onclick="edit('leads',${x.id})">Изменить</button></div></div>`).join('')||'<div class="empty">Нет заявок</div>'}</div>`}).join('')}</div>`,
-'Группы':()=>table('groups',['Название','Танец','Филиал','Возраст','Тренер','Дни','Время'],x=>[`<b>${esc(x.name)}</b>`,esc(x.dance),esc(branchName(x.branch)),esc(x.age),esc(x.teacher),esc(x.days),esc(x.time)]),
-'Тренеры':()=>table('teachers',['Тренер','Телефон','Филиал','Роль'],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone),esc(branchName(x.branch)),esc(x.role)]),
-'Филиалы':()=>table('branches',['Филиал','Адрес','Учеников','Групп'],x=>[`<b>${esc(x.name)}</b>`,esc(x.address),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
-'Абонементы':()=>table('memberships',['Ученик','Абонемент','Занятия','Цена','Филиал','До'],x=>[esc(db.students.find(s=>s.id==x.student)?.name||'—'),`<b>${esc(x.title)}</b>`,`${x.used}/${x.total}`,money(x.price),esc(branchName(x.branch)),esc(x.expires)]),
-'Финансы':()=>`<div class="stats">${stat('Доходы',money(sum('Доход')),'Поступления')}${stat('Расходы',money(sum('Расход')),'Расходы')}${stat('Баланс',money(sum('Доход')-sum('Расход')),'Доход минус расход')}${stat('Операции',db.payments.filter(inBranch).length,'Записей')}</div>${table('payments',['Дата','Тип','Действие','Категория','Описание','Сумма','Филиал'],x=>[esc(x.date),tag(x.type),esc(x.action),esc(x.category),esc(x.description),money(x.amount),esc(branchName(x.branch))])}`,
-'Посещаемость':()=>`<div class="notice">Отмечайте присутствие в таблице учеников кнопкой «Отметить» или добавьте запись вручную.</div>${table('attendance',['Дата','Ученик','Группа','Филиал','Статус'],x=>[esc(x.date),esc(db.students.find(s=>s.id==x.student)?.name||'—'),esc(x.group),esc(branchName(x.branch)),tag(x.status)])}`,
-'Расписание':()=>`<div class="card"><h3>Занятия</h3>${db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher)} · ${esc(x.room)}</span></div>`).join('')||'<div class="empty">Занятий нет</div>'}</div>`,
-'Аналитика':()=>`<div class="grid2"><div class="card"><h3>Воронка продаж</h3>${bars(STAGES.map(s=>[s,db.leads.filter(inBranch).filter(x=>x.stage===s).length]),db.leads.length)}</div><div class="card"><h3>Посещения по группам</h3>${bars([...new Set(db.groups.map(g=>g.name))].map(g=>[g,db.attendance.filter(a=>a.group===g&&a.status==='Присутствовал').length]),db.attendance.length)}</div></div>`,
-'Команда':()=>`<div class="notice">Демо-аккаунты предназначены для предварительного просмотра. Это не настоящая система авторизации.</div><div class="card"><h3>Сотрудники</h3>${users.map(u=>`<div class="row"><b>${esc(u.name)}</b><span>${esc(u.role)} · +${esc(u.phone)}</span></div>`).join('')}</div>`,
-'Журнал':()=>`<div class="card"><h3>История действий</h3>${db.log.map(x=>`<div class="row"><b>${esc(x.t)}</b><span>${esc(x.role)} · ${esc(x.at)}</span></div>`).join('')||'<div class="empty">Записей нет</div>'}`,
-'Настройки':()=>`<div class="notice">Пока это автономная версия для GitHub Pages. Записи сохраняются в браузере, в котором ты работаешь. Между телефоном и ПК синхронизации пока нет. Для этого позже подключим облачную базу и защищённую авторизацию.</div><div class="card"><h3>Резервная копия</h3><p class="sub">Скачай JSON-файл, чтобы сохранить данные или перенести их вручную.</p><div><button class="btn" onclick="backup()">Скачать копию</button> <label class="btn secondary">Восстановить копию<input type="file" accept="application/json" hidden onchange="restore(event)"></label> <button class="btn danger" onclick="reset()">Сбросить демо</button></div><div class="row">Учеников <b>${db.students.length}</b></div><div class="row">Филиалов <b>${db.branches.length}</b></div><div class="row">Заявок <b>${db.leads.length}</b></div></div>`
-};
-const F={
- student:[['name','ФИО ученика','text',1],['phone','Телефон','tel',1],['branch','Филиал','branch',1],['group','Группа','group'],['kind','Тип','select:Новенький|Действующий'],['since','Занимается с','date'],['birth','Дата рождения','date'],['status','Статус','select:Активен|Пробное|Нужна оплата|Пауза|Архив']],
- lead:[['name','Имя клиента','text',1],['phone','Телефон','tel',1],['branch','Филиал','branch',1],['stage','Этап','select:'+STAGES.join('|')],['source','Источник','text'],['manager','Менеджер','text']],
- group:[['name','Название группы','text',1],['branch','Филиал','branch',1],['age','Возраст','text'],['teacher','Тренер','text'],['dance','Вид танца','select:Лезгинка|Игра на барабане|Индивидуальные'],['days','Дни','text'],['time','Время','time']],
- teacher:[['name','ФИО тренера','text',1],['phone','Телефон','tel'],['branch','Филиал','branch',1],['role','Роль','text']],
- branch:[['name','Название филиала','text',1],['address','Адрес','text']],
- membership:[['student','Ученик','student',1],['title','Абонемент','text',1],['total','Всего занятий','number',1],['used','Использовано','number'],['price','Цена, ₸','number',1],['branch','Филиал','branch',1],['expires','Действует до','date']],
- payment:[['date','Дата','date',1],['type','Тип','select:Доход|Расход',1],['action','Действие','select:Продажи|Возвраты|Скидки|Себестоимость'],['category','Категория','select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца'],['description','Описание','text',1],['amount','Сумма, ₸','number',1],['branch','Филиал','branch',1]],
- attendance:[['student','Ученик','student',1],['date','Дата','date',1],['group','Группа','group'],['branch','Филиал','branch',1],['status','Статус','select:Присутствовал|Отсутствовал|Опоздал|Уважительная причина',1]],
- lesson:[['date','Дата','date',1],['time','Время','time',1],['group','Группа','group',1],['teacher','Тренер','text'],['branch','Филиал','branch',1],['room','Зал','text']]
-};
-const MAP={student:'students',lead:'leads',group:'groups',teacher:'teachers',branch:'branches',membership:'memberships',payment:'payments',attendance:'attendance',lesson:'lessons'};
-const REV=Object.fromEntries(Object.entries(MAP).map(([a,b])=>[b,a]));
-const N={student:'ученика',lead:'заявку',group:'группу',teacher:'тренера',branch:'филиал',membership:'абонемент',payment:'операцию',attendance:'посещение',lesson:'занятие'};
-function create(){
- formType=({'Ученики':'student','Заявки и воронка':'lead','Группы':'group','Тренеры':'teacher','Филиалы':'branch','Абонементы':'membership','Финансы':'payment','Посещаемость':'attendance','Расписание':'lesson'})[current];
- if(!formType)return;editing=null;showForm();
+function importCSV(event){
+ const file=event.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const lines=reader.result.replace(/^\uFEFF/,"").split(/\r?\n/).slice(1);
+  lines.forEach(line=>{
+   if(!line.trim())return;
+   const cols=line.split(";").map(v=>v.replace(/^"|"$/g,"").replace(/""/g,'"'));
+   if(cols.length<5)return;
+   db.operations.push({id:crypto.randomUUID(),date:cols[0],
+    type:cols[1],category:cols[2],account:cols[3],
+    amount:Number(cols[4].replace(/\s/g,"").replace(",","."))||0,
+    branch:cols[5]||"",person:cols[6]||"",comment:cols[7]||""});
+  });
+  save();alert("Импорт завершён");
+ };
+ reader.readAsText(file,"UTF-8");event.target.value="";
 }
-function edit(k,i){formType=REV[k];editing={k,i};showForm()}
-function showForm(){
- const k=MAP[formType],old=editing?db[k].find(x=>x.id===editing.i):{};
- document.getElementById('modalTitle').textContent=(editing?'Изменить: ':'Добавить: ')+N[formType];
- document.getElementById('fields').innerHTML='<div class="formgrid">'+F[formType].map(([n,l,t,r])=>{
-  const v=old?.[n]??(t==='date'?today():'');let el;
-  if(t.startsWith('select:'))el=`<select class="field" name="${n}">${t.slice(7).split('|').map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
-  else if(t==='branch')el=`<select class="field" name="${n}" required>${db.branches.map(x=>`<option value="${x.id}" ${x.id==v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
-  else if(t==='student')el=`<select class="field" name="${n}" required>${db.students.map(x=>`<option value="${x.id}" ${x.id==v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
-  else if(t==='group')el=`<select class="field" name="${n}"><option value="">—</option>${db.groups.map(x=>`<option ${x.name===v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
-  else el=`<input class="field" name="${n}" type="${t}" value="${esc(v)}" ${r?'required':''}>`;
-  return `<div class="formfield ${['name','description'].includes(n)?'full':''}"><label>${l}</label>${el}</div>`;
- }).join('')+'</div>';
- document.getElementById('modalbg').style.display='grid';
-}
-function closeModal(){document.getElementById('modalbg').style.display='none'}
-function saveForm(e){
- e.preventDefault();const k=MAP[formType],o={};new FormData(e.target).forEach((v,n)=>o[n]=v);
- ['branch','student','total','used','price','amount'].forEach(n=>{if(o[n]!==undefined)o[n]=Number(o[n])});
- if(editing){const i=db[k].findIndex(x=>x.id===editing.i);db[k][i]={...db[k][i],...o}}
- else{o.id=uid();db[k].push(o)}
- logAct((editing?'Изменено: ':'Добавлено: ')+N[formType]);save();closeModal();init();toast('Сохранено');
-}
-function del(k,i){
- if(!boss()||!confirm('Удалить запись?'))return;
- db[k]=db[k].filter(x=>x.id!==i);logAct('Удалена запись: '+k);save();render();toast('Удалено');
-}
-function advance(i){
- const x=db.leads.find(x=>x.id===i);x.stage=STAGES[Math.min(STAGES.indexOf(x.stage)+1,3)];
- logAct('Заявка '+x.name+' → '+x.stage);
- if(x.stage===STAGES[3]&&!db.students.some(s=>s.phone===x.phone)){
-  db.students.push({id:uid(),name:x.name,phone:x.phone,branch:x.branch,kind:'Новенький',status:'Активен'});
-  toast('Клиент добавлен в базу учеников');
- }else toast('Этап обновлён');
- save();render();
-}
-function attend(i){
- const s=db.students.find(x=>x.id===i);
- db.attendance.push({id:uid(),student:i,date:today(),group:s.group,branch:s.branch,status:'Присутствовал'});
- logAct('Посещение: '+s.name);save();toast('Посещение отмечено');go('Посещаемость');
-}
-function profile(i){
- const s=db.students.find(x=>x.id===i),a=db.attendance.filter(x=>x.student===i).sort((x,y)=>y.date.localeCompare(x.date)),m=db.memberships.filter(x=>x.student===i);
- const d=document.createElement('div');d.className='modalbg';d.style.display='grid';d.id='prof';
- d.onclick=e=>{if(e.target===d)d.remove()};
- d.innerHTML=`<div class="modal"><h2>${esc(s.name)}</h2>
- <div class="profilegrid">${[['Телефон',s.phone],['Статус',s.status],['Филиал',branchName(s.branch)],['Группа',s.group],['Дата рождения',s.birth],['Занимается с',s.since]].map(([a,b])=>`<div class="pbox"><small>${a}</small><b>${esc(b||'—')}</b></div>`).join('')}</div>
- <div class="card" style="margin-top:12px"><h3>Посещения (${a.length})</h3>${a.slice(0,10).map(x=>`<div class="row">${esc(x.date)} · ${esc(x.group)} ${tag(x.status)}</div>`).join('')||'<div class="empty">Посещений нет</div>'}</div>
- <div class="card" style="margin-top:12px"><h3>Абонементы</h3>${m.map(x=>`<div class="row"><b>${esc(x.title)}</b><span>${x.used}/${x.total} · ${money(x.price)}</span></div>`).join('')||'<div class="empty">Абонементов нет</div>'}</div>
- <div class="modalfoot"><button class="btn secondary" onclick="document.getElementById('prof').remove();edit('students',${i})">Изменить</button><button class="btn" onclick="document.getElementById('prof').remove();attend(${i})">Отметить посещение</button></div></div>`;
- document.body.append(d);
-}
-function backup(){
- if(!boss()){toast('Экспорт доступен руководителю');return}
- const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({db,users},null,2)],{type:'application/json'}));
- a.href=u;a.download='djigit-tau-crm-backup.json';a.click();URL.revokeObjectURL(u);
-}
-function restore(e){
- const f=e.target.files[0];if(!f)return;const r=new FileReader();
- r.onload=()=>{try{const x=JSON.parse(r.result);db=x.db||x;if(!db.students||!db.branches)throw 0;users=x.users||users;save();init();toast('Копия восстановлена')}catch(_){toast('Неверный файл')}};
- r.readAsText(f);
-}
-function reset(){if(!boss()||!confirm('Сбросить данные к демо?'))return;db=clone(seed);save();init();toast('Демо восстановлено')}
-function login(){
- const p=document.getElementById('lp').value.replace(/\D/g,''),w=document.getElementById('lw').value,u=users.find(x=>x.phone===p&&x.pass===w);
- if(!u){toast('Неверный номер или пароль');return}enter(u);
-}
-function enter(u){
- role=u.role;sessionStorage.setItem(SESS,u.phone);document.getElementById('login').style.display='none';
- current=sections.flatMap(x=>x[1]).find(allowed)||'Главная';init();
-}
-function logout(){sessionStorage.removeItem(SESS);document.getElementById('login').style.display='grid'}
-load();
-document.getElementById('demo').innerHTML=DEMO.map(u=>`<button class="mini" onclick="document.getElementById('lp').value='+${u.phone}';document.getElementById('lw').value='${u.pass}'">${u.role}</button>`).join('');
-const session=sessionStorage.getItem(SESS),active=users.find(u=>u.phone===session);
-if(active)enter(active);else document.getElementById('login').style.display='grid';
+selectOptions();
+render();
 </script>
 </body>
 </html>
