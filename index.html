@@ -146,6 +146,7 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .cav{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:0 0 38px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}.cav.sm{width:26px;height:26px;flex-basis:26px;font-size:12px}
 .crow2{display:flex;gap:10px;align-items:center;width:100%;border:0;border-top:1px solid var(--line2);background:none;padding:8px 2px;text-align:left;font-size:13.5px}.crow2:hover{background:#FBF7EC}.crow2 .tag{margin-left:auto}
 .amobox{border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;margin:8px 0}.amobox summary{cursor:pointer;font-weight:600;font-size:13.5px}.amobox[open] summary{margin-bottom:8px}
+.cchk{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin:8px 0 4px;cursor:pointer}.cchk input{margin-top:3px}
 .cfind{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line2);font-size:13.5px;line-height:1.45}.cfind .mini{margin-top:6px}
 .cfind .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;margin-top:6px;background:var(--green)}.cfind.warn .dot{background:#D99A2B}.cfind.red .dot{background:var(--red)}
 @media(prefers-reduced-motion:reduce){.citysvg .ag .bob,.citysvg .bld.busy .win{animation:none}}
@@ -559,6 +560,7 @@ function init(){
   $("expBtn").style.display="";$("toSettings").style.display=allowed("Настройки")?"":"none";
   if(!allowed(current))current=sections.flatMap(g=>g[1]).find(allowed);
   render();
+  cityAutoStart();
 }
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
@@ -740,6 +742,7 @@ function updateBell(){
   if(allowed("Абонементы")){db.memberships.filter(inBranch).filter(m=>m.total-m.used<=2&&m.total-m.used>0||(m.expires&&m.expires>=t&&m.expires<=new Date(Date.now()+7*864e5).toISOString().slice(0,10))).slice(0,4).forEach(m=>{const s=db.students.find(x=>x.id===m.student);if(s)items.push({t:"Заканчивается абонемент: "+s.name,s:(m.total-m.used)+" из "+m.total+" занятий · до "+(m.expires||"—"),go:"Абонементы"})});
     const dl=debts();if(dl.length)items.push({t:"Задолженность",s:plural(dl.length,"ученик","ученика","учеников")+" · "+money(dl.reduce((a,x)=>a+x.amount,0)),go:"Ученики"})}
   if(allowed("Панель владельца"))db.planned.filter(x=>!x.done&&x.date<=soon).forEach(x=>items.push({t:"Платёж: "+x.title,s:money(x.amount)+" · "+x.date,go:"Панель владельца"}));
+  {const ci=cityBellItem();if(ci)items.unshift(ci)}
   $("bellN").hidden=!items.length;$("bellN").textContent=items.length;
   $("bellPop").innerHTML=`<h4>Уведомления</h4>`+(items.map((x,i)=>`<button class="it" data-b="${i}"><span><b style="font-weight:600">${esc(x.t)}</b><small>${esc(x.s)}</small></span></button>`).join("")||'<div class="empty" style="padding:14px">Всё спокойно</div>');
   $("bellPop").querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{$("bellPop").classList.remove("on");go(items[+b.dataset.b].go)});
@@ -1677,7 +1680,7 @@ const amoUser=id=>amoData?.users?.[id]||"без ответственного";
 const amoStatus=(l)=>amoData.pipes.find(p=>p.id===l.pl)?.st.find(s=>s.id===l.st);
 const amoLink=id=>"https://"+amoCfg().domain+"/leads/detail/"+id;
 function amoScan(){const f=[];
-  if(!amoOn())return [{lv:"warn",t:"amoCRM не подключён. Заполните подключение ниже — и Карим начнёт проверять сделки и задачи в amoCRM."}];
+  if(!amoOn())return [{lv:"ok",t:"amoCRM не подключён. Заполните подключение ниже — и Карим начнёт проверять сделки и задачи в amoCRM."}];
   if(amoErr)f.push({lv:"red",t:amoErr});
   if(!amoData)return f.concat([{lv:"warn",t:"Данные из amoCRM ещё не загружены — нажмите «Обновить из amoCRM»."}]);
   const now=Date.now()/1000,open=amoData.leads.filter(l=>l.st!==142&&l.st!==143),openIds=new Set(open.map(l=>l.id));
@@ -1880,8 +1883,9 @@ function cityPanel(){
     <div class="hint">Собирает отчёты всех агентов и решает, что важнее сегодня.</div>
     ${CITY.map(a=>{const is=cIssues(a),red=is.filter(x=>x.lv==="red").length;return `<button class="crow2" data-agent="${a.id}"><span class="cav sm" style="background:${a.color}">${a.nm[0]}</span><span><b>${a.nm}</b> · ${a.role}</span><span class="tag ${red?"red":is.length?"warn":""}">${red?red+" срочно":is.length?is.length+" к вниманию":"всё спокойно"}</span></button>`}).join("")}
     <h3 style="margin-top:14px">Главное на сегодня</h3>
-    ${all.length?all.slice(0,6).map(({a,x})=>`<div class="cfind ${x.lv}"><span class="dot"></span><div><small style="color:var(--muted)">${a.nm}, ${a.role.toLowerCase()}</small><br>${esc(x.t)}</div></div>`).join(""):`<div class="empty">Агенты не нашли проблем</div>`}
+    ${all.length?all.slice(0,6).map(({a,x})=>`<div class="cfind ${x.lv}"><span class="dot"></span><div><small style="color:var(--muted)">${a.nm}, ${a.role[0].toLowerCase()+a.role.slice(1)}</small><br>${esc(x.t)}</div></div>`).join(""):`<div class="empty">Агенты не нашли проблем</div>`}
     <h3 style="margin-top:14px">Совет города</h3><div class="hint">Все агенты идут в штаб, а Аксакал по их отчётам составляет план на день.</div>
+    ${waOn()?`<div class="actions"><button class="btn secondary" data-wa="send">Отправить сводку в WhatsApp</button></div>`:""}
     ${cityAIBlock("mayor","Вопрос совету, например: «Что сделать, чтобы выполнить план месяца?» (пусто — план на день)")}`}
   const a=CITY.find(x=>x.id===citySel),r=cityRes[a.id]||cityScan(a);
   return `<div class="chead"><span class="cav" style="background:${a.color}">${a.nm[0]}</span><div><b>${a.nm}</b><small>${a.role} · зона «${a.house}»</small></div><button class="mini" data-cgo="${a.sec}" style="margin-left:auto">${esc(lbl(a.sec))} →</button></div>
@@ -1927,12 +1931,63 @@ function wireCityPanel(){const p=$("cityPanel");if(!p)return;
     b.disabled=true;let msg;try{msg=await it.act.run()}catch(e){msg=e.message;b.disabled=false;toast(msg);cityLog(a.nm,"Ошибка: "+msg);persist();cityRefresh();return}
     logAct(a.nm+" ("+a.role+"): "+msg);cityLog(a.nm,msg);persist();CITY.forEach(cityScan);toast(msg);render()});
   if(citySel==="amo")wireAmo(p);
+  p.querySelector('[data-wa="send"]')?.addEventListener("click",e=>waSendSummary(e.target));
   const f=$("cityForm"),q=$("cityQ");if(f){q.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))f.requestSubmit()};
     f.onsubmit=e=>{e.preventDefault();cityAskAI(citySel,q.value.trim())};if(cityBusy)$("cityAsk").disabled=true}}
+/* ===== Автоматика агентов: автообход, пока CRM открыта, и WhatsApp через функцию agents-cron (WhatsApp Cloud API).
+   Адрес функции и ключ хранятся только в этом браузере. */
+const WA_KEY="djigit_crm_wa";
+const waCfg=()=>{try{return JSON.parse(localStorage.getItem(WA_KEY)||"{}")}catch(e){return{}}};
+const waOn=()=>{const c=waCfg();return !!(c.url&&c.key)};
+let cityAutoAt="";
+async function waPost(payload){const c=waCfg();if(!waOn())throw new Error("WhatsApp не подключён");let r;
+  try{r=await fetch(c.url,{method:"POST",headers:{"Content-Type":"application/json","x-agents-key":c.key},body:JSON.stringify(payload)})}catch(e){throw new Error("Нет связи с функцией agents-cron")}
+  const j=await r.json().catch(()=>({}));
+  if(r.status===401)throw new Error("Функция не приняла ключ агентов");
+  if(!r.ok)throw new Error("WhatsApp: "+(j.error||(j.errors||[]).join("; ")||"ошибка "+r.status));
+  return j}
+function cityWaText(){const d=new Date().toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+  const all=CITY.flatMap(a=>cIssues(a).map(x=>({a,x}))).sort((p,q)=>(p.x.lv==="red"?0:1)-(q.x.lv==="red"?0:1));
+  const lines=all.slice(0,8).map(({a,x})=>(x.lv==="red"?"🔴 ":"🟡 ")+a.nm+": "+x.t);
+  const m=cityAI.mayor,plan=m&&!m.err&&m.text!=="Думаю…"?"\nПлан Аксакала:\n"+m.text:"";
+  return "Сводка агентов DJIGIT TAU, "+d+"\n"+(lines.join("\n")||"Всё спокойно")+plan}
+async function waSendSummary(btn){if(btn)btn.disabled=true;
+  try{CITY.forEach(cityScan);const r=await waPost({text:cityWaText()});cityLog(MAYOR.nm,"Сводка отправлена в WhatsApp: получателей "+r.sent);toast("Сводка отправлена в WhatsApp")}
+  catch(e){cityLog(MAYOR.nm,e.message);toast(e.message)}
+  persist();if(btn)btn.disabled=false;cityRefresh()}
+async function cityAutoRun(){if(!me||!allowed("Город агентов"))return;
+  if(amoOn()&&Date.now()-(amoData?.at||0)>25*6e4){try{await amoLoad();amoErr=""}catch(e){amoErr=e.message}}
+  CITY.forEach(cityScan);cityAutoAt=new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  if(waOn()&&settings.waDaily&&settings.waLastDaily!==today()&&new Date().getHours()>=8){settings.waLastDaily=today();
+    try{const r=await waPost({text:cityWaText()});cityLog(MAYOR.nm,"Утренняя сводка отправлена в WhatsApp: получателей "+r.sent)}catch(e){cityLog(MAYOR.nm,e.message)}persist()}
+  updateBell();if(current==="Город агентов"&&!cityBusy)cityRefresh()}
+function cityAutoStart(){clearInterval(cityAutoStart.h);if(!me||!allowed("Город агентов")||settings.agentsAuto===false)return;
+  cityAutoRun();cityAutoStart.h=setInterval(cityAutoRun,30*6e4)}
+function cityBellItem(){if(!allowed("Город агентов")||settings.agentsAuto===false)return null;
+  const red=CITY.flatMap(a=>(cityRes[a.id]?.f||[]).filter(x=>x.lv==="red").map(x=>a.nm+": "+x.t));
+  return red.length?{t:"Агенты: "+plural(red.length,"срочная находка","срочные находки","срочных находок"),s:red[0],go:"Город агентов"}:null}
+function cityAutoCard(){const c=waCfg();return `<div class="card" style="margin-top:16px" id="cityAuto"><h3>Автоматика и WhatsApp</h3>
+  <label class="cchk"><input type="checkbox" id="caAuto" ${settings.agentsAuto!==false?"checked":""}><span>Автообход при входе в CRM и каждые 30 минут, пока CRM открыта. Срочные находки появляются в колокольчике.</span></label>
+  <div class="hint">Последний автообход: ${cityAutoAt||"ещё не было"}</div>
+  <details class="amobox"${waOn()?"":" open"}><summary>WhatsApp${waOn()?" · подключён":""}</summary>
+  <div class="hint">Сообщения отправляет функция <b>agents-cron</b> в Supabase через официальный WhatsApp Cloud API. Она же по расписанию проверяет amoCRM и присылает отчёт, даже когда CRM закрыта. Настройка описана в supabase/functions/agents-cron/README.md.</div>
+  <div class="formfield"><label for="waUrl">Адрес функции</label><input class="field" id="waUrl" placeholder="https://xxxx.supabase.co/functions/v1/agents-cron" value="${esc(c.url||"")}"></div>
+  <div class="formfield"><label for="waKey">Ключ агентов (AGENTS_KEY)</label><input class="field" id="waKey" type="password" autocomplete="off" value="${esc(c.key||"")}"></div>
+  <label class="cchk"><input type="checkbox" id="caDaily" ${settings.waDaily?"checked":""}><span>Утренняя сводка в WhatsApp: при первом обходе за день, после 8:00</span></label>
+  <div class="actions"><button class="btn" data-wa="save">Сохранить</button>${waOn()?`<button class="btn secondary" data-wa="test">Проверить связь</button><button class="btn secondary" data-wa="send">Отправить сводку сейчас</button><button class="btn secondary" data-wa="off">Отключить</button>`:""}</div></details></div>`}
+function wireCityAuto(){const box=$("cityAuto");if(!box)return;const q=s=>box.querySelector(`[data-wa="${s}"]`);
+  $("caAuto").onchange=e=>{settings.agentsAuto=e.target.checked;persist();cityAutoStart();if(!e.target.checked){clearInterval(cityAutoStart.h);updateBell()}toast(e.target.checked?"Автообход включён":"Автообход выключен")};
+  $("caDaily").onchange=e=>{settings.waDaily=e.target.checked;persist()};
+  q("save").onclick=()=>{const c={url:$("waUrl").value.trim(),key:$("waKey").value.trim()};
+    if(!/^https:\/\//.test(c.url)){toast("Адрес функции должен начинаться с https://");return}if(!c.key){toast("Вставьте ключ агентов");return}
+    try{localStorage.setItem(WA_KEY,JSON.stringify(c))}catch(e){}settings.waDaily=$("caDaily").checked;persist();toast("WhatsApp сохранён");render()};
+  q("test")&&(q("test").onclick=async e=>{e.target.disabled=true;try{const r=await waPost({test:true});toast("Проверочное сообщение отправлено: "+r.sent+(r.errors?.length?" · ошибки: "+r.errors.join("; "):""))}catch(err){toast(err.message)}e.target.disabled=false});
+  q("send")&&(q("send").onclick=e=>waSendSummary(e.target));
+  q("off")&&(q("off").onclick=async()=>{if(!await ask("Отключить WhatsApp в этом браузере?","Отключить"))return;try{localStorage.removeItem(WA_KEY)}catch(e){}render()})}
 views["Город агентов"]=()=>{CITY.forEach(cityScan);return `
   <div class="card citybar"><div><h3>Семь агентов и старейшина</h3><div class="hint">Каждый агент живёт в своём здании и следит за своей зоной CRM. «Обход города» — агенты проверяют данные и приносят находки в штаб. Нажмите на здание, чтобы открыть агента.</div></div>
   <div class="actions" style="margin:0"><button class="btn" data-act="cityrun">Обход города</button><button class="btn secondary" data-act="citycouncil">Совет у Аксакала</button></div></div>
-  <div class="citywrap"><div class="card citymap">${citySVG()}<div class="clegend"><span><i style="background:#C7392F"></i>срочно</span><span><i style="background:#D99A2B"></i>к вниманию</span><span><i style="background:#3E8E4E"></i>спокойно</span></div></div>
+  <div class="citywrap"><div><div class="card citymap">${citySVG()}<div class="clegend"><span><i style="background:#C7392F"></i>срочно</span><span><i style="background:#D99A2B"></i>к вниманию</span><span><i style="background:#3E8E4E"></i>спокойно</span></div></div>${cityAutoCard()}</div>
   <div class="card cpanel" id="cityPanel">${cityPanel()}</div></div>
   <div class="card" style="margin-top:16px"><h3>Журнал города</h3><div id="cityLog">${cityLogHTML()}</div></div>`};
 after["Город агентов"]=()=>{const m=document.querySelector(".citysvg");
@@ -1940,7 +1995,7 @@ after["Город агентов"]=()=>{const m=document.querySelector(".citysvg
   m.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&e.target.dataset?.agent){e.preventDefault();citySel=e.target.dataset.agent;cityRefresh()}};
   document.querySelector('[data-act="cityrun"]').onclick=cityTour;
   document.querySelector('[data-act="citycouncil"]').onclick=()=>{citySel="mayor";cityRefresh();cityAskAI("mayor","")};
-  if(cityBusy)citySetBusy(true);wireCityPanel()};
+  if(cityBusy)citySetBusy(true);wireCityPanel();wireCityAuto()};
 (async function boot(){
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
