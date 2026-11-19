@@ -147,6 +147,7 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .crow2{display:flex;gap:10px;align-items:center;width:100%;border:0;border-top:1px solid var(--line2);background:none;padding:8px 2px;text-align:left;font-size:13.5px}.crow2:hover{background:#FBF7EC}.crow2 .tag{margin-left:auto}
 .amobox{border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;margin:8px 0}.amobox summary{cursor:pointer;font-weight:600;font-size:13.5px}.amobox[open] summary{margin-bottom:8px}
 .cchk{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin:8px 0 4px;cursor:pointer}.cchk input{margin-top:3px}
+.tgsteps{border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;margin-top:10px;font-size:13.5px}.tgsteps ol{margin:6px 0;padding-left:20px}.tgsteps code{background:var(--pale);padding:0 4px;border-radius:4px}
 .cfind{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line2);font-size:13.5px;line-height:1.45}.cfind .mini{margin-top:6px}
 .cfind .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;margin-top:6px;background:var(--green)}.cfind.warn .dot{background:#D99A2B}.cfind.red .dot{background:var(--red)}
 @media(prefers-reduced-motion:reduce){.citysvg .ag .bob,.citysvg .bld.busy .win{animation:none}}
@@ -1885,7 +1886,7 @@ function cityPanel(){
     <h3 style="margin-top:14px">Главное на сегодня</h3>
     ${all.length?all.slice(0,6).map(({a,x})=>`<div class="cfind ${x.lv}"><span class="dot"></span><div><small style="color:var(--muted)">${a.nm}, ${a.role[0].toLowerCase()+a.role.slice(1)}</small><br>${esc(x.t)}</div></div>`).join(""):`<div class="empty">Агенты не нашли проблем</div>`}
     <h3 style="margin-top:14px">Совет города</h3><div class="hint">Все агенты идут в штаб, а Аксакал по их отчётам составляет план на день.</div>
-    ${waOn()?`<div class="actions"><button class="btn secondary" data-wa="send">Отправить сводку в WhatsApp</button></div>`:""}
+    ${waOn()?`<div class="actions"><button class="btn secondary" data-wa="send">Отправить сводку в Telegram</button></div>`:""}
     ${cityAIBlock("mayor","Вопрос совету, например: «Что сделать, чтобы выполнить план месяца?» (пусто — план на день)")}`}
   const a=CITY.find(x=>x.id===citySel),r=cityRes[a.id]||cityScan(a);
   return `<div class="chead"><span class="cav" style="background:${a.color}">${a.nm[0]}</span><div><b>${a.nm}</b><small>${a.role} · зона «${a.house}»</small></div><button class="mini" data-cgo="${a.sec}" style="margin-left:auto">${esc(lbl(a.sec))} →</button></div>
@@ -1944,7 +1945,7 @@ async function waPost(payload){const c=waCfg();if(!waOn())throw new Error("Whats
   try{r=await fetch(c.url,{method:"POST",headers:{"Content-Type":"application/json","x-agents-key":c.key},body:JSON.stringify(payload)})}catch(e){throw new Error("Нет связи с функцией agents-cron")}
   const j=await r.json().catch(()=>({}));
   if(r.status===401)throw new Error("Функция не приняла ключ агентов");
-  if(!r.ok)throw new Error("WhatsApp: "+(j.error||(j.errors||[]).join("; ")||"ошибка "+r.status));
+  if(!r.ok)throw new Error("Сервер агентов: "+(j.error||(j.errors||[]).join("; ")||"ошибка "+r.status));
   return j}
 function cityWaText(){const d=new Date().toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
   const all=CITY.flatMap(a=>cIssues(a).map(x=>({a,x}))).sort((p,q)=>(p.x.lv==="red"?0:1)-(q.x.lv==="red"?0:1));
@@ -1952,38 +1953,67 @@ function cityWaText(){const d=new Date().toLocaleString("ru-RU",{day:"2-digit",m
   const m=cityAI.mayor,plan=m&&!m.err&&m.text!=="Думаю…"?"\nПлан Аксакала:\n"+m.text:"";
   return "Сводка агентов DJIGIT TAU, "+d+"\n"+(lines.join("\n")||"Всё спокойно")+plan}
 async function waSendSummary(btn){if(btn)btn.disabled=true;
-  try{CITY.forEach(cityScan);const r=await waPost({text:cityWaText()});cityLog(MAYOR.nm,"Сводка отправлена в WhatsApp: получателей "+r.sent);toast("Сводка отправлена в WhatsApp")}
+  try{CITY.forEach(cityScan);const r=await waPost({text:cityWaText()});cityLog(MAYOR.nm,"Сводка отправлена: получателей "+r.sent);toast("Сводка отправлена")}
   catch(e){cityLog(MAYOR.nm,e.message);toast(e.message)}
   persist();if(btn)btn.disabled=false;cityRefresh()}
 async function cityAutoRun(){if(!me||!allowed("Город агентов"))return;
   if(amoOn()&&Date.now()-(amoData?.at||0)>25*6e4){try{await amoLoad();amoErr=""}catch(e){amoErr=e.message}}
   CITY.forEach(cityScan);cityAutoAt=new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
   if(waOn()&&settings.waDaily&&settings.waLastDaily!==today()&&new Date().getHours()>=8){settings.waLastDaily=today();
-    try{const r=await waPost({text:cityWaText()});cityLog(MAYOR.nm,"Утренняя сводка отправлена в WhatsApp: получателей "+r.sent)}catch(e){cityLog(MAYOR.nm,e.message)}persist()}
+    try{const r=await waPost({text:cityWaText()});cityLog(MAYOR.nm,"Утренняя сводка отправлена: получателей "+r.sent)}catch(e){cityLog(MAYOR.nm,e.message)}persist()}
   updateBell();if(current==="Город агентов"&&!cityBusy)cityRefresh()}
 function cityAutoStart(){clearInterval(cityAutoStart.h);if(!me||!allowed("Город агентов")||settings.agentsAuto===false)return;
   cityAutoRun();cityAutoStart.h=setInterval(cityAutoRun,30*6e4)}
 function cityBellItem(){if(!allowed("Город агентов")||settings.agentsAuto===false)return null;
   const red=CITY.flatMap(a=>(cityRes[a.id]?.f||[]).filter(x=>x.lv==="red").map(x=>a.nm+": "+x.t));
   return red.length?{t:"Агенты: "+plural(red.length,"срочная находка","срочные находки","срочных находок"),s:red[0],go:"Город агентов"}:null}
-function cityAutoCard(){const c=waCfg();return `<div class="card" style="margin-top:16px" id="cityAuto"><h3>Автоматика и WhatsApp</h3>
+let tgState=null,tgFound=null,tgBusy=false;
+async function tgLoad(){if(!waOn()||tgBusy)return;tgBusy=true;try{tgState=await waPost({tgStatus:true})}catch(e){tgState={err:e.message,chats:[]}}tgBusy=false;cityAutoRedraw()}
+function cityAutoRedraw(){const box=$("cityAuto");if(!box)return;const open=[...box.querySelectorAll("details")].map(d=>d.open);box.outerHTML=cityAutoCard();
+  const nb=$("cityAuto");nb.querySelectorAll("details").forEach((d,i)=>{if(open[i]!==undefined)d.open=open[i]});wireCityAuto()}
+function tgBlock(){if(!waOn())return "";
+  if(!tgState)return `<div class="hint">Проверяю Telegram…</div>`;
+  if(tgState.err)return `<div class="cfind red"><span class="dot"></span><div>${esc(tgState.err)}</div></div>`;
+  if(!tgState.bot)return `<div class="tgsteps"><b>Telegram — 2 минуты</b><ol>
+    <li>Откройте в Telegram <b>@BotFather</b> и отправьте <code>/newbot</code>.</li>
+    <li>Придумайте имя (например, «DJIGIT TAU Агенты») и адрес бота, который заканчивается на <code>bot</code>.</li>
+    <li>BotFather пришлёт токен вида <code>123456:ABC…</code> — вставьте его сюда.</li></ol>
+    <div class="aiform" style="margin-top:6px"><input class="field" id="tgTok" type="password" autocomplete="off" placeholder="Токен от @BotFather"><button class="btn" data-tg="token">Подключить бота</button></div>
+    <div class="hint">Токен сохраняется на сервере в зашифрованном хранилище Supabase (Vault), в браузере не остаётся.</div></div>`;
+  const ch=tgState.chats||[],link="https://t.me/"+encodeURIComponent(tgState.bot);
+  return `<div class="tgsteps"><b>Telegram: бот <a href="${link}" target="_blank" rel="noopener">@${esc(tgState.bot)}</a> подключён</b>
+    <div style="margin:6px 0 2px">Получатели отчётов:</div>
+    ${ch.length?ch.map(c=>`<div class="row"><span>${esc(c.name||c.chat_id)}</span><button class="mini" data-tgdel="${c.chat_id}">Убрать</button></div>`).join(""):`<div class="hint">Пока никого. Откройте <a href="${link}" target="_blank" rel="noopener">@${esc(tgState.bot)}</a>, нажмите «Старт» (или отправьте /start), затем — «Найти чаты».</div>`}
+    ${tgFound?(()=>{const nw=tgFound.filter(f=>!ch.some(c=>String(c.chat_id)===String(f.id)));return nw.length?`<div style="margin:10px 0 2px">Новые чаты — нажмите «Добавить»:</div>`+nw.map(f=>`<div class="row"><span>${esc(f.name)} <small style="color:var(--muted)">написал(а) боту</small></span><button class="mini" data-tgadd="${f.id}" data-name="${esc(f.name)}">Добавить</button></div>`).join(""):`<div class="hint">Новых чатов нет. Отправьте боту /start и нажмите «Найти чаты» ещё раз.</div>`})():""}
+    <div class="actions"><button class="btn secondary" data-tg="find">Найти чаты</button><button class="btn secondary" data-tg="retoken">Сменить бота</button></div></div>`}
+function cityAutoCard(){const c=waCfg();return `<div class="card" style="margin-top:16px" id="cityAuto"><h3>Автоматика и уведомления</h3>
   <label class="cchk"><input type="checkbox" id="caAuto" ${settings.agentsAuto!==false?"checked":""}><span>Автообход при входе в CRM и каждые 30 минут, пока CRM открыта. Срочные находки появляются в колокольчике.</span></label>
   <div class="hint">Последний автообход: ${cityAutoAt||"ещё не было"}</div>
-  <details class="amobox"${waOn()?"":" open"}><summary>WhatsApp${waOn()?" · подключён":""}</summary>
-  <div class="hint">Сообщения отправляет функция <b>agents-cron</b> в Supabase через официальный WhatsApp Cloud API. Она же по расписанию проверяет amoCRM и присылает отчёт, даже когда CRM закрыта. Настройка описана в supabase/functions/agents-cron/README.md.</div>
+  <details class="amobox"${waOn()?"":" open"}><summary>Сервер агентов${waOn()?" · подключён":""}</summary>
+  <div class="hint">Функция <b>agents-cron</b> в Supabase отправляет отчёты в Telegram и WhatsApp и по расписанию проверяет amoCRM, даже когда CRM закрыта.</div>
   <div class="formfield"><label for="waUrl">Адрес функции</label><input class="field" id="waUrl" value="${esc(c.url||SB_FN+"agents-cron")}"></div>
   <div class="formfield"><label for="waKey">Ключ агентов (Supabase → Project Settings → Vault → agents_key)</label><input class="field" id="waKey" type="password" autocomplete="off" value="${esc(c.key||"")}"></div>
-  <label class="cchk"><input type="checkbox" id="caDaily" ${settings.waDaily?"checked":""}><span>Утренняя сводка в WhatsApp: при первом обходе за день, после 8:00</span></label>
-  <div class="actions"><button class="btn" data-wa="save">Сохранить</button>${waOn()?`<button class="btn secondary" data-wa="test">Проверить связь</button><button class="btn secondary" data-wa="send">Отправить сводку сейчас</button><button class="btn secondary" data-wa="off">Отключить</button>`:""}</div></details></div>`}
-function wireCityAuto(){const box=$("cityAuto");if(!box)return;const q=s=>box.querySelector(`[data-wa="${s}"]`);
+  <div class="actions"><button class="btn" data-wa="save">Сохранить</button>${waOn()?`<button class="btn secondary" data-wa="off">Отключить</button>`:""}</div></details>
+  ${waOn()?`${tgBlock()}
+  <div class="hint" style="margin-top:8px">WhatsApp: подключается позже через Meta — шаги в docs/agents-whatsapp-status.md.</div>
+  <label class="cchk"><input type="checkbox" id="caDaily" ${settings.waDaily?"checked":""}><span>Утренняя сводка: при первом обходе за день, после 8:00</span></label>
+  <div class="actions"><button class="btn secondary" data-wa="test">Проверить связь</button><button class="btn secondary" data-wa="send">Отправить сводку сейчас</button></div>`:""}</div>`}
+function wireCityAuto(){const box=$("cityAuto");if(!box)return;const q=s=>box.querySelector(`[data-wa="${s}"]`),t=s=>box.querySelector(`[data-tg="${s}"]`);
   $("caAuto").onchange=e=>{settings.agentsAuto=e.target.checked;persist();cityAutoStart();if(!e.target.checked){clearInterval(cityAutoStart.h);updateBell()}toast(e.target.checked?"Автообход включён":"Автообход выключен")};
-  $("caDaily").onchange=e=>{settings.waDaily=e.target.checked;persist()};
+  $("caDaily")&&($("caDaily").onchange=e=>{settings.waDaily=e.target.checked;persist()});
   q("save").onclick=()=>{const c={url:$("waUrl").value.trim(),key:$("waKey").value.trim()};
     if(!/^https:\/\//.test(c.url)){toast("Адрес функции должен начинаться с https://");return}if(!c.key){toast("Вставьте ключ агентов");return}
-    try{localStorage.setItem(WA_KEY,JSON.stringify(c))}catch(e){}settings.waDaily=$("caDaily").checked;persist();toast("WhatsApp сохранён");render()};
+    try{localStorage.setItem(WA_KEY,JSON.stringify(c))}catch(e){}tgState=null;tgFound=null;toast("Сервер агентов сохранён");render()};
   q("test")&&(q("test").onclick=async e=>{e.target.disabled=true;try{const r=await waPost({test:true});toast("Проверочное сообщение отправлено: "+r.sent+(r.errors?.length?" · ошибки: "+r.errors.join("; "):""))}catch(err){toast(err.message)}e.target.disabled=false});
   q("send")&&(q("send").onclick=e=>waSendSummary(e.target));
-  q("off")&&(q("off").onclick=async()=>{if(!await ask("Отключить WhatsApp в этом браузере?","Отключить"))return;try{localStorage.removeItem(WA_KEY)}catch(e){}render()})}
+  q("off")&&(q("off").onclick=async()=>{if(!await ask("Отключить сервер агентов в этом браузере? Бот и получатели на сервере останутся.","Отключить"))return;try{localStorage.removeItem(WA_KEY)}catch(e){}tgState=null;tgFound=null;render()});
+  const busy=async(btn,fn)=>{btn.disabled=true;try{await fn()}catch(e){toast(e.message)}btn.disabled=false;cityAutoRedraw()};
+  t("token")&&(t("token").onclick=e=>busy(e.target,async()=>{const v=$("tgTok").value.trim();if(!v)throw new Error("Вставьте токен от @BotFather");const r=await waPost({tgToken:v});tgState={bot:r.bot,chats:[]};cityLog(MAYOR.nm,"Подключён Telegram-бот @"+r.bot);persist();toast("Бот @"+r.bot+" подключён")}));
+  t("retoken")&&(t("retoken").onclick=()=>{tgState={bot:null,chats:tgState.chats};tgFound=null;cityAutoRedraw()});
+  t("find")&&(t("find").onclick=e=>busy(e.target,async()=>{tgFound=(await waPost({tgFind:true})).chats||[]}));
+  box.querySelectorAll("[data-tgadd]").forEach(b=>b.onclick=()=>busy(b,async()=>{const r=await waPost({tgAdd:{id:Number(b.dataset.tgadd),name:b.dataset.name}});tgState.chats=r.chats;cityLog(MAYOR.nm,"Получатель в Telegram: "+b.dataset.name);persist();toast("Добавлено. Проверьте Telegram — бот прислал приветствие")}));
+  box.querySelectorAll("[data-tgdel]").forEach(b=>b.onclick=()=>busy(b,async()=>{const r=await waPost({tgDel:Number(b.dataset.tgdel)});tgState.chats=r.chats;toast("Получатель убран")}));
+  if(waOn()&&!tgState)tgLoad()}
 views["Город агентов"]=()=>{CITY.forEach(cityScan);return `
   <div class="card citybar"><div><h3>Семь агентов и старейшина</h3><div class="hint">Каждый агент живёт в своём здании и следит за своей зоной CRM. «Обход города» — агенты проверяют данные и приносят находки в штаб. Нажмите на здание, чтобы открыть агента.</div></div>
   <div class="actions" style="margin:0"><button class="btn" data-act="cityrun">Обход города</button><button class="btn secondary" data-act="citycouncil">Совет у Аксакала</button></div></div>

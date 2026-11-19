@@ -1,9 +1,11 @@
-// Круглосуточные агенты «DJIGIT TAU»: проверка amoCRM по расписанию и отчёты в WhatsApp (официальный WhatsApp Cloud API).
+// Круглосуточные агенты «DJIGIT TAU»: проверка amoCRM по расписанию и отчёты в Telegram и/или WhatsApp (официальный Cloud API).
 //
 // Режимы (всегда нужен заголовок x-agents-key = секрет AGENTS_KEY):
 //   POST {}              — Карим проверяет amoCRM и присылает отчёт (так вызывает расписание pg_cron)
 //   POST {"text":"..."}  — отправить готовую сводку из CRM (кнопка «Отправить в WhatsApp»)
 //   POST {"test":true}   — проверочное сообщение
+//   Telegram (настраивается из CRM): {"tgToken":"..."} сохранить токен бота в Vault, {"tgStatus":true},
+//   {"tgFind":true} найти чаты, написавшие боту /start, {"tgAdd":{"id":1,"name":"..."}}, {"tgDel":1}
 //
 // Секреты (Supabase → Edge Functions → Secrets):
 //   AGENTS_KEY       — пароль агентов, его же вставляют в CRM. Если не задан, берётся из Supabase Vault
@@ -18,6 +20,7 @@
 //   AUTO_TASKS=1     — Карим сам ставит задачи в amoCRM на сделки без задач
 //   SEND_IF_OK=1     — присылать отчёт, даже если проблем нет
 //   ALLOW_ORIGIN     — адрес, где открыта CRM (по умолчанию *)
+//   TG_TOKEN         — необязательно: токен Telegram-бота (по умолчанию из Vault, секрет tg_token)
 
 const env = (k: string, d = "") => Deno.env.get(k) ?? d;
 const cors = {
@@ -64,6 +67,59 @@ async function waSendAll(text: string) {
     try { await waSend(n, text); sent.push(n); } catch (e) { errors.push(String((e as Error).message)); }
   }
   return { sent: sent.length, errors };
+}
+
+/* ---------- База Supabase (service_role) ---------- */
+async function sb(path: string, init: RequestInit = {}) {
+  const url = env("SUPABASE_URL"), k = env("SUPABASE_SERVICE_ROLE_KEY");
+  const r = await fetch(`${url}${path}`, {
+    ...init,
+    headers: { "apikey": k, "Authorization": `Bearer ${k}`, "Content-Type": "application/json", ...(init.headers ?? {}) },
+  });
+  if (!r.ok) throw new Error(`База ${r.status}: ${(await r.text()).slice(0, 150)}`);
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
+}
+const rpc = (fn: string, args: Record<string, unknown> = {}) => sb(`/rest/v1/rpc/${fn}`, { method: "POST", body: JSON.stringify(args) });
+
+/* ---------- Telegram ---------- */
+let cachedTg = "";
+async function tgToken(): Promise<string> {
+  if (env("TG_TOKEN")) return env("TG_TOKEN");
+  if (!cachedTg) cachedTg = String((await rpc("agents_tg_token").catch(() => "")) ?? "");
+  return cachedTg;
+}
+async function tg(method: string, body: Record<string, unknown> = {}, token?: string) {
+  const t = token ?? await tgToken();
+  if (!t) throw new Error("Токен Telegram-бота не сохранён");
+  const r = await fetch(`https://api.telegram.org/bot${t}/${method}`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!j.ok) throw new Error(`Telegram: ${j.description ?? r.status}`);
+  return j.result;
+}
+const tgChats = async () => (await sb("/rest/v1/agents_tg_chats?select=chat_id,name&order=added_at")) as { chat_id: number; name: string }[];
+async function tgSendAll(text: string) {
+  const chats = await tgChats(), sent: number[] = [], errors: string[] = [];
+  const parts = text.match(/[\s\S]{1,4000}/g) ?? [];
+  for (const c of chats) {
+    try { for (const p of parts) await tg("sendMessage", { chat_id: c.chat_id, text: p, disable_web_page_preview: true }); sent.push(c.chat_id); }
+    catch (e) { errors.push(`${c.name}: ${(e as Error).message}`); }
+  }
+  return { sent: sent.length, errors };
+}
+
+/* ---------- Отправка во все настроенные каналы ---------- */
+async function sendAll(text: string) {
+  const out = { sent: 0, errors: [] as string[], telegram: 0, whatsapp: 0 };
+  const tgOn = !!(await tgToken()) && (await tgChats()).length > 0;
+  const waOn = !!(env("WA_TOKEN") && env("WA_PHONE_ID") && env("WA_TO"));
+  if (!tgOn && !waOn) throw new Error("Не настроены ни Telegram, ни WhatsApp");
+  if (tgOn) { const r = await tgSendAll(text); out.telegram = r.sent; out.errors.push(...r.errors); }
+  if (waOn) { const r = await waSendAll(text); out.whatsapp = r.sent; out.errors.push(...r.errors); }
+  out.sent = out.telegram + out.whatsapp;
+  return out;
 }
 
 /* ---------- amoCRM ---------- */
@@ -143,15 +199,8 @@ let cachedKey = "";
 async function agentsKey(): Promise<string> {
   if (env("AGENTS_KEY")) return env("AGENTS_KEY");
   if (cachedKey) return cachedKey;
-  const url = env("SUPABASE_URL"), srk = env("SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !srk) return "";
-  const r = await fetch(`${url}/rest/v1/rpc/agents_key`, {
-    method: "POST",
-    headers: { "apikey": srk, "Authorization": `Bearer ${srk}`, "Content-Type": "application/json" },
-    body: "{}",
-  });
-  if (!r.ok) return "";
-  cachedKey = String(await r.json() ?? "");
+  if (!env("SUPABASE_URL") || !env("SUPABASE_SERVICE_ROLE_KEY")) return "";
+  cachedKey = String((await rpc("agents_key").catch(() => "")) ?? "");
   return cachedKey;
 }
 
@@ -161,15 +210,55 @@ Deno.serve(async (req) => {
   const key = await agentsKey();
   if (!key || req.headers.get("x-agents-key") !== key) return json(401, { error: "bad agents key" });
 
-  const body = await req.json().catch(() => ({})) as { text?: unknown; test?: unknown };
+  const body = await req.json().catch(() => ({})) as Record<string, any>;
   try {
+    if (typeof body.tgToken === "string") {
+      const t = body.tgToken.trim();
+      if (!/^\d{5,}:[A-Za-z0-9_-]{20,}$/.test(t)) return json(400, { error: "Это не похоже на токен бота от @BotFather" });
+      const me = await tg("getMe", {}, t);
+      await rpc("agents_set_tg_token", { t });
+      cachedTg = t;
+      return json(200, { bot: me.username });
+    }
+    if (body.tgStatus) {
+      const t = await tgToken();
+      const me = t ? await tg("getMe").catch(() => null) : null;
+      return json(200, { bot: me?.username ?? null, chats: await tgChats() });
+    }
+    if (body.tgFind) {
+      await tg("deleteWebhook").catch(() => null);
+      const ups = await tg("getUpdates", { limit: 100, allowed_updates: ["message"] }) as any[];
+      const seen = new Map<number, { id: number; name: string }>();
+      for (const u of ups) {
+        const c = u.message?.chat;
+        if (c) seen.set(c.id, { id: c.id, name: c.title || [c.first_name, c.last_name].filter(Boolean).join(" ") || c.username || String(c.id) });
+      }
+      return json(200, { chats: [...seen.values()] });
+    }
+    if (body.tgAdd) {
+      const id = Number(body.tgAdd.id), name = String(body.tgAdd.name ?? "").slice(0, 100);
+      if (!Number.isSafeInteger(id)) return json(400, { error: "bad chat id" });
+      await tg("sendMessage", { chat_id: id, text: "Агенты DJIGIT TAU подключены. Сюда будут приходить отчёты и сводки." });
+      await sb("/rest/v1/agents_tg_chats", { method: "POST", headers: { "Prefer": "resolution=merge-duplicates" }, body: JSON.stringify({ chat_id: id, name }) });
+      return json(200, { chats: await tgChats() });
+    }
+    if (body.tgDel !== undefined) {
+      const id = Number(body.tgDel);
+      if (!Number.isSafeInteger(id)) return json(400, { error: "bad chat id" });
+      await sb(`/rest/v1/agents_tg_chats?chat_id=eq.${id}`, { method: "DELETE" });
+      return json(200, { chats: await tgChats() });
+    }
+    const amoOn = !!(env("AMO_DOMAIN") && env("AMO_TOKEN"));
+    if (!body.test && !(typeof body.text === "string" && body.text.trim()) && !amoOn) {
+      return json(200, { sent: 0, skipped: "amoCRM ещё не настроен (AMO_DOMAIN, AMO_TOKEN)" });
+    }
     const text = body.test
-      ? "Проверка связи: агенты DJIGIT TAU подключены к WhatsApp"
+      ? "Проверка связи: агенты DJIGIT TAU подключены"
       : typeof body.text === "string" && body.text.trim()
       ? body.text.slice(0, 3000)
       : await amoReport();
     if (!text) return json(200, { sent: 0, skipped: "Проблем не найдено" });
-    const res = await waSendAll(text);
+    const res = await sendAll(text);
     return json(res.sent ? 200 : 502, res);
   } catch (e) {
     return json(500, { error: String((e as Error).message) });
