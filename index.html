@@ -145,6 +145,7 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .chead{display:flex;gap:10px;align-items:center;margin-bottom:6px}.chead b{display:block;font-size:15px}.chead small{color:var(--muted);font-size:12.5px}
 .cav{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:0 0 38px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}.cav.sm{width:26px;height:26px;flex-basis:26px;font-size:12px}
 .crow2{display:flex;gap:10px;align-items:center;width:100%;border:0;border-top:1px solid var(--line2);background:none;padding:8px 2px;text-align:left;font-size:13.5px}.crow2:hover{background:#FBF7EC}.crow2 .tag{margin-left:auto}
+.amobox{border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;margin:8px 0}.amobox summary{cursor:pointer;font-weight:600;font-size:13.5px}.amobox[open] summary{margin-bottom:8px}
 .cfind{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line2);font-size:13.5px;line-height:1.45}.cfind .mini{margin-top:6px}
 .cfind .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;margin-top:6px;background:var(--green)}.cfind.warn .dot{background:#D99A2B}.cfind.red .dot{background:var(--red)}
 @media(prefers-reduced-motion:reduce){.citysvg .ag .bob,.citysvg .bld.busy .win{animation:none}}
@@ -562,7 +563,7 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Бесплатные модели GitHub Models: вопросы по данным студии","Город агентов":"ИИ-агенты следят за продажами, деньгами, учениками, расписанием, рекламой и задачами"};
+const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Бесплатные модели GitHub Models: вопросы по данным студии","Город агентов":"ИИ-агенты следят за продажами, amoCRM, деньгами, учениками, расписанием, рекламой и задачами"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
@@ -1645,14 +1646,91 @@ function wireAI(){
     aiBusy=false;if($("aiLog")){draw();$("aiSend").disabled=false;$("aiQ").focus()}};
 }
 after["ИИ-помощник"]=wireAI;
+/* ===== amoCRM: агент Карим читает сделки и задачи и ставит задачи прямо в amoCRM.
+   amoCRM не пускает запросы из браузера (CORS), поэтому запросы идут через посредника — функцию supabase/functions/amocrm-proxy.
+   Токен, адрес и кэш хранятся только в этом браузере, отдельно от резервной копии CRM. */
+const AMO_KEY="djigit_crm_amo",AMO_DKEY="djigit_crm_amo_data";
+const amoCfg=()=>{try{return JSON.parse(localStorage.getItem(AMO_KEY)||"{}")}catch(e){return{}}};
+const amoOn=()=>{const c=amoCfg();return !!(c.proxy&&c.domain&&c.token)};
+let amoData=(()=>{try{return JSON.parse(localStorage.getItem(AMO_DKEY)||"null")}catch(e){return null}})(),amoErr="";
+function amoDomain(v){v=String(v||"").trim().toLowerCase().replace(/^https?:\/\//,"").replace(/\/.*$/,"");if(v&&!v.includes("."))v+=".amocrm.ru";return v}
+async function amoReq(path,{method="GET",query={},body}={}){const c=amoCfg();if(!c.proxy||!c.domain||!c.token)throw new Error("amoCRM не подключён");
+  const qs=new URLSearchParams({path,...query});let r;
+  try{r=await fetch(c.proxy.replace(/\/+$/,"")+"?"+qs,{method,headers:{"X-Amo-Domain":c.domain,"X-Amo-Token":c.token,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}
+  catch(e){throw new Error("Нет связи с посредником amoCRM. Проверьте адрес функции.")}
+  if(r.status===204)return null;const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(_){}
+  if(!r.ok)throw new Error(r.status===401?"amoCRM: токен недействителен или истёк":r.status===403?"amoCRM: нет доступа ("+(j?.detail||j?.error||"403")+")":r.status===402?"amoCRM: аккаунт не оплачен":"amoCRM: ошибка "+r.status+" "+(j?.detail||j?.title||j?.error||t.slice(0,120)));
+  return j}
+async function amoPages(path,key,query={},max=8){const out=[];for(let p=1;p<=max;p++){const j=await amoReq(path,{query:{...query,limit:250,page:p}});const a=j?._embedded?.[key]||[];out.push(...a);if(a.length<250)break}return out}
+async function amoLoad(){const acc=await amoReq("/api/v4/account"),from=Math.floor(Date.now()/1000)-120*86400;
+  const pls=(await amoReq("/api/v4/leads/pipelines"))?._embedded?.pipelines||[];
+  const us=await amoPages("/api/v4/users","users",{},2);
+  const leads=await amoPages("/api/v4/leads","leads",{"filter[updated_at][from]":from});
+  const tasks=await amoPages("/api/v4/tasks","tasks",{"filter[is_completed]":0},4);
+  amoData={at:Date.now(),account:acc?.name||"",
+    pipes:pls.map(p=>({id:p.id,name:p.name,st:(p._embedded?.statuses||[]).map(s=>({id:s.id,name:s.name,sort:s.sort,type:s.type}))})),
+    users:Object.fromEntries(us.map(u=>[u.id,u.name])),
+    leads:leads.map(l=>({id:l.id,name:l.name||"Сделка #"+l.id,price:l.price||0,st:l.status_id,pl:l.pipeline_id,ru:l.responsible_user_id,c:l.created_at,u:l.updated_at,cl:l.closed_at||0,nt:l.closest_task_at||0})),
+    tasks:tasks.filter(t=>!t.is_completed).map(t=>({id:t.id,e:t.entity_id,et:t.entity_type,till:t.complete_till,text:t.text||"",ru:t.responsible_user_id}))};
+  try{localStorage.setItem(AMO_DKEY,JSON.stringify(amoData))}catch(e){}amoErr="";return amoData}
+const amoUser=id=>amoData?.users?.[id]||"без ответственного";
+const amoStatus=(l)=>amoData.pipes.find(p=>p.id===l.pl)?.st.find(s=>s.id===l.st);
+const amoLink=id=>"https://"+amoCfg().domain+"/leads/detail/"+id;
+function amoScan(){const f=[];
+  if(!amoOn())return [{lv:"warn",t:"amoCRM не подключён. Заполните подключение ниже — и Карим начнёт проверять сделки и задачи в amoCRM."}];
+  if(amoErr)f.push({lv:"red",t:amoErr});
+  if(!amoData)return f.concat([{lv:"warn",t:"Данные из amoCRM ещё не загружены — нажмите «Обновить из amoCRM»."}]);
+  const now=Date.now()/1000,open=amoData.leads.filter(l=>l.st!==142&&l.st!==143),openIds=new Set(open.map(l=>l.id));
+  const taskOf={};amoData.tasks.forEach(t=>{if(t.et==="leads")(taskOf[t.e]=taskOf[t.e]||[]).push(t)});
+  const noTask=open.filter(l=>!taskOf[l.id]&&!l.nt);
+  if(noTask.length)f.push({lv:"red",t:plural(noTask.length,"открытая сделка","открытые сделки","открытых сделок")+" в amoCRM без задачи: "+cNames(noTask),
+    act:{l:"Поставить задачи в amoCRM",async run(){const due=Math.floor(Date.now()/1000)+3600,list=noTask.slice(0,100);
+      for(let i=0;i<list.length;i+=50)await amoReq("/api/v4/tasks",{method:"POST",body:list.slice(i,i+50).map(l=>({text:"Связаться с клиентом и назначить следующий шаг (агент Карим)",complete_till:due,entity_id:l.id,entity_type:"leads",task_type_id:1,...(l.ru?{responsible_user_id:l.ru}:{})}))});
+      await amoLoad();return "В amoCRM поставлено задач: "+list.length}}});
+  const late=amoData.tasks.filter(t=>t.till&&t.till<now);
+  if(late.length){const by={};late.forEach(t=>{const k=amoUser(t.ru);by[k]=(by[k]||0)+1});
+    f.push({lv:"red",t:plural(late.length,"задача просрочена","задачи просрочены","задач просрочено")+" в amoCRM: "+Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([u,n])=>u+" — "+n).join("; ")})}
+  const stuck=open.filter(l=>l.u&&now-l.u>7*86400&&openIds.has(l.id));
+  if(stuck.length)f.push({lv:"warn",t:plural(stuck.length,"сделка не менялась","сделки не менялись","сделок не менялись")+" больше 7 дней: "+cNames(stuck.sort((a,b)=>a.u-b.u))});
+  const ms=Math.floor(new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime()/1000);
+  const won=amoData.leads.filter(l=>l.st===142&&l.cl>=ms),lost=amoData.leads.filter(l=>l.st===143&&l.cl>=ms),neu=amoData.leads.filter(l=>l.c>=ms);
+  f.push({lv:"ok",t:"amoCRM «"+(amoData.account||amoCfg().domain)+"» в этом месяце: новых сделок "+neu.length+", успешно "+won.length+" на "+money(won.reduce((s,l)=>s+l.price,0))+", закрыто без успеха "+lost.length});
+  const bySt={};open.forEach(l=>{const s=amoStatus(l);const k=s?s.name:"—";bySt[k]=(bySt[k]||0)+1});
+  if(open.length)f.push({lv:"ok",t:"Открыто сделок: "+open.length+" · по этапам: "+Object.entries(bySt).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([s,n])=>s+" "+n).join("; ")});
+  f.push({lv:"ok",t:"Данные amoCRM обновлены "+new Date(amoData.at).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})});
+  return f}
+function amoPanel(){const c=amoCfg();return `<details class="amobox"${amoOn()?"":" open"}><summary>Подключение amoCRM${amoOn()?" · "+esc(c.domain):""}</summary>
+  <div class="hint">1) Долгосрочный токен: amoCRM → Настройки → Интеграции → «Создать интеграцию» (внешняя) → вкладка «Ключи и доступы» → «Долгосрочный токен».<br>
+  2) Посредник: функция <b>amocrm-proxy</b> из репозитория (папка supabase/functions), развернутая в Supabase. amoCRM не принимает запросы прямо из браузера.<br>
+  Токен хранится только в этом браузере и не попадает в резервные копии.</div>
+  <div class="formfield"><label for="amoProxy">Адрес посредника</label><input class="field" id="amoProxy" placeholder="https://xxxx.supabase.co/functions/v1/amocrm-proxy" value="${esc(c.proxy||"")}"></div>
+  <div class="formfield"><label for="amoDom">Адрес amoCRM</label><input class="field" id="amoDom" placeholder="studio.amocrm.ru" value="${esc(c.domain||"")}"></div>
+  <div class="formfield"><label for="amoTok">Долгосрочный токен</label><input class="field" id="amoTok" type="password" autocomplete="off" value="${esc(c.token||"")}"></div>
+  <div class="actions"><button class="btn" data-amo="save">Сохранить и загрузить</button>${amoOn()?`<button class="btn secondary" data-amo="off">Отключить</button>`:""}</div></details>
+  ${amoOn()?`<div class="actions" style="margin:8px 0 4px"><button class="btn secondary" data-amo="load">Обновить из amoCRM</button></div>`:""}`}
+async function amoRefresh(btn){if(btn)btn.disabled=true;const a=CITY.find(x=>x.id==="amo");cityBusyMark(a,true);
+  try{await amoLoad();cityLog(a.nm,"Загружено из amoCRM: сделок "+amoData.leads.length+", открытых задач "+amoData.tasks.length);toast("Данные amoCRM загружены")}
+  catch(e){amoErr=e.message;toast(e.message)}
+  cityBusyMark(a,false);cityScan(a);persist();cityRefresh()}
+function wireAmo(p){const q=s=>p.querySelector(`[data-amo="${s}"]`);
+  q("save")&&(q("save").onclick=()=>{const c={proxy:$("amoProxy").value.trim(),domain:amoDomain($("amoDom").value),token:$("amoTok").value.trim()};
+    if(!/^https:\/\//.test(c.proxy)){toast("Адрес посредника должен начинаться с https://");return}
+    if(!/^[a-z0-9-]+\.(amocrm\.(ru|com)|kommo\.com)$/.test(c.domain)){toast("Адрес amoCRM вида studio.amocrm.ru");return}
+    if(!c.token){toast("Вставьте долгосрочный токен");return}
+    try{localStorage.setItem(AMO_KEY,JSON.stringify(c))}catch(e){}amoData=null;amoErr="";amoRefresh(q("save"))});
+  q("off")&&(q("off").onclick=async()=>{if(!await ask("Отключить amoCRM в этом браузере? Токен и загруженные данные будут удалены отсюда.","Отключить"))return;
+    try{localStorage.removeItem(AMO_KEY);localStorage.removeItem(AMO_DKEY)}catch(e){}amoData=null;amoErr="";cityLog("Карим","amoCRM отключён");persist();cityScan(CITY.find(x=>x.id==="amo"));cityRefresh()});
+  q("load")&&(q("load").onclick=e=>amoRefresh(e.target))}
 /* ===== Город агентов: у каждого агента своё здание, своя зона ответственности и свой обход данных.
    Обход работает локально без интернета; «Спросить» и «Совет» используют модель из раздела «ИИ-помощник». */
 const CITY=[
-  {id:"sales",nm:"Аслан",role:"Агент продаж",house:"Продажи",color:"#B8924B",wall:"#F4E8C8",x:160,y:120,sec:"Заявки и воронка",
+  {id:"sales",nm:"Аслан",role:"Агент продаж",house:"Продажи",color:"#B8924B",wall:"#F4E8C8",x:125,y:120,sec:"Заявки и воронка",
    persona:"Ты — Аслан, агент продаж в CRM студии кавказских танцев «DJIGIT TAU». Твоя зона: заявки, скорость первого ответа, пробные занятия и конверсия в абонемент."},
-  {id:"cash",nm:"Мурат",role:"Казначей",house:"Финансы",color:"#3D6680",wall:"#E2ECF5",x:500,y:120,sec:"Панель владельца",
+  {id:"amo",nm:"Карим",role:"Связной amoCRM",house:"amoCRM",color:"#2E7D7A",wall:"#DFF1EF",x:375,y:120,sec:"Заявки и воронка",
+   persona:"Ты — Карим, связной amoCRM студии «DJIGIT TAU». Твоя зона: сделки и задачи в amoCRM — сделки без задач, просроченные задачи менеджеров, зависшие сделки и итоги месяца."},
+  {id:"cash",nm:"Мурат",role:"Казначей",house:"Финансы",color:"#3D6680",wall:"#E2ECF5",x:625,y:120,sec:"Панель владельца",
    persona:"Ты — Мурат, казначей студии «DJIGIT TAU». Твоя зона: доходы, расходы, выполнение плана, маржа филиалов и ближайшие платежи."},
-  {id:"keep",nm:"Лейла",role:"Хранитель учеников",house:"Ученики",color:"#4E7B36",wall:"#E5F3E6",x:840,y:120,sec:"Ученики",
+  {id:"keep",nm:"Лейла",role:"Хранитель учеников",house:"Ученики",color:"#4E7B36",wall:"#E5F3E6",x:875,y:120,sec:"Ученики",
    persona:"Ты — Лейла, хранитель учеников студии «DJIGIT TAU». Твоя зона: удержание, долги по оплате, заканчивающиеся абонементы и ученики, которые перестали ходить."},
   {id:"sched",nm:"Тимур",role:"Диспетчер",house:"Расписание",color:"#7A6A4A",wall:"#EFE7D6",x:160,y:470,sec:"Расписание",
    persona:"Ты — Тимур, диспетчер расписания студии «DJIGIT TAU». Твоя зона: занятия, посещаемость групп, наполняемость и загрузка тренеров."},
@@ -1669,6 +1747,7 @@ const cBranchOk=id=>{const v=$("branchFilter").value||"all";return v==="all"||St
 const cDaysAgo=n=>new Date(Date.now()-n*864e5).toISOString().slice(0,10);
 const cDaysAhead=n=>new Date(Date.now()+n*864e5).toISOString().slice(0,10);
 const CITY_SCAN={
+  amo(){return amoScan()},
   sales(){const f=[],L=db.leads.filter(inBranch),now=Date.now(),sla=settings.sla||15,ym=today().slice(0,7);
     const late=L.filter(x=>x.stage===STAGES[0]&&!x.firstContactAt&&now-new Date(x.createdAt||x.created).getTime()>sla*6e4);
     if(late.length)f.push({lv:"red",t:plural(late.length,"заявка ждёт","заявки ждут","заявок ждут")+" первого ответа дольше "+sla+" мин: "+cNames(late),
@@ -1758,7 +1837,7 @@ function cityHouse(a){const x=a.x,y=a.y;return `<g class="bld${citySel===a.id?" 
   <rect x="${x-11}" y="${y+8}" width="22" height="32" rx="2" fill="${a.color}" opacity=".85"/>
   <g transform="translate(${x+68},${y-58})" id="bdg-${a.id}">${cityBadge(a)}</g></g>`}
 function cityRoute(a,i){const sx=a.x+26,sy=a.y+58,end=(i%3-1)*14;
-  if(a.y<300)return a.x===500?[[sx,sy],[sx,196]]:[[sx,sy],[sx,300],[a.x<500?428:572,300+end]];
+  if(a.y<300)return [[sx,sy],[sx,300],[a.x<500?428:572,300+end]];
   const vx=a.x<500?330:670;return [[sx,sy],[sx,575],[vx,575],[vx,300],[vx<500?428:572,300+end]]}
 function citySVG(){const tree=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><rect x="-2.5" y="6" width="5" height="12" fill="#8A6A2E"/><circle r="15" fill="#6E9A55"/><circle cx="-6" cy="-5" r="8" fill="#82AE66"/></g>`;
   return `<svg class="citysvg" viewBox="0 0 1000 600" role="img" aria-label="Карта города агентов">
@@ -1766,9 +1845,9 @@ function citySVG(){const tree=(x,y,s=1)=>`<g transform="translate(${x},${y}) sca
   <path d="M0 120L70 52L130 92L220 18L300 80L380 34L450 86L540 26L620 78L700 30L780 84L860 22L940 70L1000 40V120Z" fill="#E6DECA"/>
   <path d="M220 18L240 36L226 34L212 40ZM540 26L558 42L542 40L528 46ZM860 22L878 40L862 37L848 44Z" fill="#fff" opacity=".9"/>
   <g fill="#E2D6B8"><rect x="0" y="288" width="1000" height="24"/><rect x="318" y="300" width="24" height="287"/><rect x="658" y="300" width="24" height="287"/><rect x="170" y="563" width="710" height="24" rx="12"/>
-  ${CITY.map(a=>a.y<300?`<rect x="${a.x+19}" y="160" width="14" height="${a.x===500?50:140}"/>`:`<rect x="${a.x+19}" y="510" width="14" height="60"/>`).join("")}</g>
+  ${CITY.map(a=>a.y<300?`<rect x="${a.x+19}" y="160" width="14" height="140"/>`:`<rect x="${a.x+19}" y="510" width="14" height="60"/>`).join("")}</g>
   <g stroke="#fff" stroke-width="2" stroke-dasharray="10 12" opacity=".7"><path d="M0 300H1000"/></g>
-  ${[[50,240],[275,215],[725,215],[955,240],[268,410,.9],[735,410,.9],[50,420,.85],[955,420,.85],[395,560,.7],[605,560,.7],[110,560,.8],[930,560,.8]].map(t=>tree(...t)).join("")}
+  ${[[40,240],[262,222],[750,222],[960,240],[268,410,.9],[735,410,.9],[50,420,.85],[955,420,.85],[395,560,.7],[605,560,.7],[110,560,.8],[930,560,.8]].map(t=>tree(...t)).join("")}
   <ellipse cx="500" cy="300" rx="112" ry="62" fill="#EADFC4" stroke="#D8C9A3"/>
   <g class="bld hall${citySel==="mayor"?" sel":""}" data-agent="mayor" id="bld-mayor" tabindex="0" role="button" aria-label="Штаб: Аксакал, старейшина города">
    <rect class="wall" x="440" y="252" width="120" height="66" fill="#FBF7EC" stroke="#1A1916" stroke-opacity=".2"/>
@@ -1807,7 +1886,7 @@ function cityPanel(){
   const a=CITY.find(x=>x.id===citySel),r=cityRes[a.id]||cityScan(a);
   return `<div class="chead"><span class="cav" style="background:${a.color}">${a.nm[0]}</span><div><b>${a.nm}</b><small>${a.role} · зона «${a.house}»</small></div><button class="mini" data-cgo="${a.sec}" style="margin-left:auto">${esc(lbl(a.sec))} →</button></div>
   <div class="hint">Обход: ${new Date(r.at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}</div>
-  ${r.f.map((x,i)=>cityItem(x,i,a.id)).join("")||`<div class="empty">Нечего докладывать</div>`}
+  ${a.id==="amo"?amoPanel():""}${r.f.map((x,i)=>cityItem(x,i,a.id)).join("")||`<div class="empty">Нечего докладывать</div>`}
   <h3 style="margin-top:14px">Вопрос агенту</h3>${cityAIBlock(a.id,"Пусто — 3–5 действий на сегодня. Или свой вопрос, например: «Как вернуть тех, кто пропал?»")}
   <div class="actions"><button class="btn secondary" data-cback="1">← В штаб</button></div>`}
 function cityRefresh(){const p=$("cityPanel");if(!p)return;p.innerHTML=cityPanel();
@@ -1818,7 +1897,7 @@ function cityLogHTML(){const L=settings.agentLog||[];return L.length?L.slice(0,1
 function citySetBusy(on){cityBusy=on;document.querySelectorAll('[data-act="cityrun"],[data-act="citycouncil"],#cityAsk').forEach(b=>b.disabled=on)}
 async function cityTour(){if(cityBusy)return;citySetBusy(true);
   await Promise.all(CITY.map((a,i)=>new Promise(r=>setTimeout(r,i*220)).then(async()=>{const rt=cityRoute(a,i);cityBusyMark(a,true);
-    await cityWalk(a,rt);cityScan(a);const g=$("bdg-"+a.id);if(g)g.innerHTML=cityBadge(a);await cityWalk(a,rt.slice().reverse());cityBusyMark(a,false)})));
+    await cityWalk(a,rt);if(a.id==="amo"&&amoOn()){try{await amoLoad()}catch(e){amoErr=e.message}}cityScan(a);const g=$("bdg-"+a.id);if(g)g.innerHTML=cityBadge(a);await cityWalk(a,rt.slice().reverse());cityBusyMark(a,false)})));
   const is=CITY.flatMap(cIssues),red=is.filter(x=>x.lv==="red").length;
   cityLog(MAYOR.nm,"Обход завершён: срочных "+red+", к вниманию "+(is.length-red));persist();citySetBusy(false);cityRefresh();toast("Обход города завершён")}
 function cityReport(){return CITY.map(a=>`${a.nm} (${a.role}):\n`+(cityRes[a.id]?.f||[]).map(x=>`- [${x.lv==="red"?"срочно":x.lv==="warn"?"внимание":"инфо"}] ${x.t}`).join("\n")).join("\n\n")}
@@ -1843,13 +1922,15 @@ function wireCityPanel(){const p=$("cityPanel");if(!p)return;
   p.querySelectorAll("[data-agent]").forEach(b=>b.onclick=()=>{citySel=b.dataset.agent;cityRefresh()});
   p.querySelectorAll("[data-cback]").forEach(b=>b.onclick=()=>{citySel="mayor";cityRefresh()});
   document.querySelectorAll("[data-cgo]").forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.cgo)});
-  p.querySelectorAll("[data-cact]").forEach(b=>b.onclick=()=>{const [aid,i]=b.dataset.cact.split(":"),a=CITY.find(x=>x.id===aid),it=cityRes[aid]?.f[+i];if(!it?.act)return;
+  p.querySelectorAll("[data-cact]").forEach(b=>b.onclick=async()=>{const [aid,i]=b.dataset.cact.split(":"),a=CITY.find(x=>x.id===aid),it=cityRes[aid]?.f[+i];if(!it?.act)return;
     if(it.act.go){go(it.act.go);return}
-    const msg=it.act.run();logAct(a.nm+" ("+a.role+"): "+msg);cityLog(a.nm,msg);persist();CITY.forEach(cityScan);toast(msg);render()});
+    b.disabled=true;let msg;try{msg=await it.act.run()}catch(e){msg=e.message;b.disabled=false;toast(msg);cityLog(a.nm,"Ошибка: "+msg);persist();cityRefresh();return}
+    logAct(a.nm+" ("+a.role+"): "+msg);cityLog(a.nm,msg);persist();CITY.forEach(cityScan);toast(msg);render()});
+  if(citySel==="amo")wireAmo(p);
   const f=$("cityForm"),q=$("cityQ");if(f){q.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))f.requestSubmit()};
     f.onsubmit=e=>{e.preventDefault();cityAskAI(citySel,q.value.trim())};if(cityBusy)$("cityAsk").disabled=true}}
 views["Город агентов"]=()=>{CITY.forEach(cityScan);return `
-  <div class="card citybar"><div><h3>Шесть агентов и старейшина</h3><div class="hint">Каждый агент живёт в своём здании и следит за своей зоной CRM. «Обход города» — агенты проверяют данные и приносят находки в штаб. Нажмите на здание, чтобы открыть агента.</div></div>
+  <div class="card citybar"><div><h3>Семь агентов и старейшина</h3><div class="hint">Каждый агент живёт в своём здании и следит за своей зоной CRM. «Обход города» — агенты проверяют данные и приносят находки в штаб. Нажмите на здание, чтобы открыть агента.</div></div>
   <div class="actions" style="margin:0"><button class="btn" data-act="cityrun">Обход города</button><button class="btn secondary" data-act="citycouncil">Совет у Аксакала</button></div></div>
   <div class="citywrap"><div class="card citymap">${citySVG()}<div class="clegend"><span><i style="background:#C7392F"></i>срочно</span><span><i style="background:#D99A2B"></i>к вниманию</span><span><i style="background:#3E8E4E"></i>спокойно</span></div></div>
   <div class="card cpanel" id="cityPanel">${cityPanel()}</div></div>
