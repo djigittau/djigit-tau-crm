@@ -670,7 +670,7 @@ function render(){
   after[current]?.();
 }
 function statsCard(l,v,n){return `<div class="stat"><strong class="num">${v}</strong><label>${l}</label><small>${n}</small></div>`}
-function sum(t){return db.payments.filter(inBranch).filter(x=>x.type===t).reduce((a,x)=>a+Number(x.amount||0),0)}
+function sum(t){return db.payments.filter(inBranch).filter(x=>x.type===t&&!x.noCash).reduce((a,x)=>a+Number(x.amount||0),0)}
 function bars(rows,max){return rows.map(([l,n,c])=>`<div class="barrow"><span>${esc(l)}</span><div class="bar"><i style="width:${Math.min(100,n/Math.max(1,max)*100)}%;${c?"background:"+c:""}"></i></div><b class="num">${n}</b></div>`).join("")}
 
 /* ===== Разделы ===== */
@@ -701,7 +701,7 @@ const views={
 "Таблица УО":()=>sheetsView(),
 "Абонементы":()=>tablePage("memberships",["Ученик","Абонемент","Занятия","Цена","Филиал","До"],x=>[esc(db.students.find(s=>s.id===x.student)?.name||"—"),`<b>${esc(x.title)}</b>`,`<span class="num">${x.used}/${x.total}</span>`,`<span class="num">${money(x.price)}</span>`,esc(branchName(x.branch)),esc(x.expires||"—")]),
 "Филиалы":()=>tablePage("branches",["Филиал","Адрес","Учеников","Групп"],x=>[`<b>${esc(x.name)}</b>`,esc(x.address||"—"),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
-"Финансы":()=>`<div class="stats">${statsCard("Доходы",money(sum("Доход")),"Поступления")}${statsCard("Расходы",money(sum("Расход")),"Расходные операции")}${statsCard("Баланс",money(sum("Доход")-sum("Расход")),"Доход минус расходы")}${statsCard("Операции",db.payments.filter(inBranch).length,sum("Вывод")?"Вывод дивидендов: "+money(sum("Вывод")):"Всего записей")}</div>${tablePage("payments",["Дата","Тип","Категория","Описание","Сумма","Счёт","Филиал","Тренер"],x=>[esc(x.date),status(x.type),esc(x.category||"—"),esc(x.description),`<span class="num">${money(x.amount)}</span>`,esc((x.account||"—")+(x.toAccount?" → "+x.toAccount:"")),esc(branchName(x.branch)),esc(x.teacher||"—")])}`,
+"Финансы":()=>finTabs()+(finTab==="dds"?ddsCard()+ddsDayCard():finTab==="bal"?balanceCard():`<div class="stats">${statsCard("Доходы",money(sum("Доход")),"Поступления")}${statsCard("Расходы",money(sum("Расход")),"Расходные операции")}${statsCard("Баланс",money(sum("Доход")-sum("Расход")),"Доход минус расходы")}${statsCard("Операции",db.payments.filter(inBranch).length,sum("Вывод")?"Вывод дивидендов: "+money(sum("Вывод")):"Всего записей")}</div>${tablePage("payments",["Дата","Тип","Категория","Описание","Сумма","Счёт","Филиал","Тренер"],x=>[esc(x.date),status(x.type),esc(x.category||"—"),esc(x.description),`<span class="num">${money(x.amount)}</span>`,esc((x.account||"—")+(x.toAccount?" → "+x.toAccount:"")),esc(branchName(x.branch)),esc(x.teacher||"—")])}`),
 "Посещаемость":()=>`<div class="notice">Отметить присутствие можно кнопкой «Отметить» в разделе «Ученики» или кнопкой «+ Отметка» здесь.<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="deductSw" ${settings.deduct===false?"":"checked"}> Списывать занятие с абонемента при отметке «Присутствовал» или «Опоздал». Когда занятия кончились, ученик получает статус «Нужна оплата».</label></div>${tablePage("attendance",["Дата","Ученик","Группа","Филиал","Статус"],x=>[esc(x.date),esc(db.students.find(s=>s.id===x.student)?.name||"—"),esc(x.group||"—"),esc(branchName(x.branch)),status(x.status)])}`,
 "Расписание":()=>{const ls=db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
   return `<div class="card"><h3>Занятия</h3><div class="hint">Добавляйте занятия кнопкой «+ Занятие»</div>${ls.map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher||"—")} · ${esc(x.room||"—")} <button class="mini" data-edit-any="lessons:${x.id}">Изменить</button>${isBoss()?` <button class="mini del" data-del-any="lessons:${x.id}">Удалить</button>`:""}</span></div>`).join("")||'<div class="empty">Занятий пока нет</div>'}</div>`},
@@ -843,9 +843,9 @@ const MONTHS_FULL=["январь","февраль","март","апрель","м
 function shiftMonth(ym,k){const[y,m]=ym.split("-").map(Number);const d=new Date(y,m-1+k,1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 const isInc=p=>p.type==="Доход",isExp=p=>p.type==="Расход";
 const total=(a)=>a.reduce((s,p)=>s+Number(p.amount||0),0);
-function payIn(ym,list=db.payments.filter(inBranch)){return list.filter(p=>(p.date||"").startsWith(ym))}
+function payIn(ym,list=db.payments.filter(inBranch)){return list.filter(p=>!p.noCash&&(p.date||"").startsWith(ym))}
 function marginPill(m){return `<span class="mg ${m<.1?"lo":m<.25?"mid":"hi"}">${Math.round(m*100)} %</span>`}
-function accBalance(name,i){const def=settings.accounts[0]?.name;let b=Number(settings.accounts[i].start||0);db.payments.forEach(p=>{const a=p.account||def,v=Number(p.amount||0);if(p.type==="Перевод"){if(a===name)b-=v;if(p.toAccount===name)b+=v}else if(a===name){if(isInc(p))b+=v;else if(isExp(p)||p.type==="Вывод")b-=v}});return b}
+function accBalance(name,i){const def=settings.accounts[0]?.name;let b=Number(settings.accounts[i].start||0);db.payments.forEach(p=>{if(p.noCash)return;const a=p.account||def,v=Number(p.amount||0);if(p.type==="Перевод"){if(a===name)b-=v;if(p.toAccount===name)b+=v}else if(a===name){if(isInc(p))b+=v;else if(isExp(p)||p.type==="Вывод")b-=v}});return b}
 function branchFin(b,ym){const ps=payIn(ym,db.payments.filter(p=>p.branch===b.id));const inc=total(ps.filter(isInc)),exp=total(ps.filter(isExp));
   const cats={};ps.filter(isExp).forEach(p=>{const c=EXP_CATS.includes(p.category)?p.category:"Прочее";cats[c]=(cats[c]||0)+Number(p.amount||0)});
   return {b,inc,exp,res:inc-exp,m:inc?(inc-exp)/inc:0,cats,students:db.students.filter(s=>s.branch===b.id&&s.status!=="Архив").length}}
@@ -1335,7 +1335,7 @@ const forms={
   teacher:[["name","ФИО тренера","text",1],["phone","Телефон","tel"],["branch","Филиал","branch",1],["role","Роль","text"],["payType","Модель оплаты","select:"+PAY_TYPES.join("|")],["rate","Ставка: ₸ за занятие / ₸ за посещение / % от выручки","number"],["fixed","Оклад в месяц, ₸","number"]],
   branch:[["name","Название филиала","text",1],["address","Адрес","text"]],
   membership:[["student","Ученик","student",1],["title","Название абонемента","text",1],["total","Всего занятий","number",1],["used","Использовано","number"],["price","Цена, ₸","number",1],["branch","Филиал","branch",1],["sold","Дата продажи","date"],["expires","Действует до","date"],["payNow","Оплата","select:Записать доход в Финансы|Не записывать (оплата уже внесена)"]],
-  payment:[["date","Дата","date",1],["type","Тип операции","select:Доход|Расход|Вывод",1],["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],["category","Категория","select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца|"+EXP_CATS.join("|")],["description","Описание","text",1],["amount","Сумма, ₸","number",1],["branch","Филиал","branch",1],["account","Счёт","account"],["student","Ученик (для LTV)","student"],["teacher","Тренер (для зарплаты)","teacher"],["channel","Канал рекламы (для статьи «Реклама»)","select:—|"+AD_SRC.join("|")]],
+  payment:[["date","Дата","date",1],["type","Тип операции","select:Доход|Расход|Вывод",1],["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],["category","Категория","select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца|"+EXP_CATS.join("|")],["description","Описание","text",1],["amount","Сумма, ₸","number",1],["branch","Филиал","branch",1],["account","Счёт","account"],["student","Ученик (для LTV)","student"],["teacher","Тренер (для зарплаты)","teacher"],["channel","Канал рекламы (для статьи «Реклама»)","select:—|"+AD_SRC.join("|")],["kind","Тип ученика (для доходов)","select:—|Новенький|Действующий"],["dance","Вид танца","select:—|Лезгинка|Игра на барабане"]],
   planned:[["date","Дата платежа","date",1],["title","Что оплатить","text",1],["category","Статья","select:"+EXP_CATS.join("|")],["amount","Сумма, ₸","number",1],["account","Со счёта","account"],["branch","Филиал","branch",1]],
   attendance:[["student","Ученик","student",1],["date","Дата","date",1],["group","Группа","group"],["branch","Филиал","branch",1],["status","Статус","select:Присутствовал|Отсутствовал|Опоздал|Уважительная причина",1]],
   lesson:[["date","Дата","date",1],["time","Время","time",1],["group","Группа","group",1],["teacher","Тренер","teacher"],["branch","Филиал","branch",1],["room","Зал","text"]]
@@ -1534,6 +1534,112 @@ function linkPayments(){const key=n=>String(n||"").toLowerCase().replace(/ё/g,"
   db.students.forEach(s=>{const k=key(s.name);if(k)(by[k]=by[k]||[]).push(s.id)});let n=0;
   db.payments.forEach(p=>{if(p.student||!p.client)return;const ids=by[key(p.client)];if(ids&&ids.length===1){p.student=ids[0];n++}});
   if(n)persist()}
+/* ===== ОПУ, ДДС и Баланс — по правилам таблицы «Камран_УО» =====
+   ОПУ (прибыль): по месяцу ОПУ, только статьи из справочника. Продажи → Себестоимость (ЗП тренеров) → Маржа
+   → Переменные → Валовая прибыль → Постоянные → Головной → Операционная прибыль → Налоги бизнеса (% от продаж) → Чистая.
+   Расход, который относится к колонке (филиал / категория / тренер), идёт в неё; остальное делится по доле продаж.
+   ДДС (деньги): по дате оплаты. Баланс: остатки по счетам. */
+const CAT2GRP={"Зарплата тренеров":"Себестоимость","Комиссия банка":"Переменные","ЗП персонала и бонусы":"Переменные","Аренда":"Постоянные","Реклама":"Постоянные","Костюмы и инвентарь":"Постоянные","Налоги":"Налоги","Прочее":"Головной"};
+const OPU_GROUPS=["Себестоимость","Переменные","Постоянные","Головной"];
+const opuM=p=>p.opu||(p.date||"").slice(0,7);
+function opuGrp(p){if(p.type==="Перевод")return"";if(p.grp)return p.grp;if(isInc(p))return"Продажи";if(p.type==="Вывод")return"Вывод";return CAT2GRP[p.category]||"Головной"}
+const opuArt=p=>p.art||(isInc(p)?"Продажи "+branchName(p.branch):p.category||"Прочее");
+/* Ставка налога бизнеса: заданная в «Экономике», иначе 3% до 2025 г. и 4% с 2026 г. (упрощёнка ИП) */
+const bizTax=per=>settings.taxRate!==undefined&&settings.taxRate!==""?Number(settings.taxRate):(Number(String(per).slice(0,4))<=2025?3:4);
+const OPU_DIMS={branch:"Филиалы",cat:"Категории",teacher:"Тренеры",month:"Месяцы"};
+function opuKey(p,dim){if(dim==="branch")return p.branch?String(p.branch):"";if(dim==="cat")return isInc(p)?(p.category||""):(p.pcat||"");if(dim==="teacher")return p.teacher||"";return opuM(p)}
+function opuLabel(k,dim){if(dim==="branch")return branchName(+k)||"—";if(dim==="month"){const[y,m]=k.split("-");return ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"][+m-1]+" "+y}return k||"—"}
+function opuReport(dim,per,bid=null){
+  const ps=db.payments.filter(p=>p.type!=="Перевод"&&opuM(p).startsWith(per)&&(bid==null?inBranch(p):p.branch===bid));
+  const sales=ps.filter(p=>opuGrp(p)==="Продажи"),S={},N={},O={};
+  sales.forEach(p=>{const k=opuKey(p,dim);S[k]=(S[k]||0)+Number(p.amount||0);if(p.kind==="Новенький")N[k]=(N[k]||0)+1;else if(p.kind==="Действующий")O[k]=(O[k]||0)+1});
+  let cols=Object.keys(S);cols=dim==="month"?cols.sort():cols.sort((a,b)=>S[b]-S[a]);
+  const tot=cols.reduce((a,k)=>a+S[k],0),G={},A={},U={},UA={};cols.forEach(k=>{G[k]={};A[k]={}});
+  ps.forEach(p=>{const g=opuGrp(p);if(!OPU_GROUPS.includes(g))return;const k=opuKey(p,dim),a=Number(p.amount||0),art=opuArt(p);
+    if(k in G){G[k][g]=(G[k][g]||0)+a;A[k][g+"|"+art]=(A[k][g+"|"+art]||0)+a}else{U[g]=(U[g]||0)+a;UA[g+"|"+art]=(UA[g+"|"+art]||0)+a}});
+  const col=k=>{const sh=tot?S[k]/tot:0,v=g=>(G[k][g]||0)+(U[g]||0)*sh,arts={};
+    Object.entries(A[k]).forEach(([ga,x])=>arts[ga]=(arts[ga]||0)+x);Object.entries(UA).forEach(([ga,x])=>arts[ga]=(arts[ga]||0)+x*sh);
+    const r={k,label:opuLabel(k,dim),nNew:N[k]||0,nOld:O[k]||0,sales:S[k],cogs:v("Себестоимость"),vari:v("Переменные"),fixed:v("Постоянные"),head:v("Головной"),arts};
+    r.margin=r.sales-r.cogs;r.gross=r.margin-r.vari;r.oper=r.gross-r.fixed-r.head;r.tax=r.sales*bizTax(per)/100;r.net=r.oper-r.tax;return r};
+  const rows=cols.map(col);
+  const T={k:"",label:"Итого",nNew:0,nOld:0,sales:tot,arts:{}};["cogs","vari","fixed","head","margin","gross","oper","tax","net","nNew","nOld"].forEach(f=>T[f]=rows.reduce((a,r)=>a+r[f],0));
+  if(!rows.length){["cogs","vari","fixed","head"].forEach((f,i)=>T[f]=U[OPU_GROUPS[i]]||0);T.margin=-T.cogs;T.gross=T.margin-T.vari;T.oper=T.gross-T.fixed-T.head;T.tax=0;T.net=T.oper}
+  rows.forEach(r=>Object.entries(r.arts).forEach(([ga,x])=>T.arts[ga]=(T.arts[ga]||0)+x));if(!rows.length)Object.assign(T.arts,UA);
+  const wd=total(ps.filter(p=>opuGrp(p)==="Вывод"));
+  return {dim,per,rows,T,wd}}
+let opuDim="branch",opuPer="month",opuDet=false;
+function opuCard(M){
+  const per=opuPer==="year"?M.slice(0,4):M,R=opuReport(opuDim,per),cols=opuDim==="month"||R.rows.length<=1?R.rows:[...R.rows,R.T],all=opuDim==="month"?[...R.rows,R.T]:cols;
+  const pc=(v,s)=>s?`<span class="sub"> ${Math.round(v/s*100)}%</span>`:"";
+  const L=(t,f,o={})=>`<tr${o.b?' style="font-weight:700"':""}><td style="white-space:nowrap;position:sticky;left:0;background:var(--panel,#fff)">${t}</td>${all.map(c=>`<td class="right num" style="white-space:nowrap">${o.n?f(c):money(f(c))+(o.np?"":pc(f(c),c.sales))}</td>`).join("")}</tr>`;
+  const det=g=>opuDet?Object.keys(R.T.arts).filter(ga=>ga.startsWith(g+"|")).sort().map(ga=>`<tr><td class="sub" style="padding-left:22px;position:sticky;left:0;background:var(--panel,#fff)">${esc(ga.split("|")[1])}</td>${all.map(c=>`<td class="right num sub">${money(c.arts[ga]||0)}</td>`).join("")}</tr>`).join(""):"";
+  return `<div class="card" style="margin-bottom:16px"><h3>ОПУ — прибыль за ${opuPer==="year"?esc(per)+" год":esc(opuLabel(per,"month"))}</h3>
+  <div class="hint">Как в листах «ОПУ Филиалы / категории / тренера / месяц»: по месяцу ОПУ и статьям справочника. Расходы, привязанные к колонке, идут в неё, общие делятся по доле продаж. Налог бизнеса — ${bizTax(per)}% от продаж.</div>
+  <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px"><div class="seg">${Object.entries(OPU_DIMS).map(([k,l])=>`<button data-opudim="${k}" class="${opuDim===k?"on":""}">${l}</button>`).join("")}</div>
+   <div class="seg"><button data-opuper="month" class="${opuPer==="month"?"on":""}">Месяц</button><button data-opuper="year" class="${opuPer==="year"?"on":""}">Год</button></div>
+   <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="opuDet" ${opuDet?"checked":""}> по статьям</label></div>
+  ${all.length?`<div class="tablewrap" style="overflow:auto"><table class="table"><thead><tr><th style="position:sticky;left:0;background:var(--panel,#fff)">Статья</th>${all.map(c=>`<th class="right" style="white-space:nowrap">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>
+  ${L("Новенький",c=>c.nNew,{n:1})}${L("Действующий",c=>c.nOld,{n:1})}${L("Продажи",c=>c.sales,{b:1,np:1})}
+  ${L("− Себестоимость",c=>c.cogs)}${det("Себестоимость")}${L("= Маржа / наценка",c=>c.margin,{b:1})}${L("− Переменные расходы",c=>c.vari)}${det("Переменные")}${L("= Валовая прибыль",c=>c.gross,{b:1})}
+  ${L("− Постоянные расходы",c=>c.fixed)}${det("Постоянные")}${L("− Головной (общие)",c=>c.head)}${det("Головной")}${L("= Операционная прибыль",c=>c.oper,{b:1})}
+  ${L("− Налоги бизнеса",c=>c.tax)}${L("= Чистая прибыль",c=>c.net,{b:1})}</tbody></table></div>
+  ${R.wd?`<p class="sub" style="margin-top:8px">Вывод дивидендов за период (не входит в прибыль): ${money(R.wd)}</p>`:""}`:`<div class="empty">За этот период нет продаж и расходов</div>`}</div>`}
+function wireOpu(){document.querySelectorAll("[data-opudim]").forEach(b=>b.onclick=()=>{opuDim=b.dataset.opudim;render()});
+  document.querySelectorAll("[data-opuper]").forEach(b=>b.onclick=()=>{opuPer=b.dataset.opuper;render()});
+  $("opuDet")&&($("opuDet").onchange=e=>{opuDet=e.target.checked;render()})}
+/* --- ДДС: движение денег по дате оплаты --- */
+let finTab="ops",ddsYear="",ddsMonth="";
+const cashP=p=>!p.noCash;
+function ddsData(year){
+  const ps=db.payments.filter(inBranch).filter(p=>cashP(p)&&(p.date||"")),start=settings.accounts.reduce((a,x)=>a+Number(x.start||0),0);
+  const months=[...Array(12)].map((_,i)=>year+"-"+String(i+1).padStart(2,"0"));
+  const flow=p=>isInc(p)?Number(p.amount||0):(isExp(p)||p.type==="Вывод")?-Number(p.amount||0):0;
+  let bal=start+ps.filter(p=>p.date<year&&!p.ddsOff&&p.type!=="Перевод").reduce((a,p)=>a+flow(p),0);
+  const lines={};const add=(sec,name,m,v)=>{const k=sec+"|"+name;(lines[k]=lines[k]||{})[m]=(lines[k][m]||0)+v};
+  const cols=months.map(m=>{const pm=ps.filter(p=>p.date.startsWith(m));const open=bal;let inc=0,exp=0,off=0;
+    pm.forEach(p=>{if(p.type==="Перевод")return;const a=Number(p.amount||0);
+      if(p.ddsOff){off+=flow(p);return}
+      if(isInc(p)){inc+=a;add("Доходы",opuArt(p),m,a)}else{exp+=a;add("Расходы",(opuGrp(p)||"Прочее")+(opuGrp(p)==="Вывод"?"":" · "+opuArt(p)),m,a)}});
+    bal=open+inc-exp;return {m,open,inc,exp,off,close:bal}});   // как в таблице: «вне статей» в сальдо ДДС не входят
+  return {cols,lines}}
+function ddsCard(){
+  const years=[...new Set(db.payments.map(p=>(p.date||"").slice(0,4)).filter(Boolean))].sort();if(!ddsYear||!years.includes(ddsYear))ddsYear=years[years.length-1]||String(new Date().getFullYear());
+  const D=ddsData(ddsYear),act=D.cols.filter(c=>c.inc||c.exp||c.off),mn=["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"];
+  const show=act.length?D.cols.slice(D.cols.indexOf(act[0]),D.cols.indexOf(act[act.length-1])+1):[];
+  const row=(t,f,b)=>`<tr${b?' style="font-weight:700"':""}><td style="white-space:nowrap">${t}</td>${show.map(c=>`<td class="right num">${money(f(c))}</td>`).join("")}<td class="right num">${b===2?"":money(show.reduce((a,c)=>a+f(c),0))}</td></tr>`;
+  const ln=sec=>Object.keys(D.lines).filter(k=>k.startsWith(sec+"|")).sort().map(k=>`<tr><td class="sub" style="padding-left:18px">${esc(k.split("|")[1])}</td>${show.map(c=>`<td class="right num sub">${D.lines[k][c.m]?money(D.lines[k][c.m]):""}</td>`).join("")}<td class="right num sub">${money(Object.values(D.lines[k]).reduce((a,b)=>a+b,0))}</td></tr>`).join("");
+  return `<div class="card"><h3>ДДС — движение денег</h3><div class="hint">Как лист «ДДС месяц»: по дате оплаты, сальдо всех счетов. Строка «Вне статей» — операции со статьями не из справочника (снятия и взносы наличных и т.п.): как и в таблице, в доходы, расходы и сальдо ДДС не входят.</div>
+  <div class="row" style="gap:8px;margin-bottom:10px"><div class="seg">${years.map(y=>`<button data-ddsy="${y}" class="${y===ddsYear?"on":""}">${y}</button>`).join("")}</div></div>
+  ${show.length?`<div class="tablewrap" style="overflow:auto"><table class="table"><thead><tr><th>Статья</th>${show.map(c=>`<th class="right">${mn[+c.m.slice(5)-1]}</th>`).join("")}<th class="right">Итого</th></tr></thead><tbody>
+  ${row("Сальдо на начало",c=>c.open,2)}${row("Доходы",c=>c.inc,1)}${ln("Доходы")}${row("Расходы",c=>c.exp,1)}${ln("Расходы")}${row("Доходы − расходы",c=>c.inc-c.exp,1)}${show.some(c=>c.off)?row("Вне статей",c=>c.off):""}${row("Сальдо на конец",c=>c.close,2)}
+  </tbody></table></div>`:'<div class="empty">Нет операций за этот год</div>'}</div>`}
+function ddsDayCard(){
+  const ms=[...new Set(db.payments.filter(cashP).map(p=>(p.date||"").slice(0,7)).filter(Boolean))].sort();if(!ddsMonth||!ms.includes(ddsMonth))ddsMonth=ms[ms.length-1]||"";
+  const ps=db.payments.filter(inBranch).filter(p=>cashP(p)&&(p.date||"").startsWith(ddsMonth)&&p.type!=="Перевод"&&!p.ddsOff),days={};
+  ps.forEach(p=>{const d=p.date,x=days[d]=days[d]||{inc:0,exp:0,n:0};x.n++;if(isInc(p))x.inc+=Number(p.amount||0);else x.exp+=Number(p.amount||0)});
+  return `<div class="card" style="margin-top:16px"><h3>ДДС по дням</h3><div class="hint">Как лист «ДДС день»</div><select class="field" id="ddsMonth" style="max-width:200px;margin-bottom:10px">${ms.map(m=>`<option ${m===ddsMonth?"selected":""}>${m}</option>`).join("")}</select>
+  <div class="tablewrap"><table class="table"><thead><tr><th>День</th><th class="right">Операций</th><th class="right">Доходы</th><th class="right">Расходы</th><th class="right">Итог дня</th></tr></thead><tbody>
+  ${Object.keys(days).sort().map(d=>{const x=days[d];return `<tr><td>${esc(d)}</td><td class="right num">${x.n}</td><td class="right num">${money(x.inc)}</td><td class="right num">${money(x.exp)}</td><td class="right num"><b>${money(x.inc-x.exp)}</b></td></tr>`}).join("")||'<tr><td colspan="5" class="empty">Нет операций</td></tr>'}</tbody></table></div></div>`}
+function balanceCard(){const rows=settings.accounts.map((a,i)=>[a.name,accBalance(a.name,i)]),tot=rows.reduce((s,r)=>s+r[1],0);
+  return `<div class="card"><h3>Баланс по счетам</h3><div class="hint">Как лист «БАЛАНС»: начальный остаток + доходы − расходы ± переводы по каждому счёту. Начальные остатки — в «Панели владельца».</div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Счёт</th><th class="right">Текущий баланс</th></tr></thead><tbody><tr style="font-weight:700"><td>ИТОГО</td><td class="right num">${money(tot)}</td></tr>
+  ${rows.map(([n,v])=>`<tr><td>${esc(n)}</td><td class="right num" style="${v<0?"color:var(--red)":""}">${money(v)}</td></tr>`).join("")}</tbody></table></div></div>`}
+function finTabs(){return `<div class="ptabs" style="margin-bottom:12px">${[["ops","Операции"],["dds","ДДС"],["bal","Баланс"]].map(([k,l])=>`<button data-fintab="${k}" class="${finTab===k?"on":""}">${l}</button>`).join("")}</div>`}
+function wireFin(){document.querySelectorAll("[data-fintab]").forEach(b=>b.onclick=()=>{finTab=b.dataset.fintab;render()});
+  document.querySelectorAll("[data-ddsy]").forEach(b=>b.onclick=()=>{ddsYear=b.dataset.ddsy;render()});$("ddsMonth")&&($("ddsMonth").onchange=e=>{ddsMonth=e.target.value;render()})}
+/* --- «Для руководителя»: ученики по филиалам и месяцам (новенькие / действующие) --- */
+function bossStudentsCard(){
+  const y=panelMonth.slice(0,4),ps=db.payments.filter(inBranch).filter(p=>opuGrp(p)==="Продажи"&&opuM(p).startsWith(y)),mn=["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"];
+  const months=[...new Set(ps.map(opuM))].sort(),br=[...new Set(ps.map(p=>p.branch))].filter(Boolean).sort((a,b)=>branchName(a).localeCompare(branchName(b),"ru"));
+  const cnt=(b,m,k)=>ps.filter(p=>(b==null||p.branch===b)&&opuM(p)===m&&(!k||p.kind===k)).length;
+  return `<div class="card" style="margin-top:16px"><h3>Ученики по филиалам и месяцам, ${esc(y)}</h3><div class="hint">Как лист «Для руководителя»: оплаты месяца, в скобках — новенькие. Год берётся из выбранного месяца на «Главной».</div>
+  ${months.length?`<div class="tablewrap" style="overflow:auto"><table class="table"><thead><tr><th>Филиал</th>${months.map(m=>`<th class="right">${mn[+m.slice(5)-1]}</th>`).join("")}</tr></thead><tbody>
+  ${br.map(b=>`<tr><td>${esc(branchName(b))}</td>${months.map(m=>{const n=cnt(b,m),nw=cnt(b,m,"Новенький");return `<td class="right num">${n||""}${nw?` <span class="sub">(${nw})</span>`:""}</td>`}).join("")}</tr>`).join("")}
+  <tr style="font-weight:700"><td>Итого</td>${months.map(m=>`<td class="right num">${cnt(null,m)} <span class="sub">(${cnt(null,m,"Новенький")})</span></td>`).join("")}</tr></tbody></table></div>`:'<div class="empty">Нет оплат за год</div>'}</div>`}
+/* --- «Отчёт по проекту»: финансы ученика --- */
+function studentFin(id){const ps=db.payments.filter(p=>p.student===id),inc=total(ps.filter(isInc)),exp=total(ps.filter(isExp)),s=db.students.find(x=>x.id===id);
+  const debt=s&&s.status==="Нужна оплата"?Number(db.memberships.filter(m=>m.student===id).sort((a,b)=>(b.expires||"").localeCompare(a.expires||""))[0]?.price||0):0;
+  const first=ps.filter(isInc).map(p=>p.date).sort()[0]||"";return {ps,inc,exp,debt,margin:inc-exp,first}}
 /* ===== Расчётные листы: черновик → утверждён → выплачен ===== */
 const bonusSale=()=>settings.bonusSale===undefined?2000:Number(settings.bonusSale),bonusRenew=()=>settings.bonusRenew===undefined?1000:Number(settings.bonusRenew);
 const staffPeople=()=>users.filter(u=>u.role==="Администратор"||u.role==="Отдел продаж");
@@ -1670,17 +1776,12 @@ function payroll(t,ym){
   const acc=type&&type!=="Не задано"?Math.round(v+fixed):0;
   const paid=total(db.payments.filter(p=>isExp(p)&&p.category==="Зарплата тренеров"&&p.teacher===t.name&&(p.date||"").startsWith(ym)));
   return {t,type,lessons:ls.length,visits,rev,groups,acc,paid,due:Math.max(0,acc-paid),set:!!type&&type!=="Не задано"}}
-/* P&L за месяц: bid — id филиала или null (вся сеть) */
-function pnl(bid,ym){
-  const ps=payIn(ym,db.payments.filter(p=>bid==null?inBranch(p):p.branch===bid)),exp=ps.filter(isExp);
-  const cat=c=>total(exp.filter(p=>(EXP_CATS.includes(p.category)?p.category:"Прочее")===c));
-  const rev=total(ps.filter(isInc));
-  const pr=db.teachers.filter(t=>bid==null?inBranch(t):t.branch===bid).map(t=>payroll(t,ym)),useAcc=pr.some(x=>x.set);
-  const fot=useAcc?pr.reduce((s,x)=>{const sl=slipOf(x.t.name,ym);return s+(sl?slipAccrued(sl):x.set?x.acc:x.paid)},0):cat("Зарплата тренеров");
-  const rent=cat("Аренда"),gross=rev-fot-rent,staff=cat("ЗП персонала и бонусы"),ads=cat("Реклама");
-  const other=cat("Комиссия банка")+cat("Костюмы и инвентарь")+cat("Прочее");
-  const taxFact=cat("Налоги"),tax=taxFact||Math.round(rev*taxRate()/100),net=gross-staff-ads-other-tax;
-  return {rev,fot,fotAcc:useAcc,rent,gross,staff,ads,other,tax,taxEst:!taxFact,net,m:rev?net/rev:0}}
+/* P&L за месяц для подсказок и ИИ-разбора — на основе ОПУ (bid — id филиала или null) */
+function pnl(bid,ym){const T=opuReport("branch",ym,bid).T,sumA=re=>Object.entries(T.arts).filter(([k])=>re.test(k)).reduce((a,[,v])=>a+v,0);
+  const pr=db.teachers.filter(t=>bid==null?inBranch(t):t.branch===bid).map(t=>payroll(t,ym)),useAcc=!T.cogs&&pr.some(x=>x.set);
+  const fot=useAcc?pr.reduce((s,x)=>{const sl=slipOf(x.t.name,ym);return s+(sl?slipAccrued(sl):x.set?x.acc:x.paid)},0):T.cogs;
+  const rent=sumA(/Аренда/i),ads=sumA(/Маркетинг|Реклама|Таргет|СММ/i),rev=T.sales,net=T.net-(useAcc?fot-T.cogs:0);
+  return {rev,fot,fotAcc:useAcc,rent,gross:rev-fot,staff:T.vari,ads,other:T.fixed+T.head-rent-ads,tax:T.tax,taxEst:true,net,m:rev?net/rev:0}}
 /* Маркетинг по каналам за месяц */
 function marketing(ym){
   // Канал берём из поля «Канал рекламы», а если его нет — ищем название канала в описании (для импортированных операций)
@@ -1722,13 +1823,8 @@ function econView(){
   mk.rows.forEach(r=>{if(r.romi!=null&&r.romi<0)warn.push(`${r.src}: реклама не окупается (ROMI ${Math.round(r.romi*100)}%)`)});
   const pr2=pr;if(pr2.length&&!pr2.some(x=>x.set))warn.push("У тренеров не заданы ставки — откройте «Тренеры» и укажите модель оплаты, тогда зарплата посчитается сама");
   return `${warn.length?`<div class="notice" style="margin-bottom:16px"><b>Требует внимания:</b><br>${warn.map(esc).join("<br>")}</div>`:""}
-  <div class="card" style="margin-bottom:16px"><h3>Прибыль и убытки за ${esc(M)}</h3><div class="hint">ФОТ тренеров — начислено по ставкам, если они заданы, иначе фактические выплаты. Налог — фактический или оценка по ставке упрощёнки.</div>
-  <div class="tablewrap"><table class="table"><thead><tr><th>Статья</th>${cols.map(([n])=>`<th class="right">${esc(n)}</th>`).join("")}</tr></thead><tbody>
-  ${row("Выручка",x=>x.rev,{b:1})}${row("− ФОТ тренеров",x=>x.fot,{p:1,n:x=>x.fotAcc?' <span class="sub">начисл.</span>':""})}${row("− Аренда",x=>x.rent,{p:1})}
-  ${row("= Валовая прибыль",x=>x.gross,{b:1,p:1})}${row("− ЗП персонала и бонусы",x=>x.staff,{p:1})}${row("− Реклама",x=>x.ads,{p:1})}${row("− Прочие расходы",x=>x.other,{p:1})}
-  ${row("− Налоги",x=>x.tax,{n:x=>x.taxEst?' <span class="sub">оценка</span>':""})}${row("= Чистая прибыль",x=>x.net,{b:1})}${row("Маржа",x=>0,{m:1})}
-  </tbody></table></div>
-  <div class="row" style="gap:8px;align-items:center;margin-top:10px"><label for="taxRate">Ставка налога, % от выручки (упрощёнка ИП с 2026 г. — 4%, уточните у бухгалтера)</label><input class="field" id="taxRate" type="number" step="0.1" min="0" style="width:90px" value="${taxRate()}"></div></div>
+  ${opuCard(M)}
+  <div class="row" style="gap:8px;align-items:center;margin:-6px 0 16px"><label for="taxRate" class="sub">Ставка налога бизнеса, % от продаж (пусто — как в таблице: 3% до 2025 г., 4% с 2026 г.)</label><input class="field" id="taxRate" type="number" step="0.1" min="0" style="width:90px" value="${settings.taxRate===undefined?"":settings.taxRate}"></div>
   ${slipsCard(M)}
   <div class="card" style="margin-bottom:16px"><h3>Реклама: CAC, LTV и ROMI по каналам</h3><div class="hint">Расход — операции «Реклама» с указанным каналом. Новые ученики — купившие абонемент заявки месяца или ученики, начавшие заниматься в этом месяце. LTV — средняя сумма абонементов ученика из канала за всё время. LTV/CAC выше 3 — реклама выгодна.${mk.unassigned?` <b>Без канала: ${money(mk.unassigned)}</b> — укажите канал в операциях, чтобы посчитать окупаемость.`:""}</div>
   <div class="tablewrap"><table class="table"><thead><tr><th>Канал</th><th class="right">Расход</th><th class="right">Заявок</th><th class="right">Новых учеников</th><th class="right">CAC</th><th class="right">LTV</th><th class="right">LTV/CAC</th><th class="right">ROMI</th></tr></thead><tbody>
@@ -1745,7 +1841,7 @@ function econView(){
     <div class="actions" style="margin-top:8px"><button class="btn" data-act="econai">Разобрать месяц</button></div></div></div>`}
 let econAiText="";
 function wireEcon(){
-  $("taxRate").onchange=e=>{settings.taxRate=e.target.value===""?"":Number(e.target.value);persist();render();toast("Ставка налога сохранена")};
+  $("taxRate").onchange=e=>{if(e.target.value==="")delete settings.taxRate;else settings.taxRate=Number(e.target.value);persist();render();toast("Ставка налога сохранена")};wireOpu();
   document.querySelectorAll("[data-tedit]").forEach(a=>a.onclick=e=>{e.preventDefault();editItem("teachers",Number(a.dataset.tedit))});
   wireSlips();
   document.querySelector('[data-act="econai"]').onclick=async e=>{const box=$("econAi");e.target.disabled=true;box.style.display="";box.textContent="Думаю…";
@@ -1803,6 +1899,8 @@ function openProfile(id){
   <div class="card" style="margin-top:12px"><h3>Занятия</h3>${R("Занимается с",esc(since||"—"))}${R("Срок занятий",dur(since))}${R("Посещено занятий",pres.length)}${R("Пропусков",miss.length)}${R("Последнее занятие",esc(last||"—"))}${R("Следующее занятие",nl?esc(nl.date+" · "+nl.time):"—")}${s.status==="Архив"?R("Закончил занятия",esc(last||"—")):""}</div>
   <div class="card" style="margin-top:12px"><h3>Абонемент</h3>${act?R("Остаток занятий",(act.total-act.used)+" из "+act.total)+R("Действует до",esc(act.expires||"—")):'<div class="empty">Нет активного абонемента</div>'}${ms.map(m=>R(esc(m.title)+" · "+money(m.price),m.used+"/"+m.total+" · до "+esc(m.expires||"—"))).join("")}</div>
   ${canLtv()?`<div class="card" style="margin-top:12px"><h3>LTV</h3>${R("LTV ученика",money(ltv(id)))}${R("Покупок абонементов",ms.length)}${R("Средний чек",ms.length?money(ltv(id)/ms.length):"—")}${R("В месяц, в среднем",since?money(ltv(id)/Math.max(1,Math.floor(Math.max(0,Date.now()-new Date(since))/864e5/30.4))):"—")}</div>`:""}
+  ${canLtv()?(()=>{const f=studentFin(id);return `<div class="card" style="margin-top:12px"><h3>Финансы ученика</h3><div class="hint">Как «ОТЧЕТ по проекту» в таблице</div>${R("Дата первой оплаты",esc(f.first||"—"))}${R("Оплачено факт",money(f.inc))}${R("Долг по оплате",f.debt?`<b style="color:var(--red)">${money(f.debt)}</b>`:"нет")}${R("Расходы",money(f.exp))}${R("Маржа",money(f.margin))}${R("Рентабельность",f.inc?Math.round(f.margin/f.inc*100)+"%":"—")}
+    ${f.ps.length?`<details style="margin-top:8px"><summary class="sub">Операции (${f.ps.length})</summary>${f.ps.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,40).map(p=>R(esc(p.date)+" · "+esc(p.type),money(p.amount))).join("")}</details>`:""}</div>`})():""}
   <div class="card" style="margin-top:12px"><h3>Последние посещения</h3>${att.slice(0,8).map(a=>R(esc(a.date)+" · "+esc(a.group||""),status(a.status))).join("")||'<div class="empty">Отметок пока нет</div>'}</div>
   <div class="card" style="margin-top:12px"><h3>Заметки</h3>${(s.notes||[]).map(n=>R(esc(n.t),esc(n.role)+" · "+esc(n.at))).join("")}<input class="field" id="pnote" placeholder="Новая заметка" aria-label="Новая заметка" style="margin-top:8px"><div class="modalfoot"><button class="btn" onclick="addNote(${id})">Добавить заметку</button></div></div>
   <div class="modalfoot"><button class="btn secondary" onclick="closeProfile()">Закрыть</button></div></div>`;
@@ -2046,7 +2144,7 @@ function importXls(){
     const s={id:++id,name,phone,parent,branch:B(b),group,status,since,birth:"",kind,source:"",src};if(note)s.notes=[{t:note,role:"Из таблицы",at:"причина ухода"}];db.students.push(s);sk[k]=s.id});
   XLS.memberships.forEach(([k,title,total,used,price,expires,b])=>{if(sk[k])db.memberships.push({id:++id,student:sk[k],title,total,used,price,expires,branch:B(b),src})});
   settings.accounts=XLS.accounts.map(a=>({...a}));
-  XLS.payments.forEach(([date,type,category,description,amount,b,account,teacher,client,action,to])=>db.payments.push({id:++id,date,type,action,category,description,amount,branch:B(b),account:account||XLS.accounts[0].name,teacher,client,src}));
+  XLS.payments.forEach(([date,type,category,description,amount,b,account,teacher,client,action,to,ex])=>db.payments.push({...(ex||{}),id:++id,date,type,action,category,description,amount,branch:B(b),account:account||XLS.accounts[0].name,teacher,client,src}));
   XLS.payments.forEach((p,i)=>{if(p[10])db.payments[db.payments.length-XLS.payments.length+i].toAccount=p[10]});
   if(Array.isArray(XLS.sheets))saveSheets(XLS.sheets);
   settings.xlsVersion=XLS.v;logAct("Загружены данные из таблицы студии");linkPayments();
@@ -2229,6 +2327,8 @@ function wireAI(){
 after["ИИ-помощник"]=wireAI;
 after["Экономика"]=wireEcon;
 after["Таблица УО"]=wireSheets;
+after["Финансы"]=wireFin;
+{const _an=views["Аналитика"];views["Аналитика"]=()=>_an()+bossStudentsCard()}
 after["Автоматизация"]=()=>{wireAuto();wireAgents()};
 after["Посещаемость"]=()=>{$("deductSw").onchange=e=>{settings.deduct=e.target.checked;persist();toast(e.target.checked?"Списание включено":"Списание выключено")}};
 /* ===== ИИ в карточке сделки ===== */
