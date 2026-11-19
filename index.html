@@ -775,7 +775,7 @@ function homeView(){
   const firstDay=upcoming[0]?.date;upcoming=upcoming.filter(l=>l.date===firstDay).slice(0,5);
   const stIcon=st=>st===STAGES[3]?svg("okc","color:var(--green)"):st===LOST?svg("xc","color:var(--red)"):svg("clockc","color:var(--gold)");
   const stLabel=st=>st===STAGES[3]?"Оплата (абонемент)":st===STAGES[2]?"Пробное занятие":st===STAGES[1]?"Связались":st===LOST?"Отказ":"Новая заявка";
-  return weeklyCard()+`<div class="kpis">
+  return encBanner()+weeklyCard()+`<div class="kpis">
     <div class="kpi"><span class="ic">${svg("users")}</span><div><label>Активные ученики</label><strong class="num">${stNow}</strong>${delta(stNow,stPrev)} <small>к прошлому месяцу</small></div></div>
     <div class="kpi"><span class="ic">${svg("userplus")}</span><div><label>Новые заявки</label><strong class="num">${lNow}</strong>${delta(lNow,lPrev)}</div></div>
     <div class="kpi"><span class="ic">${svg("coins")}</span><div><label>Выручка (месяц)</label><strong class="num">${money(rNow)}</strong>${delta(rNow,rPrev)}</div></div>
@@ -803,6 +803,7 @@ function homeView(){
   </div>`;
 }
 function wireHome(){
+  document.querySelector('[data-act="encload"]')?.addEventListener("click",()=>{encLater=false;showEncPrompt()});
   document.querySelector('[data-act="weekly"]')?.addEventListener("click",()=>makeWeekly(true));
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   document.querySelectorAll("[data-lead]").forEach(d=>d.onclick=()=>{if(allowed("Заявки и воронка"))editItem("leads",+d.dataset.lead)});
@@ -1980,7 +1981,9 @@ function demoSeed(){
    он вводится один раз на устройстве, нигде не сохраняется. */
 let encData=null,encLater=false;
 async function loadEnc(){if(encData!==null)return encData;try{const r=await fetch("studio-data.enc.json",{cache:"no-cache"});encData=r.ok?await r.json():false}catch(e){encData=false}return encData}
-async function checkEncData(){if(encLater||!me)return;const e=await loadEnc();if(!e||settings.xlsVersion===e.v)return;showEncPrompt()}
+function encBanner(){if(!encData||settings.xlsVersion===encData.v)return"";
+  return `<div class="notice" style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:220px"><b>Таблица студии ещё не загружена на это устройство.</b> Ученики, оплаты, группы и операции из таблицы «Камран_УО» ждут загрузки — нужен пароль данных.</span><button class="btn" data-act="encload">Загрузить данные студии</button></div>`}
+async function checkEncData(){if(!me)return;const e=await loadEnc();if(!e||settings.xlsVersion===e.v)return;if(current==="Главная")render();if(!encLater)showEncPrompt()}
 async function decryptEnc(e,pass){const u=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0)),S=crypto.subtle;
   const base=await S.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
   const key=await S.deriveKey({name:"PBKDF2",salt:u(e.salt),iterations:e.iter,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
@@ -1992,7 +1995,7 @@ async function showEncPrompt(){const e=await loadEnc();if(!e){toast("Файл д
     <input class="field" id="encPass" type="password" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="Пароль данных"><div class="sub" id="encErr" style="color:var(--red);min-height:18px;margin-top:6px"></div>
     <div class="modalfoot"><button type="button" class="btn secondary" id="encLater">Позже</button><button class="btn" id="encGo">Загрузить</button></div></form>`;
   document.body.append(d);$("encPass").focus();
-  $("encLater").onclick=()=>{encLater=true;d.remove()};
+  $("encLater").onclick=()=>{encLater=true;d.remove();if(current==="Главная")render()};
   d.querySelector("form").onsubmit=async ev=>{ev.preventDefault();const p=$("encPass").value.trim().toUpperCase();if(!p)return;$("encGo").disabled=true;$("encGo").textContent="Расшифровка…";$("encErr").textContent="";
     let data;try{data=await decryptEnc(e,p)}catch(_){$("encErr").textContent="Неверный пароль";$("encGo").disabled=false;$("encGo").textContent="Загрузить";return}
     XLS=data;importXls();persist();d.remove();init();toast("Данные студии загружены: "+data.students.length+" учеников, "+data.payments.length+" операций")}}
