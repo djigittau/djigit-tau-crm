@@ -6,7 +6,8 @@
 //   POST {"test":true}   — проверочное сообщение
 //
 // Секреты (Supabase → Edge Functions → Secrets):
-//   AGENTS_KEY       — любой длинный пароль, его же вставляют в CRM
+//   AGENTS_KEY       — пароль агентов, его же вставляют в CRM. Если не задан, берётся из Supabase Vault
+//                      (секрет agents_key, через SQL-функцию public.agents_key(), доступную только service_role)
 //   WA_TOKEN         — постоянный токен системного пользователя Meta (whatsapp_business_messaging)
 //   WA_PHONE_ID      — Phone number ID отправителя из WhatsApp Manager
 //   WA_TO            — получатели через запятую, только цифры: 77010000000,77020000000
@@ -138,10 +139,26 @@ async function amoReport(): Promise<string | null> {
     `Месяц: успешных сделок ${won.length} на ${sum.toLocaleString("ru-RU")} ₸, открыто ${open.length}`].join("\n");
 }
 
+let cachedKey = "";
+async function agentsKey(): Promise<string> {
+  if (env("AGENTS_KEY")) return env("AGENTS_KEY");
+  if (cachedKey) return cachedKey;
+  const url = env("SUPABASE_URL"), srk = env("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !srk) return "";
+  const r = await fetch(`${url}/rest/v1/rpc/agents_key`, {
+    method: "POST",
+    headers: { "apikey": srk, "Authorization": `Bearer ${srk}`, "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (!r.ok) return "";
+  cachedKey = String(await r.json() ?? "");
+  return cachedKey;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
-  const key = env("AGENTS_KEY");
+  const key = await agentsKey();
   if (!key || req.headers.get("x-agents-key") !== key) return json(401, { error: "bad agents key" });
 
   const body = await req.json().catch(() => ({})) as { text?: unknown; test?: unknown };

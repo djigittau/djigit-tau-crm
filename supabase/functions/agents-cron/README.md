@@ -30,7 +30,7 @@ Supabase → Edge Functions → Secrets (или `supabase secrets set ...`):
 
 | Секрет | Значение |
 |---|---|
-| `AGENTS_KEY` | длинный случайный пароль, его же вставить в CRM |
+| `AGENTS_KEY` | необязательно: по умолчанию ключ берётся из Vault (`agents_key`) |
 | `WA_TOKEN` | бессрочный токен системного пользователя |
 | `WA_PHONE_ID` | Phone number ID |
 | `WA_TO` | номера получателей через запятую: `77010000000, 77020000000` |
@@ -51,38 +51,33 @@ supabase functions deploy amocrm-proxy --no-verify-jwt
 
 Функции не требуют входа в Supabase: `agents-cron` защищена ключом `AGENTS_KEY`, а `amocrm-proxy` пересылает запросы только в API amoCRM с токеном, который передал браузер.
 
-## 4. Расписание
+## 4. Расписание и ключ (уже сделано в проекте djigit-tau-crm)
 
-Supabase → SQL Editor. Замените `<project-ref>` и ключ на свои:
+- Расширения `pg_cron` и `pg_net` включены.
+- В Vault создан случайный ключ `agents_key`. Функция читает его через `public.agents_key()`, которая доступна только `service_role`.
+- Задание `agents-amo-report` вызывает функцию в 9:00, 13:00 и 18:00 по Алматы (`0 4,8,13 * * *` UTC).
+
+Для другого проекта повторите так:
 
 ```sql
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
-
-select vault.create_secret('ВАШ_AGENTS_KEY', 'agents_key');
-
--- 9:00, 13:00 и 18:00 по Алматы (UTC+5)
+select vault.create_secret(encode(extensions.gen_random_bytes(24), 'hex'), 'agents_key');
+create or replace function public.agents_key() returns text language sql security definer set search_path = '' as $$
+  select decrypted_secret from vault.decrypted_secrets where name = 'agents_key' $$;
+revoke all on function public.agents_key() from public, anon, authenticated;
+grant execute on function public.agents_key() to service_role;
 select cron.schedule('agents-amo-report', '0 4,8,13 * * *', $$
   select net.http_post(
     url := 'https://<project-ref>.supabase.co/functions/v1/agents-cron',
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'x-agents-key', (select decrypted_secret from vault.decrypted_secrets where name = 'agents_key')
-    ),
-    body := '{}'::jsonb,
-    timeout_milliseconds := 30000
-  );
+    headers := jsonb_build_object('Content-Type', 'application/json',
+      'x-agents-key', (select decrypted_secret from vault.decrypted_secrets where name = 'agents_key')),
+    body := '{}'::jsonb, timeout_milliseconds := 30000);
 $$);
 ```
 
-Изменить расписание: `select cron.unschedule('agents-amo-report');` и создать заново.
-Проверить вручную:
-
-```bash
-curl -X POST https://<project-ref>.supabase.co/functions/v1/agents-cron \
-  -H "x-agents-key: ВАШ_AGENTS_KEY" -H "Content-Type: application/json" -d '{"test":true}'
-```
+Ответы функции видны в `select * from net._http_response order by id desc limit 5;`.
 
 ## 5. В CRM
 
-«Город агентов» → «Автоматика и WhatsApp»: вставьте адрес функции `https://<project-ref>.supabase.co/functions/v1/agents-cron` и ключ `AGENTS_KEY`. Нажмите «Проверить связь».
+«Город агентов» → «Автоматика и WhatsApp»: адрес функции уже подставлен; вставьте ключ из Supabase → Project Settings → Vault → `agents_key`. Нажмите «Проверить связь».

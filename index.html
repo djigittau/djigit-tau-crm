@@ -1652,7 +1652,7 @@ after["ИИ-помощник"]=wireAI;
 /* ===== amoCRM: агент Карим читает сделки и задачи и ставит задачи прямо в amoCRM.
    amoCRM не пускает запросы из браузера (CORS), поэтому запросы идут через посредника — функцию supabase/functions/amocrm-proxy.
    Токен, адрес и кэш хранятся только в этом браузере, отдельно от резервной копии CRM. */
-const AMO_KEY="djigit_crm_amo",AMO_DKEY="djigit_crm_amo_data";
+const AMO_KEY="djigit_crm_amo",AMO_DKEY="djigit_crm_amo_data",SB_FN="https://qfrspiobhvugslvcvjdn.supabase.co/functions/v1/";
 const amoCfg=()=>{try{return JSON.parse(localStorage.getItem(AMO_KEY)||"{}")}catch(e){return{}}};
 const amoOn=()=>{const c=amoCfg();return !!(c.proxy&&c.domain&&c.token)};
 let amoData=(()=>{try{return JSON.parse(localStorage.getItem(AMO_DKEY)||"null")}catch(e){return null}})(),amoErr="";
@@ -1704,9 +1704,9 @@ function amoScan(){const f=[];
   return f}
 function amoPanel(){const c=amoCfg();return `<details class="amobox"${amoOn()?"":" open"}><summary>Подключение amoCRM${amoOn()?" · "+esc(c.domain):""}</summary>
   <div class="hint">1) Долгосрочный токен: amoCRM → Настройки → Интеграции → «Создать интеграцию» (внешняя) → вкладка «Ключи и доступы» → «Долгосрочный токен».<br>
-  2) Посредник: функция <b>amocrm-proxy</b> из репозитория (папка supabase/functions), развернутая в Supabase. amoCRM не принимает запросы прямо из браузера.<br>
+  2) Посредник <b>amocrm-proxy</b> уже развёрнут в Supabase, адрес подставлен. amoCRM не принимает запросы прямо из браузера.<br>
   Токен хранится только в этом браузере и не попадает в резервные копии.</div>
-  <div class="formfield"><label for="amoProxy">Адрес посредника</label><input class="field" id="amoProxy" placeholder="https://xxxx.supabase.co/functions/v1/amocrm-proxy" value="${esc(c.proxy||"")}"></div>
+  <div class="formfield"><label for="amoProxy">Адрес посредника</label><input class="field" id="amoProxy" value="${esc(c.proxy||SB_FN+"amocrm-proxy")}"></div>
   <div class="formfield"><label for="amoDom">Адрес amoCRM</label><input class="field" id="amoDom" placeholder="studio.amocrm.ru" value="${esc(c.domain||"")}"></div>
   <div class="formfield"><label for="amoTok">Долгосрочный токен</label><input class="field" id="amoTok" type="password" autocomplete="off" value="${esc(c.token||"")}"></div>
   <div class="actions"><button class="btn" data-amo="save">Сохранить и загрузить</button>${amoOn()?`<button class="btn secondary" data-amo="off">Отключить</button>`:""}</div></details>
@@ -1971,8 +1971,8 @@ function cityAutoCard(){const c=waCfg();return `<div class="card" style="margin-
   <div class="hint">Последний автообход: ${cityAutoAt||"ещё не было"}</div>
   <details class="amobox"${waOn()?"":" open"}><summary>WhatsApp${waOn()?" · подключён":""}</summary>
   <div class="hint">Сообщения отправляет функция <b>agents-cron</b> в Supabase через официальный WhatsApp Cloud API. Она же по расписанию проверяет amoCRM и присылает отчёт, даже когда CRM закрыта. Настройка описана в supabase/functions/agents-cron/README.md.</div>
-  <div class="formfield"><label for="waUrl">Адрес функции</label><input class="field" id="waUrl" placeholder="https://xxxx.supabase.co/functions/v1/agents-cron" value="${esc(c.url||"")}"></div>
-  <div class="formfield"><label for="waKey">Ключ агентов (AGENTS_KEY)</label><input class="field" id="waKey" type="password" autocomplete="off" value="${esc(c.key||"")}"></div>
+  <div class="formfield"><label for="waUrl">Адрес функции</label><input class="field" id="waUrl" value="${esc(c.url||SB_FN+"agents-cron")}"></div>
+  <div class="formfield"><label for="waKey">Ключ агентов (Supabase → Project Settings → Vault → agents_key)</label><input class="field" id="waKey" type="password" autocomplete="off" value="${esc(c.key||"")}"></div>
   <label class="cchk"><input type="checkbox" id="caDaily" ${settings.waDaily?"checked":""}><span>Утренняя сводка в WhatsApp: при первом обходе за день, после 8:00</span></label>
   <div class="actions"><button class="btn" data-wa="save">Сохранить</button>${waOn()?`<button class="btn secondary" data-wa="test">Проверить связь</button><button class="btn secondary" data-wa="send">Отправить сводку сейчас</button><button class="btn secondary" data-wa="off">Отключить</button>`:""}</div></details></div>`}
 function wireCityAuto(){const box=$("cityAuto");if(!box)return;const q=s=>box.querySelector(`[data-wa="${s}"]`);
