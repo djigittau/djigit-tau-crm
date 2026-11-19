@@ -124,6 +124,12 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .toolbar{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
 .toolbar input{max-width:360px;flex:1}
 .field{width:100%;padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);font-size:14px;outline:none}
+.aichat{display:flex;flex-direction:column;gap:10px;max-height:58vh;overflow:auto;padding:4px 2px 8px}
+.aimsg{padding:10px 13px;border-radius:var(--r);font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word;max-width:85%}
+.aimsg.u{align-self:flex-end;background:var(--pale);border:1px solid var(--line)}
+.aimsg.a{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+.aimsg.err{border-color:var(--red);background:var(--red-bg)}
+.aiform{display:flex;gap:8px;margin-top:10px}.aiform textarea{flex:1;resize:vertical;min-height:44px}
 .field:focus{border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(199,155,53,.18)}
 .empty{padding:22px;text-align:center;color:var(--muted)}
 .notice{background:#FFF6DC;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;color:#5C4B2A;margin-bottom:14px}
@@ -436,7 +442,7 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Группы","Расписание","Посещаемость","Абонементы","Финансы","Аналитика","Автоматизация","Панель владельца","Филиалы","Тренеры","Команда","Журнал","Настройки"]]];
+const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Группы","Расписание","Посещаемость","Абонементы","Финансы","Аналитика","ИИ-помощник","Автоматизация","Панель владельца","Филиалы","Тренеры","Команда","Журнал","Настройки"]]];
 const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
@@ -463,7 +469,7 @@ const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="
   xc:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
   robot:'<rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/><circle cx="12" cy="3.5" r="1"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/>'};
-const icons={"Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot"};
+const icons={"Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
 const ico=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[icons[n]]||P.grid}</svg>`;
 const svg=(k,st="")=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${st?`style="${st}"`:""}>${P[k]}</svg>`;
 /* Какие разделы видит каждая роль. null = всё. */
@@ -536,7 +542,7 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные"};
+const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Бесплатные модели GitHub Models: вопросы по данным студии"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
@@ -1557,6 +1563,68 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;
   if($("modalbg").style.display==="grid"){closeModal();return}
   $("gres").classList.remove("on");$("mePop").classList.remove("on");$("bellPop").classList.remove("on");
   closeSide()});
+/* ===== ИИ-помощник: GitHub Models (бесплатный LLM API по токену GitHub) =====
+   Токен хранится только в этом браузере (отдельный ключ), не попадает в резервные копии и Excel. */
+const AI_URL="https://models.github.ai/inference/chat/completions",AI_TKEY="djigit_crm_gh_token",AI_MKEY="djigit_crm_ai_model";
+const AI_MODELS=[["openai/gpt-4.1-mini","GPT-4.1 mini (быстрая)"],["openai/gpt-4.1","GPT-4.1"],["openai/gpt-4o-mini","GPT-4o mini"],["meta/Llama-4-Scout-17B-16E-Instruct","Llama 4 Scout"],["deepseek/DeepSeek-V3-0324","DeepSeek V3"],["mistral-ai/mistral-small-2503","Mistral Small"]];
+const aiGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}};
+const aiSet=(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}};
+let aiChat=[],aiBusy=false;
+function aiContext(){
+  const L=db.leads.filter(inBranch),S=db.students.filter(inBranch),Pm=db.payments.filter(inBranch),ym=new Date().toISOString().slice(0,7);
+  const cnt=(a,f)=>a.reduce((m,x)=>{const k=f(x)||"—";m[k]=(m[k]||0)+1;return m},{});
+  const mon={};Pm.forEach(p=>{const k=(p.date||"").slice(0,7);if(!k)return;mon[k]=mon[k]||{доход:0,расход:0};mon[k][p.type==="Доход"?"доход":"расход"]+=Number(p.amount||0)});
+  const exp={};Pm.filter(p=>p.type!=="Доход"&&(p.date||"").startsWith(ym)).forEach(p=>{const k=p.cat||p.category||"Прочее";exp[k]=(exp[k]||0)+Number(p.amount||0)});
+  const months=Object.keys(mon).sort().slice(-6),lines=[
+    "Сегодня: "+today()+". Филиал в фильтре: "+($("branchFilter").selectedOptions[0]?.textContent||"все"),
+    "Филиалы: "+db.branches.map(b=>b.name).join(", "),
+    "Ученики: "+S.length+"; по статусам "+JSON.stringify(cnt(S,x=>x.status))+"; по филиалам "+JSON.stringify(cnt(S,x=>branchName(x.branch))),
+    "Заявки: "+L.length+"; по этапам "+JSON.stringify(cnt(L,x=>x.stage))+"; по источникам "+JSON.stringify(cnt(L,x=>x.source))+"; причины отказов "+JSON.stringify(cnt(L.filter(x=>x.stage===LOST),x=>x.reason)),
+    "Деньги по месяцам (₸): "+JSON.stringify(Object.fromEntries(months.map(k=>[k,mon[k]]))),
+    "Расходы текущего месяца по статьям (₸): "+JSON.stringify(exp),
+    "Группы: "+db.groups.length+", тренеры: "+db.teachers.length+", абонементы: "+db.memberships.filter(inBranch).length+", задачи: "+db.tasks.length,
+    "Ученики, которым нужна оплата: "+S.filter(x=>x.status==="Нужна оплата").slice(0,40).map(x=>x.name).join(", "),
+    "Новые заявки без обработки: "+L.filter(x=>x.stage===STAGES[0]).slice(0,40).map(x=>x.name+" ("+(x.source||"—")+")").join(", ")];
+  return lines.join("\n");
+}
+function aiMsgs(){return aiChat.map(m=>`<div class="aimsg ${m.role==="user"?"u":"a"}${m.err?" err":""}">${esc(m.content)}</div>`).join("")||`<div class="hint">Спросите, например: «Какой источник заявок самый эффективный?», «Почему растут отказы?», «Напиши сообщение ученикам с долгом по оплате».</div>`}
+views["ИИ-помощник"]=()=>{const tok=aiGet(AI_TKEY),mdl=aiGet(AI_MKEY)||AI_MODELS[0][0];return `
+  <div class="card" style="margin-bottom:16px"><h3>Подключение GitHub Models</h3>
+  <div class="hint">Бесплатный LLM API от GitHub. Создайте токен: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token с правом <b>Models: Read-only</b> (github.com/settings/personal-access-tokens/new). Токен хранится только в этом браузере и не попадает в резервные копии. Бесплатный лимит — около 50–150 запросов в день в зависимости от модели.</div>
+  <div class="formfield"><label for="aiTok">Токен GitHub</label><input class="field" id="aiTok" type="password" autocomplete="off" placeholder="github_pat_…" value="${esc(tok)}"></div>
+  <div class="formfield"><label for="aiModel">Модель</label><select class="field" id="aiModel">${AI_MODELS.map(([v,t])=>`<option value="${v}" ${v===mdl?"selected":""}>${t}</option>`).join("")}</select></div>
+  <div class="actions"><button class="btn" data-act="aisave">Сохранить</button><button class="btn secondary" data-act="aitest">Проверить связь</button>${tok?`<button class="btn secondary" data-act="aidel">Удалить токен</button>`:""}</div></div>
+  <div class="card"><h3>Чат</h3><div class="hint">К вопросу прикладывается сводка CRM: количества, этапы, источники, финансы по месяцам и имена (без телефонов).</div>
+  <div class="aichat" id="aiLog">${aiMsgs()}</div>
+  <form class="aiform" id="aiForm"><textarea class="field" id="aiQ" placeholder="Ваш вопрос… (Ctrl+Enter — отправить)"></textarea><button class="btn" type="submit" id="aiSend">Отправить</button></form>
+  <div class="actions" style="margin-top:8px"><button class="btn secondary" data-act="aiclear">Очистить чат</button></div></div>`};
+async function aiCall(messages,max=900){
+  const tok=aiGet(AI_TKEY);if(!tok)throw new Error("Сначала вставьте токен GitHub и нажмите «Сохранить».");
+  let r;try{r=await fetch(AI_URL,{method:"POST",headers:{"Authorization":"Bearer "+tok,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"},body:JSON.stringify({model:aiGet(AI_MKEY)||AI_MODELS[0][0],messages,max_tokens:max,temperature:.4})})}
+  catch(e){throw new Error("Нет связи с models.github.ai (сеть или блокировка браузером).")}
+  const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(_){}
+  if(!r.ok){const m=j?.error?.message||j?.message||t.slice(0,200);throw new Error(r.status===401?"Токен недействителен или без права Models: Read.":r.status===429?"Исчерпан бесплатный лимит запросов. Попробуйте позже или другую модель.":"Ошибка "+r.status+": "+m)}
+  return j?.choices?.[0]?.message?.content||"(пустой ответ)";
+}
+function wireAI(){
+  const log=$("aiLog"),q=$("aiQ"),draw=()=>{log.innerHTML=aiMsgs();log.scrollTop=log.scrollHeight};draw();
+  const save=()=>{aiSet(AI_TKEY,$("aiTok").value.trim());aiSet(AI_MKEY,$("aiModel").value)};
+  document.querySelector('[data-act="aisave"]').onclick=()=>{save();toast("Подключение сохранено");render()};
+  $("aiModel").onchange=()=>aiSet(AI_MKEY,$("aiModel").value);
+  document.querySelector('[data-act="aidel"]')?.addEventListener("click",()=>{aiSet(AI_TKEY,"");toast("Токен удалён");render()});
+  document.querySelector('[data-act="aiclear"]').onclick=()=>{aiChat=[];draw()};
+  document.querySelector('[data-act="aitest"]').onclick=async e=>{save();e.target.disabled=true;
+    try{await aiCall([{role:"user",content:"Ответь одним словом: ок"}],5);toast("Связь есть: модель отвечает")}catch(err){toast(err.message)}e.target.disabled=false};
+  q.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))$("aiForm").requestSubmit()};
+  $("aiForm").onsubmit=async e=>{e.preventDefault();const text=q.value.trim();if(!text||aiBusy)return;
+    aiBusy=true;$("aiSend").disabled=true;q.value="";aiChat.push({role:"user",content:text});aiChat.push({role:"assistant",content:"Думаю…"});draw();
+    const hist=aiChat.slice(0,-1).filter(m=>!m.err).slice(-12).map(({role,content})=>({role,content}));
+    const sys={role:"system",content:"Ты — ИИ-помощник CRM студии кавказских танцев «DJIGIT TAU» (Казахстан, валюта ₸). Отвечай по-русски, кратко и по делу, с конкретными цифрами и рекомендациями. Опирайся на сводку данных; если данных не хватает — так и скажи, ничего не выдумывай.\n\nСводка CRM:\n"+aiContext()};
+    const slot=aiChat[aiChat.length-1];
+    try{slot.content=await aiCall([sys,...hist])}catch(err){slot.content=err.message;slot.err=true}
+    aiBusy=false;if($("aiLog")){draw();$("aiSend").disabled=false;$("aiQ").focus()}};
+}
+after["ИИ-помощник"]=wireAI;
 (async function boot(){
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
