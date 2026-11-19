@@ -443,7 +443,7 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Группы","Расписание","Посещаемость","Абонементы","Финансы","Аналитика","ИИ-помощник","Автоматизация","Панель владельца","Филиалы","Тренеры","Команда","Журнал","Настройки"]]];
+const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Группы","Расписание","Посещаемость","Абонементы","Финансы","Аналитика","Экономика","ИИ-помощник","Автоматизация","Панель владельца","Филиалы","Тренеры","Команда","Журнал","Настройки"]]];
 const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
@@ -470,7 +470,7 @@ const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="
   xc:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
   robot:'<rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/><circle cx="12" cy="3.5" r="1"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/>'};
-const icons={"Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
+const icons={"Экономика":"chart","Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
 const ico=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[icons[n]]||P.grid}</svg>`;
 const svg=(k,st="")=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${st?`style="${st}"`:""}>${P[k]}</svg>`;
 /* Какие разделы видит каждая роль. null = всё. */
@@ -486,6 +486,8 @@ const STAGE_BG=["var(--s1)","var(--s2)","var(--s3)","var(--s4)"];
 const COLS=["branches","students","leads","renewals","tasks","groups","teachers","memberships","attendance","payments","lessons","planned","log"];
 const ACC_COLORS=["#D2A744","#3D6680","#4E7B36","#8E2A35","#7A6A4A"];
 const EXP_CATS=["Зарплата тренеров","Аренда","Реклама","Налоги","ЗП персонала и бонусы","Комиссия банка","Костюмы и инвентарь","Прочее"];
+const PAY_TYPES=["Не задано","За занятие","За ученика (каждое посещение)","% от выручки групп","Только оклад"];
+const AD_SRC=["Instagram","TikTok","WhatsApp","Звонок","2ГИС","Сарафан","Вывеска"];
 const DEFAULT_SETTINGS={robots:{},templates:{},payLink:"",sla:15,plan:0,accounts:[{name:"Kaspi",start:0},{name:"Halyk",start:0},{name:"Наличные",start:0}],lastImport:"",xlsVersion:""};
 let settings=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 let panelMonth=new Date().toISOString().slice(0,7),panelCompare=[];
@@ -543,12 +545,12 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
+const subs={"Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
   $("xlsBtn").style.display=SECTION_SHEET[current]?"":"none";
-  $("monthWrap").style.display=["Главная","Панель владельца"].includes(current)?"":"none";
+  $("monthWrap").style.display=["Главная","Панель владельца","Экономика"].includes(current)?"":"none";
   $("monthSel").innerHTML=[...new Set([...[...Array(12)].map((_,i)=>shiftMonth(new Date().toISOString().slice(0,7),-i)),...db.payments.map(p=>(p.date||"").slice(0,7)).filter(x=>/^\d{4}-\d{2}$/.test(x)),panelMonth])].sort().reverse().map(ym=>{const[a,b]=ym.split("-").map(Number);return `<option value="${ym}" ${ym===panelMonth?"selected":""}>${MONTHS_FULL[b-1][0].toUpperCase()+MONTHS_FULL[b-1].slice(1)} ${a}</option>`}).join("");
   const nl=db.leads.filter(inBranch).filter(l=>l.stage===STAGES[0]).length;if($("leadCnt")){$("leadCnt").textContent=nl;$("leadCnt").hidden=!nl}
   const tl=myTasks().filter(isLateT).length;if($("taskCnt")){$("taskCnt").textContent=tl;$("taskCnt").hidden=!tl}
@@ -588,7 +590,8 @@ const views={
 "Ученики":()=>tablePage("students",["Ученик","Тип","Телефон","Филиал","Группа","Статус","LTV"],x=>[`<b>${esc(x.name)}</b>`,esc(x.kind||"—"),esc(x.phone),esc(branchName(x.branch)),esc(x.group||"—"),status(x.status),canLtv()?`<span class="num">${money(ltv(x.id))}</span>`:"—"]),
 "Заявки и воронка":()=>pipelineView(),
 "Группы":()=>tablePage("groups",["Название","Вид танца","Филиал","Возраст","Тренер","Дни","Время"],x=>[`<b>${esc(x.name)}</b>`,esc(x.dance||"—"),esc(branchName(x.branch)),esc(x.age),esc(x.teacher),esc(x.days),esc(x.time)]),
-"Тренеры":()=>tablePage("teachers",["Тренер","Телефон","Филиал","Роль"],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone||"—"),esc(branchName(x.branch)),esc(x.role)]),
+"Тренеры":()=>tablePage("teachers",["Тренер","Телефон","Филиал","Роль","Оплата"],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone||"—"),esc(branchName(x.branch)),esc(x.role),x.payType&&x.payType!=="Не задано"?payLabel(x):"—"]),
+"Экономика":()=>econView(),
 "Абонементы":()=>tablePage("memberships",["Ученик","Абонемент","Занятия","Цена","Филиал","До"],x=>[esc(db.students.find(s=>s.id===x.student)?.name||"—"),`<b>${esc(x.title)}</b>`,`<span class="num">${x.used}/${x.total}</span>`,`<span class="num">${money(x.price)}</span>`,esc(branchName(x.branch)),esc(x.expires||"—")]),
 "Филиалы":()=>tablePage("branches",["Филиал","Адрес","Учеников","Групп"],x=>[`<b>${esc(x.name)}</b>`,esc(x.address||"—"),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
 "Финансы":()=>`<div class="stats">${statsCard("Доходы",money(sum("Доход")),"Поступления")}${statsCard("Расходы",money(sum("Расход")),"Расходные операции")}${statsCard("Баланс",money(sum("Доход")-sum("Расход")),"Доход минус расходы")}${statsCard("Операции",db.payments.filter(inBranch).length,sum("Вывод")?"Вывод дивидендов: "+money(sum("Вывод")):"Всего записей")}</div>${tablePage("payments",["Дата","Тип","Категория","Описание","Сумма","Счёт","Филиал","Тренер"],x=>[esc(x.date),status(x.type),esc(x.category||"—"),esc(x.description),`<span class="num">${money(x.amount)}</span>`,esc((x.account||"—")+(x.toAccount?" → "+x.toAccount:"")),esc(branchName(x.branch)),esc(x.teacher||"—")])}`,
@@ -1114,10 +1117,10 @@ const forms={
   student:[["name","ФИО ученика","text",1],["phone","Телефон","tel",1],["branch","Филиал","branch",1],["group","Группа","group"],["kind","Тип","select:Новенький|Действующий"],["since","Занимается с","date"],["birth","Дата рождения","date"],["parent","Родитель","text"],["status","Статус","select:Активен|Пробное|Нужна оплата|Пауза|Архив"],["source","Откуда пришёл","select:—|Instagram|TikTok|WhatsApp|Звонок|2ГИС|Сарафан|Вывеска"]],
   lead:[["name","Имя клиента","text",1],["phone","Телефон","tel",1],["branch","Филиал","branch",1],["stage","Этап","select:"+STAGES.join("|")],["price","Бюджет, ₸","number"],["source","Источник заявки","select:Instagram|TikTok|WhatsApp|Звонок|2ГИС|Сарафан|Вывеска"],["age","Возраст ребёнка","text"],["manager","Ответственный","text"]],
   group:[["name","Название группы","text",1],["branch","Филиал","branch",1],["age","Возраст","text"],["teacher","Тренер","teacher"],["dance","Вид танца","select:Лезгинка|Игра на барабане|Индивидуальные"],["days","Дни занятий","text"],["time","Время","time"]],
-  teacher:[["name","ФИО тренера","text",1],["phone","Телефон","tel"],["branch","Филиал","branch",1],["role","Роль","text"]],
+  teacher:[["name","ФИО тренера","text",1],["phone","Телефон","tel"],["branch","Филиал","branch",1],["role","Роль","text"],["payType","Модель оплаты","select:"+PAY_TYPES.join("|")],["rate","Ставка: ₸ за занятие / ₸ за посещение / % от выручки","number"],["fixed","Оклад в месяц, ₸","number"]],
   branch:[["name","Название филиала","text",1],["address","Адрес","text"]],
   membership:[["student","Ученик","student",1],["title","Название абонемента","text",1],["total","Всего занятий","number",1],["used","Использовано","number"],["price","Цена, ₸","number",1],["branch","Филиал","branch",1],["expires","Действует до","date"]],
-  payment:[["date","Дата","date",1],["type","Тип операции","select:Доход|Расход|Вывод",1],["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],["category","Категория","select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца|"+EXP_CATS.join("|")],["description","Описание","text",1],["amount","Сумма, ₸","number",1],["branch","Филиал","branch",1],["account","Счёт","account"]],
+  payment:[["date","Дата","date",1],["type","Тип операции","select:Доход|Расход|Вывод",1],["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],["category","Категория","select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца|"+EXP_CATS.join("|")],["description","Описание","text",1],["amount","Сумма, ₸","number",1],["branch","Филиал","branch",1],["account","Счёт","account"],["teacher","Тренер (для зарплаты)","teacher"],["channel","Канал рекламы (для статьи «Реклама»)","select:—|"+AD_SRC.join("|")]],
   planned:[["date","Дата платежа","date",1],["title","Что оплатить","text",1],["category","Статья","select:"+EXP_CATS.join("|")],["amount","Сумма, ₸","number",1],["account","Со счёта","account"],["branch","Филиал","branch",1]],
   attendance:[["student","Ученик","student",1],["date","Дата","date",1],["group","Группа","group"],["branch","Филиал","branch",1],["status","Статус","select:Присутствовал|Отсутствовал|Опоздал|Уважительная причина",1]],
   lesson:[["date","Дата","date",1],["time","Время","time",1],["group","Группа","group",1],["teacher","Тренер","teacher"],["branch","Филиал","branch",1],["room","Зал","text"]]
@@ -1125,7 +1128,7 @@ const forms={
 const T2K={student:"students",lead:"leads",group:"groups",teacher:"teachers",branch:"branches",membership:"memberships",payment:"payments",attendance:"attendance",lesson:"lessons",planned:"planned",renewal:"renewals"};
 const K2T=Object.fromEntries(Object.entries(T2K).map(([a,b])=>[b,a]));
 const NAMES={student:"ученик",lead:"заявка",group:"группа",teacher:"тренер",branch:"филиал",membership:"абонемент",payment:"операция",attendance:"посещение",lesson:"занятие",planned:"платёж",renewal:"сделку продления"};
-const NUMS=["branch","student","total","used","price","amount"];
+const NUMS=["branch","student","total","used","price","amount","rate","fixed"];
 function openCreate(){formType=FORM_OF[current];if(!formType)return;editing=null;showForm()}
 function editItem(key,id){if(key==="leads"||key==="renewals"){openDeal(id);return}formType=K2T[key];editing={key,id};showForm()}
 function showForm(){
@@ -1295,6 +1298,111 @@ function exportExcelAll(){
   if(!sheets.length){toast("Нет разделов для выгрузки");return}
   logAct("Выгрузка в Excel: вся база");persist();
   saveFile("DJIGIT-TAU-база"+fileTag()+".xlsx",XL.book(sheets));
+}
+
+/* ===== Экономика: прибыль (P&L), зарплаты тренеров, LTV/CAC/ROMI, отток =====
+   Выручка группы считается «по факту занятий»: каждое посещение ученика стоит цена абонемента / число занятий.
+   Зарплата тренера начисляется по его модели оплаты из карточки тренера. */
+const taxRate=()=>settings.taxRate===undefined||settings.taxRate===""?4:Number(settings.taxRate);
+const cameIn=a=>a.status==="Присутствовал"||a.status==="Опоздал";
+/* Сколько стоит одно посещение ученика: цена / занятия абонемента, действовавшего в этот день */
+function visitValue(a){
+  const ms=db.memberships.filter(m=>m.student===a.student&&Number(m.total)>0&&Number(m.price)>0);if(!ms.length)return 0;
+  const m=ms.filter(m=>!m.expires||m.expires>=a.date).sort((x,y)=>(x.expires||"9").localeCompare(y.expires||"9"))[0]||ms[ms.length-1];
+  return Number(m.price)/Number(m.total)}
+function payLabel(t){const ty=t.payType,f=Number(t.fixed)?"оклад "+money(t.fixed):"";
+  if(ty==="Только оклад")return esc(f||"оклад не указан");
+  return esc(ty+" · "+(ty.startsWith("%")?Number(t.rate||0)+"%":money(t.rate))+(f?" + "+f:""))}
+function payroll(t,ym){
+  const ls=db.lessons.filter(l=>l.teacher===t.name&&(l.date||"").startsWith(ym)&&l.date<=today()),groups={};let visits=0,rev=0;
+  ls.forEach(l=>{const at=db.attendance.filter(a=>a.group===l.group&&a.date===l.date&&cameIn(a)),v=at.reduce((s,a)=>s+visitValue(a),0);
+    const g=groups[l.group]=groups[l.group]||{lessons:0,visits:0,rev:0};g.lessons++;g.visits+=at.length;g.rev+=v;visits+=at.length;rev+=v});
+  const type=t.payType||"",rate=Number(t.rate||0),fixed=Number(t.fixed||0);
+  const v=type==="За занятие"?rate*ls.length:type.startsWith("За ученика")?rate*visits:type.startsWith("%")?rev*rate/100:0;
+  const acc=type&&type!=="Не задано"?Math.round(v+fixed):0;
+  const paid=total(db.payments.filter(p=>isExp(p)&&p.category==="Зарплата тренеров"&&p.teacher===t.name&&(p.date||"").startsWith(ym)));
+  return {t,type,lessons:ls.length,visits,rev,groups,acc,paid,due:Math.max(0,acc-paid),set:!!type&&type!=="Не задано"}}
+/* P&L за месяц: bid — id филиала или null (вся сеть) */
+function pnl(bid,ym){
+  const ps=payIn(ym,db.payments.filter(p=>bid==null?inBranch(p):p.branch===bid)),exp=ps.filter(isExp);
+  const cat=c=>total(exp.filter(p=>(EXP_CATS.includes(p.category)?p.category:"Прочее")===c));
+  const rev=total(ps.filter(isInc));
+  const pr=db.teachers.filter(t=>bid==null?inBranch(t):t.branch===bid).map(t=>payroll(t,ym)),useAcc=pr.some(x=>x.set);
+  const fot=useAcc?pr.reduce((s,x)=>s+(x.set?x.acc:x.paid),0):cat("Зарплата тренеров");
+  const rent=cat("Аренда"),gross=rev-fot-rent,staff=cat("ЗП персонала и бонусы"),ads=cat("Реклама");
+  const other=cat("Комиссия банка")+cat("Костюмы и инвентарь")+cat("Прочее");
+  const taxFact=cat("Налоги"),tax=taxFact||Math.round(rev*taxRate()/100),net=gross-staff-ads-other-tax;
+  return {rev,fot,fotAcc:useAcc,rent,gross,staff,ads,other,tax,taxEst:!taxFact,net,m:rev?net/rev:0}}
+/* Маркетинг по каналам за месяц */
+function marketing(ym){
+  // Канал берём из поля «Канал рекламы», а если его нет — ищем название канала в описании (для импортированных операций)
+  const chan=p=>AD_SRC.includes(p.channel)?p.channel:AD_SRC.find(c=>(p.description||"").toLowerCase().includes(c.toLowerCase()))||(/инст|insta/i.test(p.description||"")?"Instagram":/2gis|2 гис|дубль ?гис/i.test(p.description||"")?"2ГИС":/тик ?ток/i.test(p.description||"")?"TikTok":"");
+  const ads=payIn(ym).filter(p=>isExp(p)&&p.category==="Реклама").map(p=>({...p,channel:chan(p)})),st=db.students.filter(inBranch);
+  const rows=AD_SRC.map(src=>{const spend=total(ads.filter(p=>p.channel===src)),leads=db.leads.filter(inBranch).filter(l=>l.source===src&&(l.created||"").startsWith(ym));
+    const bought=leads.filter(l=>l.stage===STAGES[STAGES.length-1]).length,news=st.filter(s=>s.source===src&&(s.since||"").startsWith(ym)).length,payers=Math.max(bought,news);
+    const L=Math.round(avgLtv(st.filter(s=>s.source===src))),cac=payers?spend/payers:0;
+    return {src,spend,leads:leads.length,payers,ltv:L,cac,ratio:cac?L/cac:0,romi:spend?(L*payers-spend)/spend:null}}).filter(r=>r.spend||r.leads||r.payers);
+  return {rows,unassigned:total(ads.filter(p=>!AD_SRC.includes(p.channel)))}}
+/* Отток (оценка по датам окончания абонементов): был активен в начале месяца, абонемент кончился в месяце и не продлён */
+function churn(ym){
+  const s0=ym+"-01",e=monthEnd(ym),t=today();let base=0,lost=0,names=[];
+  db.students.filter(inBranch).forEach(s=>{const ex=db.memberships.filter(m=>m.student===s.id&&m.expires).map(m=>m.expires);if(!ex.some(x=>x>=s0))return;if(s.since&&s.since>=s0)return;
+    base++;const last=ex.sort().pop();if(last<e&&last<t){lost++;names.push(s.name)}});
+  return {base,lost,rate:base?lost/base:0,names}}
+function econText(ym){const P=pnl(null,ym),M=marketing(ym),C=churn(ym);
+  return [`Месяц ${ym}, филиал в фильтре: ${$("branchFilter").selectedOptions[0]?.textContent||"все"}.`,
+    `P&L: выручка ${P.rev}, ФОТ тренеров ${P.fot}${P.fotAcc?" (начислено по ставкам)":""}, аренда ${P.rent}, валовая прибыль ${P.gross}, ЗП персонала ${P.staff}, реклама ${P.ads}, прочие ${P.other}, налоги ${P.tax}${P.taxEst?" (оценка "+taxRate()+"%)":""}, чистая прибыль ${P.net}, маржа ${Math.round(P.m*100)}%.`,
+    "По филиалам: "+db.branches.map(b=>{const x=pnl(b.id,ym);return `${b.name}: выручка ${x.rev}, чистая ${x.net}, маржа ${Math.round(x.m*100)}%, ФОТ ${x.rev?Math.round(x.fot/x.rev*100):0}% выручки, аренда ${x.rev?Math.round(x.rent/x.rev*100):0}%`}).join("; "),
+    "Тренеры: "+db.teachers.filter(inBranch).map(t=>{const p=payroll(t,ym);return `${t.name}: занятий ${p.lessons}, посещений ${p.visits}, выручка групп ${Math.round(p.rev)}, начислено ${p.acc}, выплачено ${p.paid}`}).join("; "),
+    "Каналы: "+(M.rows.map(r=>`${r.src}: расход ${r.spend}, заявок ${r.leads}, новых учеников ${r.payers}, CAC ${Math.round(r.cac)}, LTV ${r.ltv}, ROMI ${r.romi==null?"—":Math.round(r.romi*100)+"%"}`).join("; ")||"нет данных"),
+    `Отток: ${C.lost} из ${C.base} (${Math.round(C.rate*100)}%).`].join("\n")}
+function econView(){
+  const M=panelMonth,P=pnl(null,M),br=db.branches.filter(b=>$("branchFilter").value==="all"||String(b.id)===$("branchFilter").value),cols=br.map(b=>[b.name,pnl(b.id,M)]).filter(([,x])=>x.rev||x.fot||x.rent||x.staff||x.ads||x.other||Number(x.tax));
+  if(!cols.length)cols.push(["Итого",P]);
+  if(cols.length>1)cols.push(["Итого",P]);
+  const pct=(v,x)=>x.rev?` <span class="sub">${Math.round(v/x.rev*100)}%</span>`:"";
+  const row=(l,f,o={})=>`<tr${o.b?' style="font-weight:700"':""}><td>${l}</td>${cols.map(([,x])=>`<td class="right num">${o.m?marginPill(x.m):money(f(x))+(o.p?pct(f(x),x):"")+(o.n?o.n(x):"")}</td>`).join("")}</tr>`;
+  const pr=db.teachers.filter(inBranch).map(t=>payroll(t,M)),mk=marketing(M),ch=churn(M);
+  const warn=[];cols.forEach(([n,x])=>{if(!x.rev)return;if(x.fot/x.rev>.45)warn.push(`${n}: ФОТ тренеров ${Math.round(x.fot/x.rev*100)}% выручки (норма 30–40%)`);if(x.rent/x.rev>.2)warn.push(`${n}: аренда ${Math.round(x.rent/x.rev*100)}% выручки (норма 10–15%)`);if(x.m<.1)warn.push(`${n}: чистая маржа ${Math.round(x.m*100)}% — ниже 10%`)});
+  if(ch.rate>.08)warn.push(`Отток ${Math.round(ch.rate*100)}% за месяц — выше 8%`);
+  mk.rows.forEach(r=>{if(r.romi!=null&&r.romi<0)warn.push(`${r.src}: реклама не окупается (ROMI ${Math.round(r.romi*100)}%)`)});
+  if(pr.length&&!pr.some(x=>x.set))warn.push("У тренеров не заданы ставки — откройте «Тренеры» и укажите модель оплаты, тогда зарплата посчитается сама");
+  return `${warn.length?`<div class="notice" style="margin-bottom:16px"><b>Требует внимания:</b><br>${warn.map(esc).join("<br>")}</div>`:""}
+  <div class="card" style="margin-bottom:16px"><h3>Прибыль и убытки за ${esc(M)}</h3><div class="hint">ФОТ тренеров — начислено по ставкам, если они заданы, иначе фактические выплаты. Налог — фактический или оценка по ставке упрощёнки.</div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Статья</th>${cols.map(([n])=>`<th class="right">${esc(n)}</th>`).join("")}</tr></thead><tbody>
+  ${row("Выручка",x=>x.rev,{b:1})}${row("− ФОТ тренеров",x=>x.fot,{p:1,n:x=>x.fotAcc?' <span class="sub">начисл.</span>':""})}${row("− Аренда",x=>x.rent,{p:1})}
+  ${row("= Валовая прибыль",x=>x.gross,{b:1,p:1})}${row("− ЗП персонала и бонусы",x=>x.staff,{p:1})}${row("− Реклама",x=>x.ads,{p:1})}${row("− Прочие расходы",x=>x.other,{p:1})}
+  ${row("− Налоги",x=>x.tax,{n:x=>x.taxEst?' <span class="sub">оценка</span>':""})}${row("= Чистая прибыль",x=>x.net,{b:1})}${row("Маржа",x=>0,{m:1})}
+  </tbody></table></div>
+  <div class="row" style="gap:8px;align-items:center;margin-top:10px"><label for="taxRate">Ставка налога, % от выручки (упрощёнка ИП с 2026 г. — 4%, уточните у бухгалтера)</label><input class="field" id="taxRate" type="number" step="0.1" min="0" style="width:90px" value="${taxRate()}"></div></div>
+  <div class="card" style="margin-bottom:16px"><h3>Зарплаты тренеров за ${esc(M)}</h3><div class="hint">Считается по проведённым занятиям из «Расписания» и отметкам в «Посещаемости». «Выплатить» создаёт расход «Зарплата тренеров» в Финансах.</div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Тренер</th><th>Модель оплаты</th><th class="right">Занятий</th><th class="right">Посещений</th><th class="right">Выручка групп</th><th class="right">Начислено</th><th class="right">Выплачено</th><th class="right">К выплате</th><th></th></tr></thead><tbody>
+  ${pr.map(x=>`<tr><td><b>${esc(x.t.name)}</b>${Object.keys(x.groups).length?`<div class="sub">${Object.entries(x.groups).map(([g,v])=>`${esc(g)}: ${v.lessons} зан., ${v.visits} пос., ${money(v.rev)}`).join("<br>")}</div>`:""}</td>
+    <td>${x.set?payLabel(x.t):`<a href="#" data-tedit="${x.t.id}">задать ставку</a>`}</td>
+    <td class="right num">${x.lessons}</td><td class="right num">${x.visits}</td><td class="right num">${money(x.rev)}</td><td class="right num">${x.set?money(x.acc):"—"}</td><td class="right num">${money(x.paid)}</td>
+    <td class="right num"><b>${x.set?money(x.due):"—"}</b></td><td>${x.set&&x.due>0?`<button class="btn mini" data-paysal="${x.t.id}">Выплатить</button>`:""}</td></tr>`).join("")||`<tr><td colspan="9" class="empty">Нет тренеров</td></tr>`}
+  </tbody></table></div></div>
+  <div class="card" style="margin-bottom:16px"><h3>Реклама: CAC, LTV и ROMI по каналам</h3><div class="hint">Расход — операции «Реклама» с указанным каналом. Новые ученики — купившие абонемент заявки месяца или ученики, начавшие заниматься в этом месяце. LTV — средняя сумма абонементов ученика из канала за всё время. LTV/CAC выше 3 — реклама выгодна.${mk.unassigned?` <b>Без канала: ${money(mk.unassigned)}</b> — укажите канал в операциях, чтобы посчитать окупаемость.`:""}</div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Канал</th><th class="right">Расход</th><th class="right">Заявок</th><th class="right">Новых учеников</th><th class="right">CAC</th><th class="right">LTV</th><th class="right">LTV/CAC</th><th class="right">ROMI</th></tr></thead><tbody>
+  ${mk.rows.map(r=>`<tr><td>${esc(r.src)}</td><td class="right num">${money(r.spend)}</td><td class="right num">${r.leads}</td><td class="right num">${r.payers}</td><td class="right num">${r.cac?money(r.cac):"—"}</td><td class="right num">${money(r.ltv)}</td><td class="right num">${r.ratio?r.ratio.toFixed(1):"—"}</td><td class="right num">${r.romi==null?"—":Math.round(r.romi*100)+"%"}</td></tr>`).join("")||`<tr><td colspan="8" class="empty">Нет заявок и рекламных расходов за месяц</td></tr>`}
+  </tbody></table></div></div>
+  <div class="grid2"><div class="card"><h3>Отток учеников</h3><div class="hint">Оценка: абонемент закончился в этом месяце и не продлён. Норма — до 8% в месяц.</div>
+    <div class="big num">${Math.round(ch.rate*100)}%</div><p>Ушли ${ch.lost} из ${ch.base} активных на начало месяца</p>${ch.names.length?`<div class="sub">${ch.names.slice(0,15).map(esc).join(", ")}${ch.names.length>15?"…":""}</div>`:""}</div>
+  <div class="card"><h3>ИИ-разбор месяца</h3><div class="hint">ИИ-помощник получает цифры этой страницы (без телефонов) и даёт выводы и 3–5 действий. Работает через раздел «ИИ-помощник».</div>
+    <div id="econAi" class="aimsg a" style="max-width:100%;${econAiText?"":"display:none"}">${esc(econAiText)}</div>
+    <div class="actions" style="margin-top:8px"><button class="btn" data-act="econai">Разобрать месяц</button></div></div></div>`}
+let econAiText="";
+function wireEcon(){
+  $("taxRate").onchange=e=>{settings.taxRate=e.target.value===""?"":Number(e.target.value);persist();render();toast("Ставка налога сохранена")};
+  document.querySelectorAll("[data-tedit]").forEach(a=>a.onclick=e=>{e.preventDefault();editItem("teachers",Number(a.dataset.tedit))});
+  document.querySelectorAll("[data-paysal]").forEach(b=>b.onclick=async()=>{const t=db.teachers.find(x=>x.id===Number(b.dataset.paysal)),p=payroll(t,panelMonth);
+    if(!await ask(`Выплатить ${t.name} ${money(p.due)} за ${panelMonth}? Будет создан расход «Зарплата тренеров».`,"Выплатить"))return;
+    db.payments.push({id:nid(),date:today(),type:"Расход",action:"Себестоимость",category:"Зарплата тренеров",description:"Зарплата за "+panelMonth+" — "+t.name,amount:p.due,branch:t.branch,account:settings.accounts[0]?.name||"",teacher:t.name});
+    logAct("Выплата зарплаты: "+t.name+" "+money(p.due));persist();render();toast("Выплата записана в Финансы")});
+  document.querySelector('[data-act="econai"]').onclick=async e=>{const box=$("econAi");e.target.disabled=true;box.style.display="";box.textContent="Думаю…";
+    try{const r=await aiCall([{role:"system",content:"Ты — финансовый аналитик сети студий кавказских танцев «DJIGIT TAU» (Казахстан, ₸). Ориентиры отрасли: ФОТ тренеров 30–40% выручки, аренда 10–15%, отток до 8% в месяц, LTV/CAC больше 3, чистая маржа 15–25%. Дай по-русски: 1) 3–4 главных вывода с цифрами, 2) 3–5 конкретных действий на следующий месяц. Не выдумывай данных, которых нет."},{role:"user",content:econText(panelMonth)}],{onTry:m=>box.textContent="Думаю… ("+aiInfo(m)[1]+")"});
+      econAiText=r.text+"\n\n— "+aiInfo(r.model)[1];}catch(err){econAiText=err.message}
+    if($("econAi")){$("econAi").textContent=econAiText;e.target.disabled=false}};
 }
 
 /* ===== LTV и профиль ученика ===== */
@@ -1715,6 +1823,7 @@ function wireAI(){
     aiBusy=false;if($("aiLog")){draw();lim();$("aiSend").disabled=false;$("aiQ").focus()}};
 }
 after["ИИ-помощник"]=wireAI;
+after["Экономика"]=wireEcon;
 (async function boot(){
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
