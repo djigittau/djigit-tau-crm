@@ -130,6 +130,25 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .aimsg.a{align-self:flex-start;background:#fff;border:1px solid var(--line)}
 .aimsg.err{border-color:var(--red);background:var(--red-bg)}
 .aiform{display:flex;gap:8px;margin-top:10px}.aiform textarea{flex:1;resize:vertical;min-height:44px}
+.citybar{display:flex;gap:16px;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap}.citybar>div:first-child{flex:1;min-width:260px}
+.citywrap{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:16px;align-items:start}
+.citymap{padding:10px}.citysvg{width:100%;height:auto;display:block;border-radius:var(--r-sm);font-family:var(--font)}
+.citysvg .bld{cursor:pointer;outline:none}.citysvg .bld:hover .wall,.citysvg .bld:focus-visible .wall{stroke:#C79B35;stroke-opacity:1;stroke-width:2}
+.citysvg .bld.sel .wall{stroke:#9A7633;stroke-opacity:1;stroke-width:3}
+.citysvg .bld.busy .win{fill:#F2C14E;animation:cwin .5s ease-in-out infinite alternate}
+@keyframes cwin{to{fill:#FFF1C4}}
+.citysvg .ag{cursor:pointer}.citysvg .ag .bob{animation:cbob 2.6s ease-in-out infinite}
+.citysvg .ag:nth-of-type(2n) .bob{animation-delay:-1.2s}
+@keyframes cbob{50%{transform:translateY(-2.5px)}}
+.clegend{display:flex;gap:14px;font-size:12px;color:var(--muted);padding:8px 4px 0}.clegend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+.cpanel{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow:auto}
+.chead{display:flex;gap:10px;align-items:center;margin-bottom:6px}.chead b{display:block;font-size:15px}.chead small{color:var(--muted);font-size:12.5px}
+.cav{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:0 0 38px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}.cav.sm{width:26px;height:26px;flex-basis:26px;font-size:12px}
+.crow2{display:flex;gap:10px;align-items:center;width:100%;border:0;border-top:1px solid var(--line2);background:none;padding:8px 2px;text-align:left;font-size:13.5px}.crow2:hover{background:#FBF7EC}.crow2 .tag{margin-left:auto}
+.cfind{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line2);font-size:13.5px;line-height:1.45}.cfind .mini{margin-top:6px}
+.cfind .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;margin-top:6px;background:var(--green)}.cfind.warn .dot{background:#D99A2B}.cfind.red .dot{background:var(--red)}
+@media(prefers-reduced-motion:reduce){.citysvg .ag .bob,.citysvg .bld.busy .win{animation:none}}
+@media(max-width:1100px){.citywrap{grid-template-columns:1fr}.cpanel{position:static;max-height:none}}
 .field:focus{border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(199,155,53,.18)}
 .empty{padding:22px;text-align:center;color:var(--muted)}
 .notice{background:#FFF6DC;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;color:#5C4B2A;margin-bottom:14px}
@@ -442,7 +461,7 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Группы","Расписание","Посещаемость","Абонементы","Финансы","Аналитика","ИИ-помощник","Автоматизация","Панель владельца","Филиалы","Тренеры","Команда","Журнал","Настройки"]]];
+const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Группы","Расписание","Посещаемость","Абонементы","Финансы","Аналитика","ИИ-помощник","Город агентов","Автоматизация","Панель владельца","Филиалы","Тренеры","Команда","Журнал","Настройки"]]];
 const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
@@ -468,8 +487,9 @@ const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="
   clockc:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   xc:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
   robot:'<rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/><circle cx="12" cy="3.5" r="1"/>',
+  city:'<path d="M3 21h18M5 21V10l4-3 4 3v11M13 21V6l3-2 3 2v15"/><path d="M8 13h2M8 17h2M15.5 10h1M15.5 14h1M15.5 18h1"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/>'};
-const icons={"Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
+const icons={"Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot","Город агентов":"city"};
 const ico=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[icons[n]]||P.grid}</svg>`;
 const svg=(k,st="")=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${st?`style="${st}"`:""}>${P[k]}</svg>`;
 /* Какие разделы видит каждая роль. null = всё. */
@@ -542,7 +562,7 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Бесплатные модели GitHub Models: вопросы по данным студии"};
+const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Бесплатные модели GitHub Models: вопросы по данным студии","Город агентов":"ИИ-агенты следят за продажами, деньгами, учениками, расписанием, рекламой и задачами"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
@@ -1625,6 +1645,221 @@ function wireAI(){
     aiBusy=false;if($("aiLog")){draw();$("aiSend").disabled=false;$("aiQ").focus()}};
 }
 after["ИИ-помощник"]=wireAI;
+/* ===== Город агентов: у каждого агента своё здание, своя зона ответственности и свой обход данных.
+   Обход работает локально без интернета; «Спросить» и «Совет» используют модель из раздела «ИИ-помощник». */
+const CITY=[
+  {id:"sales",nm:"Аслан",role:"Агент продаж",house:"Торговый двор",color:"#B8924B",wall:"#F4E8C8",x:160,y:120,sec:"Заявки и воронка",
+   persona:"Ты — Аслан, агент продаж в CRM студии кавказских танцев «DJIGIT TAU». Твоя зона: заявки, скорость первого ответа, пробные занятия и конверсия в абонемент."},
+  {id:"cash",nm:"Мурат",role:"Казначей",house:"Казна",color:"#3D6680",wall:"#E2ECF5",x:500,y:120,sec:"Панель владельца",
+   persona:"Ты — Мурат, казначей студии «DJIGIT TAU». Твоя зона: доходы, расходы, выполнение плана, маржа филиалов и ближайшие платежи."},
+  {id:"keep",nm:"Лейла",role:"Хранитель учеников",house:"Дом учеников",color:"#4E7B36",wall:"#E5F3E6",x:840,y:120,sec:"Ученики",
+   persona:"Ты — Лейла, хранитель учеников студии «DJIGIT TAU». Твоя зона: удержание, долги по оплате, заканчивающиеся абонементы и ученики, которые перестали ходить."},
+  {id:"sched",nm:"Тимур",role:"Диспетчер",house:"Часовая башня",color:"#7A6A4A",wall:"#EFE7D6",x:160,y:470,sec:"Расписание",
+   persona:"Ты — Тимур, диспетчер расписания студии «DJIGIT TAU». Твоя зона: занятия, посещаемость групп, наполняемость и загрузка тренеров."},
+  {id:"mkt",nm:"Амина",role:"Маркетолог",house:"Дом глашатая",color:"#8E2A35",wall:"#F6E1E3",x:500,y:470,sec:"Аналитика",
+   persona:"Ты — Амина, маркетолог студии «DJIGIT TAU». Твоя зона: источники заявок, стоимость заявки и продажи, причины отказов."},
+  {id:"tasks",nm:"Расул",role:"Курьер задач",house:"Почта",color:"#C79B35",wall:"#FFF6DC",x:840,y:470,sec:"Задачи",
+   persona:"Ты — Расул, курьер задач студии «DJIGIT TAU». Твоя зона: просроченные и сегодняшние задачи менеджеров и сделки без следующего шага."}];
+const MAYOR={id:"mayor",nm:"Аксакал",role:"Старейшина города",house:"Ратуша",color:"#1A1916"};
+let citySel="mayor",cityRes={},cityAI={},cityBusy=false;
+const cNames=(a,k=4)=>a.slice(0,k).map(x=>x.name).join(", ")+(a.length>k?" и ещё "+(a.length-k):"");
+const cSum=a=>a.reduce((s,p)=>s+Number(p.amount||0),0);
+const cPct=(a,b)=>b?Math.round(a/b*100):0;
+const cBranchOk=id=>{const v=$("branchFilter").value||"all";return v==="all"||String(id)===v};
+const cDaysAgo=n=>new Date(Date.now()-n*864e5).toISOString().slice(0,10);
+const cDaysAhead=n=>new Date(Date.now()+n*864e5).toISOString().slice(0,10);
+const CITY_SCAN={
+  sales(){const f=[],L=db.leads.filter(inBranch),now=Date.now(),sla=settings.sla||15,ym=today().slice(0,7);
+    const late=L.filter(x=>x.stage===STAGES[0]&&!x.firstContactAt&&now-new Date(x.createdAt||x.created).getTime()>sla*6e4);
+    if(late.length)f.push({lv:"red",t:plural(late.length,"заявка ждёт","заявки ждут","заявок ждут")+" первого ответа дольше "+sla+" мин: "+cNames(late),
+      act:{l:"Поставить задачи «Связаться»",run(){let n=0;late.forEach(x=>{if(!db.tasks.some(t=>t.dealId===x.id&&!t.done)){addTask(x,"Связаться с клиентом",new Date(Date.now()+15*6e4).toISOString(),true);n++}});return n?"Поставлено задач: "+n:"У этих заявок задачи уже стоят"}}});
+    const trials=L.filter(x=>x.stage===STAGES[2]&&x.trial&&new Date(x.trial).getTime()<now);
+    if(trials.length)f.push({lv:"warn",t:plural(trials.length,"пробное прошло","пробных прошло","пробных прошло")+", но итог не отмечен: "+cNames(trials),act:{l:"Открыть воронку",go:"Заявки и воронка"}});
+    const cm=L.filter(x=>(x.created||"").startsWith(ym)),won=cm.filter(x=>x.stage===STAGES[3]).length,lost=cm.filter(x=>x.stage===LOST).length,p=cPct(won,cm.length);
+    f.push({lv:cm.length>=5&&p<20?"warn":"ok",t:"В этом месяце "+plural(cm.length,"заявка","заявки","заявок")+": купили "+won+" ("+p+"%), отказов "+lost});
+    const rt=L.filter(x=>x.firstContactAt&&x.createdAt&&x.created>=cDaysAgo(30)).map(x=>(new Date(x.firstContactAt)-new Date(x.createdAt))/6e4).sort((a,b)=>a-b);
+    if(rt.length){const med=Math.round(rt[rt.length>>1]);f.push({lv:med>sla?"warn":"ok",t:"Медианное время первого ответа за 30 дней — "+med+" мин (норма "+sla+" мин)"})}
+    return f},
+  cash(){const f=[],P=db.payments.filter(inBranch),ym=today().slice(0,7),lm=shiftMonth(ym,-1),inc=t=>p=>(t?p.type==="Доход":p.type!=="Доход");
+    const of=m=>P.filter(p=>(p.date||"").startsWith(m)),I=cSum(of(ym).filter(inc(1))),E=cSum(of(ym).filter(inc(0)));
+    const d=new Date(),dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),day=d.getDate(),all=($("branchFilter").value||"all")==="all";
+    if(all&&settings.plan){const need=settings.plan*day/dim;
+      f.push({lv:I<need*.9?"warn":"ok",t:"Доход месяца "+money(I)+" — "+cPct(I,settings.plan)+"% плана "+money(settings.plan)+"; к этому дню ожидалось ~"+money(need)})}
+    else f.push({lv:"ok",t:"Доход месяца "+money(I)+", расход "+money(E)+(all?" · план не задан":"")});
+    if(I-E<0)f.push({lv:"red",t:"Месяц пока в минусе: "+money(I-E)+" (доход "+money(I)+", расход "+money(E)+")",act:{l:"Открыть финансы",go:"Финансы"}});
+    db.branches.filter(b=>cBranchOk(b.id)).forEach(b=>{const bp=P.filter(p=>p.branch===b.id&&(p.date||"").startsWith(lm)),bi=cSum(bp.filter(inc(1))),be=cSum(bp.filter(inc(0)));
+      if(bi||be){if(bi-be<0)f.push({lv:"red",t:"Филиал «"+b.name+"» в прошлом месяце в минусе: "+money(bi-be),act:{l:"Панель владельца",go:"Панель владельца"}});
+        else if(bi&&cPct(bi-be,bi)<15)f.push({lv:"warn",t:"Низкая маржа у филиала «"+b.name+"» в прошлом месяце: "+cPct(bi-be,bi)+"%"})}});
+    const pl=(db.planned||[]).filter(x=>!x.done&&inBranch(x)&&x.date>=today()&&x.date<=cDaysAhead(7)).sort((a,b)=>a.date.localeCompare(b.date));
+    if(pl.length)f.push({lv:"warn",t:"За 7 дней предстоит оплатить "+money(cSum(pl))+": "+pl.slice(0,4).map(x=>x.title+" ("+x.date.slice(5)+")").join(", "),act:{l:"Панель владельца",go:"Панель владельца"}});
+    const over=(db.planned||[]).filter(x=>!x.done&&inBranch(x)&&x.date<today());
+    if(over.length)f.push({lv:"red",t:"Просрочены плановые платежи: "+over.slice(0,4).map(x=>x.title).join(", "),act:{l:"Панель владельца",go:"Панель владельца"}});
+    return f},
+  keep(){const f=[],S=db.students.filter(inBranch),act=S.filter(x=>x.status==="Активен");
+    const need=S.filter(x=>x.status==="Нужна оплата");
+    if(need.length)f.push({lv:"red",t:plural(need.length,"ученик ждёт","ученика ждут","учеников ждут")+" оплату: "+cNames(need),act:{l:"Открыть учеников",go:"Ученики"}});
+    const lastM={};db.memberships.forEach(m=>{const c=lastM[m.student];if(!c||(m.expires||"")>(c.expires||""))lastM[m.student]=m});
+    const soon=act.filter(s=>{const m=lastM[s.id];if(!m)return false;const left=(m.total||0)-(m.used||0);return (m.expires>=today()&&m.expires<=cDaysAhead(7))||(left<=1&&m.expires>=today())});
+    if(soon.length)f.push({lv:"warn",t:"Абонемент заканчивается в ближайшую неделю у "+plural(soon.length,"ученика","учеников","учеников")+": "+cNames(soon)+" — пора предложить продление",act:{l:"Открыть абонементы",go:"Абонементы"}});
+    const lastA={};db.attendance.forEach(a=>{if(a.status==="Присутствовал"||a.status==="Опоздал"){if(!lastA[a.student]||a.date>lastA[a.student])lastA[a.student]=a.date}});
+    const lim=cDaysAgo(14),gone=act.filter(s=>lastA[s.id]?lastA[s.id]<lim:(s.since&&s.since<cDaysAgo(21)&&db.attendance.length>0));
+    if(gone.length)f.push({lv:"warn",t:plural(gone.length,"активный ученик не был","активных ученика не были","активных учеников не были")+" на занятиях больше 2 недель: "+cNames(gone),act:{l:"Открыть посещения",go:"Посещаемость"}});
+    const pause=S.filter(x=>x.status==="Пауза").length;
+    f.push({lv:"ok",t:"Активных учеников: "+act.length+(pause?", на паузе: "+pause:"")});
+    return f},
+  sched(){const f=[],Ls=db.lessons.filter(inBranch),td=today(),tm=cDaysAhead(1);
+    const lt=Ls.filter(x=>x.date===td),ltm=Ls.filter(x=>x.date===tm);
+    f.push({lv:"ok",t:"Сегодня "+plural(lt.length,"занятие","занятия","занятий")+(lt.length?" ("+lt.slice(0,4).map(x=>x.time+" "+x.group).join("; ")+")":"")+", завтра "+ltm.length});
+    const A=db.attendance.filter(inBranch).filter(a=>a.date>=cDaysAgo(30)),byG={};
+    A.forEach(a=>{const g=byG[a.group||"—"]=byG[a.group||"—"]||{n:0,p:0};g.n++;if(a.status==="Присутствовал"||a.status==="Опоздал")g.p++});
+    const low=Object.entries(byG).filter(([,g])=>g.n>=10&&g.p/g.n<.85);
+    if(low.length)f.push({lv:"warn",t:"Посещаемость ниже 85% за 30 дней: "+low.map(([n,g])=>n+" — "+cPct(g.p,g.n)+"%").join("; "),act:{l:"Открыть посещения",go:"Посещаемость"}});
+    else if(A.length)f.push({lv:"ok",t:"Посещаемость за 30 дней: "+cPct(A.filter(a=>a.status==="Присутствовал"||a.status==="Опоздал").length,A.length)+"%"});
+    const small=db.groups.filter(inBranch).filter(g=>!/индивид/i.test(g.name||"")).map(g=>[g.name,db.students.filter(s=>s.group===g.name&&s.status==="Активен").length]).filter(([,n])=>n<6);
+    if(small.length)f.push({lv:"warn",t:"Малая наполняемость групп: "+small.map(([g,n])=>g+" — "+n).join("; ")+". Стоит направить туда новые заявки",act:{l:"Открыть группы",go:"Группы"}});
+    const wk=Ls.filter(x=>x.date>=td&&x.date<=cDaysAhead(7)),noT=wk.filter(x=>!x.teacher);
+    if(noT.length)f.push({lv:"red",t:"На неделе "+plural(noT.length,"занятие","занятия","занятий")+" без тренера",act:{l:"Открыть расписание",go:"Расписание"}});
+    const load={};wk.forEach(x=>{if(x.teacher)load[x.teacher]=(load[x.teacher]||0)+1});
+    const top=Object.entries(load).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    if(top.length)f.push({lv:"ok",t:"Загрузка тренеров на 7 дней: "+top.map(([t,n])=>t+" — "+n).join("; ")});
+    return f},
+  mkt(){const f=[],L=db.leads.filter(inBranch).filter(x=>(x.created||"")>=cDaysAgo(60)),by={};
+    L.forEach(x=>{const s=by[x.source||"—"]=by[x.source||"—"]||{n:0,w:0};s.n++;if(x.stage===STAGES[3])s.w++});
+    const rows=Object.entries(by).sort((a,b)=>b[1].w/b[1].n-a[1].w/a[1].n);
+    if(rows.length)f.push({lv:"ok",t:"Конверсия источников за 60 дней: "+rows.map(([s,v])=>s+" "+v.w+"/"+v.n+" ("+cPct(v.w,v.n)+"%)").join("; ")});
+    rows.filter(([,v])=>v.n>=4&&!v.w).forEach(([s,v])=>f.push({lv:"warn",t:"Источник «"+s+"» дал "+v.n+" заявок и ни одной продажи за 60 дней"}));
+    const ads=cSum(db.payments.filter(inBranch).filter(p=>p.type!=="Доход"&&(p.category==="Реклама"||p.cat==="Реклама")&&(p.date||"")>=cDaysAgo(30)));
+    const l30=db.leads.filter(inBranch).filter(x=>(x.created||"")>=cDaysAgo(30)),w30=l30.filter(x=>x.stage===STAGES[3]).length;
+    if(ads)f.push({lv:"ok",t:"Реклама за 30 дней "+money(ads)+": заявка ~"+money(l30.length?ads/l30.length:0)+", продажа ~"+(w30?money(ads/w30):"нет продаж")});
+    const lost=L.filter(x=>x.stage===LOST),rs={};lost.forEach(x=>{rs[x.reason||"Не указана"]=(rs[x.reason||"Не указана"]||0)+1});
+    const tr=Object.entries(rs).sort((a,b)=>b[1]-a[1]);
+    if(tr.length)f.push({lv:lost.length>=3&&tr[0][1]/lost.length>=.3?"warn":"ok",t:"Главная причина отказов: «"+tr[0][0]+"» — "+tr[0][1]+" из "+lost.length,act:{l:"Открыть отчёты",go:"Аналитика"}});
+    return f},
+  tasks(){const f=[],T=myTasks(),late=T.filter(isLateT),td=today();
+    if(late.length)f.push({lv:"red",t:plural(late.length,"задача просрочена","задачи просрочены","задач просрочено")+": "+late.slice(0,4).map(t=>t.text+" ("+(findDeal(t.dealId)?.name||"—")+")").join("; "),act:{l:"Открыть задачи",go:"Задачи"}});
+    const due=T.filter(t=>!t.done&&!isLateT(t)&&(t.due||"").slice(0,10)===td);
+    f.push({lv:"ok",t:"На сегодня ещё "+plural(due.length,"задача","задачи","задач")+", всего открыто "+T.filter(t=>!t.done).length});
+    const idle=db.leads.filter(inBranch).filter(x=>x.stage===STAGES[1]&&!db.tasks.some(t=>t.dealId===x.id&&!t.done));
+    if(idle.length)f.push({lv:"warn",t:plural(idle.length,"сделка","сделки","сделок")+" на этапе «"+STAGES[1]+"» без следующего шага: "+cNames(idle),
+      act:{l:"Поставить «Перезвонить» на завтра",run(){const due=new Date(Date.now()+864e5);due.setHours(18,0,0,0);idle.forEach(x=>addTask(x,"Перезвонить и пригласить на пробное",due.toISOString(),true));return "Поставлено задач: "+idle.length}}});
+    return f}};
+function cityScan(a){try{cityRes[a.id]={f:CITY_SCAN[a.id](),at:Date.now()}}catch(e){cityRes[a.id]={f:[{lv:"warn",t:"Агент не смог сделать обход: "+e.message}],at:Date.now()}}return cityRes[a.id]}
+const cIssues=a=>(cityRes[a.id]?.f||[]).filter(x=>x.lv!=="ok");
+function cityLog(who,t){(settings.agentLog=settings.agentLog||[]).unshift({at:new Date().toLocaleString("ru-RU"),who,t});settings.agentLog=settings.agentLog.slice(0,80)}
+function cityBadge(a){const is=cIssues(a),red=is.some(x=>x.lv==="red"),n=is.length;
+  return `<circle r="13" fill="${red?"#C7392F":n?"#D99A2B":"#3E8E4E"}" stroke="#fff" stroke-width="2"/><text text-anchor="middle" dy="4.5" font-size="12" font-weight="700" fill="#fff">${n||"✓"}</text>`}
+function citySprite(a,x,y){return `<g class="ag" id="ag-${a.id}" transform="translate(${x},${y})" data-agent="${a.id}"><g class="bob"><ellipse cx="0" cy="15" rx="11" ry="3.5" fill="#000" opacity=".12"/><circle r="13" fill="${a.color}" stroke="#fff" stroke-width="2.5"/><text text-anchor="middle" dy="4.5" font-size="12.5" font-weight="700" fill="#fff">${a.nm[0]}</text></g></g>`}
+function cityHouse(a){const x=a.x,y=a.y;return `<g class="bld${citySel===a.id?" sel":""}" data-agent="${a.id}" id="bld-${a.id}" tabindex="0" role="button" aria-label="${esc(a.house)}: ${esc(a.role)} ${esc(a.nm)}">
+  <rect class="wall" x="${x-72}" y="${y-56}" width="144" height="96" rx="5" fill="${a.wall}" stroke="#1A1916" stroke-opacity=".18"/>
+  <path d="M${x-84} ${y-52}L${x} ${y-102}L${x+84} ${y-52}Z" fill="${a.color}"/>
+  ${[-52,-12,28].map(dx=>`<rect class="win" x="${x+dx}" y="${y-44}" width="24" height="18" rx="2" fill="#FFFDF6" stroke="#1A1916" stroke-opacity=".15"/>`).join("")}
+  <rect x="${x-58}" y="${y-18}" width="116" height="20" rx="3" fill="#fff" stroke="${a.color}"/>
+  <text x="${x}" y="${y-4}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1A1916">${esc(a.house)}</text>
+  <rect x="${x-11}" y="${y+8}" width="22" height="32" rx="2" fill="${a.color}" opacity=".85"/>
+  <g transform="translate(${x+68},${y-58})" id="bdg-${a.id}">${cityBadge(a)}</g></g>`}
+function cityRoute(a,i){const sx=a.x+26,sy=a.y+58,end=(i%3-1)*14;
+  if(a.y<300)return a.x===500?[[sx,sy],[sx,196]]:[[sx,sy],[sx,300],[a.x<500?428:572,300+end]];
+  const vx=a.x<500?330:670;return [[sx,sy],[sx,575],[vx,575],[vx,300],[vx<500?428:572,300+end]]}
+function citySVG(){const tree=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><rect x="-2.5" y="6" width="5" height="12" fill="#8A6A2E"/><circle r="15" fill="#6E9A55"/><circle cx="-6" cy="-5" r="8" fill="#82AE66"/></g>`;
+  return `<svg class="citysvg" viewBox="0 0 1000 600" role="img" aria-label="Карта города агентов">
+  <rect width="1000" height="600" fill="#F3EEDF"/>
+  <path d="M0 120L70 52L130 92L220 18L300 80L380 34L450 86L540 26L620 78L700 30L780 84L860 22L940 70L1000 40V120Z" fill="#E6DECA"/>
+  <path d="M220 18L240 36L226 34L212 40ZM540 26L558 42L542 40L528 46ZM860 22L878 40L862 37L848 44Z" fill="#fff" opacity=".9"/>
+  <g fill="#E2D6B8"><rect x="0" y="288" width="1000" height="24"/><rect x="318" y="300" width="24" height="287"/><rect x="658" y="300" width="24" height="287"/><rect x="170" y="563" width="710" height="24" rx="12"/>
+  ${CITY.map(a=>a.y<300?`<rect x="${a.x+19}" y="160" width="14" height="${a.x===500?50:140}"/>`:`<rect x="${a.x+19}" y="510" width="14" height="60"/>`).join("")}</g>
+  <g stroke="#fff" stroke-width="2" stroke-dasharray="10 12" opacity=".7"><path d="M0 300H1000"/></g>
+  ${[[50,240],[275,215],[725,215],[955,240],[268,410,.9],[735,410,.9],[50,420,.85],[955,420,.85],[395,560,.7],[605,560,.7],[110,560,.8],[930,560,.8]].map(t=>tree(...t)).join("")}
+  <ellipse cx="500" cy="300" rx="112" ry="62" fill="#EADFC4" stroke="#D8C9A3"/>
+  <g class="bld hall${citySel==="mayor"?" sel":""}" data-agent="mayor" id="bld-mayor" tabindex="0" role="button" aria-label="Ратуша: Аксакал, старейшина города">
+   <rect class="wall" x="440" y="252" width="120" height="66" fill="#FBF7EC" stroke="#1A1916" stroke-opacity=".2"/>
+   <path d="M430 254L500 216L570 254Z" fill="#1A1916"/><text x="500" y="247" text-anchor="middle" font-size="11" font-weight="600" fill="#E9D6A6">РАТУША</text>
+   ${[452,476,516,540].map(x=>`<rect x="${x}" y="262" width="8" height="48" fill="#E9D6A6"/>`).join("")}
+   <rect x="490" y="286" width="20" height="32" fill="#1A1916" opacity=".85"/>
+   <path d="M500 216V196" stroke="#1A1916" stroke-width="2"/><path d="M500 196h18l-5 5 5 5h-18z" fill="#C79B35"/>
+   <g transform="translate(560,252)" id="bdg-mayor">${cityMayorBadge()}</g></g>
+  ${CITY.map(cityHouse).join("")}
+  ${citySprite(MAYOR,500,342).replace('class="ag"','class="ag mayor"')}
+  ${CITY.map(a=>citySprite(a,a.x+26,a.y+58)).join("")}
+  </svg>`}
+function cityMayorBadge(){const n=CITY.reduce((s,a)=>s+cIssues(a).length,0),red=CITY.some(a=>cIssues(a).some(x=>x.lv==="red"));
+  return `<circle r="13" fill="${red?"#C7392F":n?"#D99A2B":"#3E8E4E"}" stroke="#fff" stroke-width="2"/><text text-anchor="middle" dy="4.5" font-size="12" font-weight="700" fill="#fff">${n||"✓"}</text>`}
+function cityWalk(a,pts){const el=$("ag-"+a.id);if(!el)return Promise.resolve();
+  return new Promise(res=>{let k=0,t0=null;const sp=.45;
+    const step=ts=>{if(!document.body.contains(el)){res();return}
+      if(k>=pts.length-1){res();return}
+      const [x1,y1]=pts[k],[x2,y2]=pts[k+1],d=Math.hypot(x2-x1,y2-y1)||1;if(t0===null)t0=ts;
+      const p=Math.min(1,(ts-t0)*sp/d);el.setAttribute("transform",`translate(${x1+(x2-x1)*p},${y1+(y2-y1)*p})`);
+      if(p>=1){k++;t0=ts}requestAnimationFrame(step)};requestAnimationFrame(step)})}
+function cityBusyMark(a,on){$("bld-"+a.id)?.classList.toggle("busy",on)}
+function cityItem(x,i,aid){return `<div class="cfind ${x.lv}"><span class="dot"></span><div>${esc(x.t)}${x.act?`<div><button class="mini" data-cact="${aid}:${i}">${esc(x.act.l)}</button></div>`:""}</div></div>`}
+function cityAIBlock(id,ph){const r=cityAI[id];return `<div class="aichat" style="max-height:none">${r?`<div class="aimsg a${r.err?" err":""}" style="max-width:100%">${esc(r.text)}</div>`:""}</div>
+  ${aiGet(AI_TKEY)?"":`<div class="hint">Чтобы агенты отвечали своими словами, подключите токен в разделе <a href="#" data-cgo="ИИ-помощник">ИИ-помощник</a>. Обход и действия работают и без него.</div>`}
+  <form class="aiform" id="cityForm"><textarea class="field" id="cityQ" placeholder="${esc(ph)}"></textarea><button class="btn" type="submit" id="cityAsk">Спросить</button></form>`}
+function cityPanel(){
+  if(citySel==="mayor"){const all=CITY.flatMap(a=>cIssues(a).map(x=>({a,x}))).sort((p,q)=>(p.x.lv==="red"?0:1)-(q.x.lv==="red"?0:1));
+    return `<div class="chead"><span class="cav" style="background:${MAYOR.color}">А</span><div><b>${MAYOR.nm}</b><small>${MAYOR.role} · ${MAYOR.house}</small></div></div>
+    <div class="hint">Собирает отчёты всех агентов и решает, что важнее сегодня.</div>
+    ${CITY.map(a=>{const is=cIssues(a),red=is.filter(x=>x.lv==="red").length;return `<button class="crow2" data-agent="${a.id}"><span class="cav sm" style="background:${a.color}">${a.nm[0]}</span><span><b>${a.nm}</b> · ${a.role}</span><span class="tag ${red?"red":is.length?"warn":""}">${red?red+" срочно":is.length?is.length+" к вниманию":"всё спокойно"}</span></button>`}).join("")}
+    <h3 style="margin-top:14px">Главное на сегодня</h3>
+    ${all.length?all.slice(0,6).map(({a,x})=>`<div class="cfind ${x.lv}"><span class="dot"></span><div><small style="color:var(--muted)">${a.nm}, ${a.role.toLowerCase()}</small><br>${esc(x.t)}</div></div>`).join(""):`<div class="empty">Агенты не нашли проблем</div>`}
+    <h3 style="margin-top:14px">Совет города</h3><div class="hint">Все агенты идут в ратушу, а Аксакал по их отчётам составляет план на день.</div>
+    ${cityAIBlock("mayor","Вопрос совету, например: «Что сделать, чтобы выполнить план месяца?» (пусто — план на день)")}`}
+  const a=CITY.find(x=>x.id===citySel),r=cityRes[a.id]||cityScan(a);
+  return `<div class="chead"><span class="cav" style="background:${a.color}">${a.nm[0]}</span><div><b>${a.nm}</b><small>${a.role} · ${a.house}</small></div><button class="mini" data-cgo="${a.sec}" style="margin-left:auto">${esc(lbl(a.sec))} →</button></div>
+  <div class="hint">Обход: ${new Date(r.at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}</div>
+  ${r.f.map((x,i)=>cityItem(x,i,a.id)).join("")||`<div class="empty">Нечего докладывать</div>`}
+  <h3 style="margin-top:14px">Вопрос агенту</h3>${cityAIBlock(a.id,"Пусто — 3–5 действий на сегодня. Или свой вопрос, например: «Как вернуть тех, кто пропал?»")}
+  <div class="actions"><button class="btn secondary" data-cback="1">← В ратушу</button></div>`}
+function cityRefresh(){const p=$("cityPanel");if(!p)return;p.innerHTML=cityPanel();
+  document.querySelectorAll(".citysvg .bld").forEach(b=>b.classList.toggle("sel",b.dataset.agent===citySel));
+  CITY.forEach(a=>{const g=$("bdg-"+a.id);if(g)g.innerHTML=cityBadge(a)});const m=$("bdg-mayor");if(m)m.innerHTML=cityMayorBadge();
+  if($("cityLog"))$("cityLog").innerHTML=cityLogHTML();wireCityPanel()}
+function cityLogHTML(){const L=settings.agentLog||[];return L.length?L.slice(0,12).map(x=>`<div class="row"><span><b>${esc(x.who)}</b> · ${esc(x.t)}</span><small style="color:var(--muted);white-space:nowrap">${esc(x.at)}</small></div>`).join(""):`<div class="empty" style="text-align:left;padding:4px 0">Пока пусто. Нажмите «Обход города».</div>`}
+function citySetBusy(on){cityBusy=on;document.querySelectorAll('[data-act="cityrun"],[data-act="citycouncil"],#cityAsk').forEach(b=>b.disabled=on)}
+async function cityTour(){if(cityBusy)return;citySetBusy(true);
+  await Promise.all(CITY.map((a,i)=>new Promise(r=>setTimeout(r,i*220)).then(async()=>{const rt=cityRoute(a,i);cityBusyMark(a,true);
+    await cityWalk(a,rt);cityScan(a);const g=$("bdg-"+a.id);if(g)g.innerHTML=cityBadge(a);await cityWalk(a,rt.slice().reverse());cityBusyMark(a,false)})));
+  const is=CITY.flatMap(cIssues),red=is.filter(x=>x.lv==="red").length;
+  cityLog(MAYOR.nm,"Обход завершён: срочных "+red+", к вниманию "+(is.length-red));persist();citySetBusy(false);cityRefresh();toast("Обход города завершён")}
+function cityReport(){return CITY.map(a=>`${a.nm} (${a.role}):\n`+(cityRes[a.id]?.f||[]).map(x=>`- [${x.lv==="red"?"срочно":x.lv==="warn"?"внимание":"инфо"}] ${x.t}`).join("\n")).join("\n\n")}
+async function cityAskAI(id,q){if(cityBusy)return;
+  if(!aiGet(AI_TKEY)){cityAI[id]={text:"Нужен токен GitHub Models — подключите его в разделе «ИИ-помощник».",err:true};cityRefresh();return}
+  citySetBusy(true);cityAI[id]={text:"Думаю…"};cityRefresh();
+  const base="Отвечай по-русски, кратко, нумерованным списком конкретных действий с именами и цифрами из данных. Валюта ₸. Не выдумывай того, чего нет в данных.";
+  let msgs,walkers=[];
+  if(id==="mayor"){CITY.forEach(cityScan);
+    msgs=[{role:"system",content:"Ты — Аксакал, старейшина «города агентов» CRM студии кавказских танцев «DJIGIT TAU» (Казахстан). Агенты принесли тебе отчёты обхода. Сведи их в единый план: 5 приоритетных действий на сегодня (что сделать, кто из сотрудников — руководитель, администратор, отдел продаж или тренер), затем одна строка о главном риске месяца. "+base+"\n\nОтчёты агентов:\n"+cityReport()+"\n\nОбщая сводка CRM:\n"+aiContext()},
+      {role:"user",content:q||"Составь план на сегодня."}];
+    walkers=CITY.map((a,i)=>({a,rt:cityRoute(a,i)}));}
+  else{const a=CITY.find(x=>x.id===id),r=cityScan(a);
+    msgs=[{role:"system",content:a.persona+" "+base+"\n\nТвой обход:\n"+r.f.map(x=>"- "+x.t).join("\n")+"\n\nОбщая сводка CRM:\n"+aiContext()},{role:"user",content:q||"Что сделать сегодня в твоей зоне? Дай 3–5 действий по приоритету."}];
+    walkers=[{a,rt:cityRoute(a,CITY.indexOf(a))}]}
+  walkers.forEach(w=>cityBusyMark(w.a,true));
+  const [res]=await Promise.all([aiCall(msgs,1000).then(t=>({text:t}),e=>({text:e.message,err:true})),...walkers.map(w=>cityWalk(w.a,w.rt))]);
+  cityAI[id]=res;if(!res.err)cityLog(id==="mayor"?MAYOR.nm:CITY.find(x=>x.id===id).nm,id==="mayor"?"Совет города: составлен план на день":"Ответ на вопрос"+(q?": «"+q.slice(0,60)+"»":""));
+  await Promise.all(walkers.map(w=>cityWalk(w.a,w.rt.slice().reverse())));walkers.forEach(w=>cityBusyMark(w.a,false));
+  persist();citySetBusy(false);cityRefresh()}
+function wireCityPanel(){const p=$("cityPanel");if(!p)return;
+  p.querySelectorAll("[data-agent]").forEach(b=>b.onclick=()=>{citySel=b.dataset.agent;cityRefresh()});
+  p.querySelectorAll("[data-cback]").forEach(b=>b.onclick=()=>{citySel="mayor";cityRefresh()});
+  document.querySelectorAll("[data-cgo]").forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.cgo)});
+  p.querySelectorAll("[data-cact]").forEach(b=>b.onclick=()=>{const [aid,i]=b.dataset.cact.split(":"),a=CITY.find(x=>x.id===aid),it=cityRes[aid]?.f[+i];if(!it?.act)return;
+    if(it.act.go){go(it.act.go);return}
+    const msg=it.act.run();logAct(a.nm+" ("+a.role+"): "+msg);cityLog(a.nm,msg);persist();CITY.forEach(cityScan);toast(msg);render()});
+  const f=$("cityForm"),q=$("cityQ");if(f){q.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))f.requestSubmit()};
+    f.onsubmit=e=>{e.preventDefault();cityAskAI(citySel,q.value.trim())};if(cityBusy)$("cityAsk").disabled=true}}
+views["Город агентов"]=()=>{CITY.forEach(cityScan);return `
+  <div class="card citybar"><div><h3>Шесть агентов и старейшина</h3><div class="hint">Каждый агент живёт в своём здании и следит за своей зоной CRM. «Обход города» — агенты проверяют данные и приносят находки в ратушу. Нажмите на здание, чтобы открыть агента.</div></div>
+  <div class="actions" style="margin:0"><button class="btn" data-act="cityrun">Обход города</button><button class="btn secondary" data-act="citycouncil">Совет у Аксакала</button></div></div>
+  <div class="citywrap"><div class="card citymap">${citySVG()}<div class="clegend"><span><i style="background:#C7392F"></i>срочно</span><span><i style="background:#D99A2B"></i>к вниманию</span><span><i style="background:#3E8E4E"></i>спокойно</span></div></div>
+  <div class="card cpanel" id="cityPanel">${cityPanel()}</div></div>
+  <div class="card" style="margin-top:16px"><h3>Журнал города</h3><div id="cityLog">${cityLogHTML()}</div></div>`};
+after["Город агентов"]=()=>{const m=document.querySelector(".citysvg");
+  m.onclick=e=>{const g=e.target.closest("[data-agent]");if(!g)return;citySel=g.dataset.agent;cityRefresh();if(innerWidth<900)$("cityPanel").scrollIntoView({behavior:"smooth",block:"start"})};
+  m.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&e.target.dataset?.agent){e.preventDefault();citySel=e.target.dataset.agent;cityRefresh()}};
+  document.querySelector('[data-act="cityrun"]').onclick=cityTour;
+  document.querySelector('[data-act="citycouncil"]').onclick=()=>{citySel="mayor";cityRefresh();cityAskAI("mayor","")};
+  if(cityBusy)citySetBusy(true);wireCityPanel()};
 (async function boot(){
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
