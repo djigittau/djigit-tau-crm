@@ -128,6 +128,7 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .aimsg{padding:10px 13px;border-radius:var(--r);font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word;max-width:85%}
 .aimsg.u{align-self:flex-end;background:var(--pale);border:1px solid var(--line)}
 .aimsg.a{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+.aimeta{margin-top:6px;font-size:11px;color:var(--muted)}
 .aimsg.err{border-color:var(--red);background:var(--red-bg)}
 .aiform{display:flex;gap:8px;margin-top:10px}.aiform textarea{flex:1;resize:vertical;min-height:44px}
 .field:focus{border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(199,155,53,.18)}
@@ -542,7 +543,7 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"GitHub Models (бесплатно) или Claude от Anthropic: вопросы по данным студии"};
+const subs={"Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
@@ -1563,18 +1564,87 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;
   if($("modalbg").style.display==="grid"){closeModal();return}
   $("gres").classList.remove("on");$("mePop").classList.remove("on");$("bellPop").classList.remove("on");
   closeSide()});
-/* ===== ИИ-помощник: GitHub Models (бесплатно, токен GitHub) или Anthropic Claude (платно, API-ключ) =====
-   Токены хранятся только в этом браузере (отдельные ключи), не попадают в резервные копии и Excel. */
+/* ===== ИИ-помощник: GitHub Models (бесплатно) + Anthropic Claude (платно) с автопереключением =====
+   Режим «Авто»: запрос уходит бесплатной модели GitHub, у которой сегодня израсходована
+   наименьшая доля дневного лимита (нагрузка размазывается по всем моделям). При лимите, сбое или
+   ошибке модель ставится на паузу и запрос сразу повторяется на следующей. Платный Claude
+   (сначала дешёвый Haiku) подключается, только когда бесплатные недоступны.
+   Токены и счётчики хранятся только в этом браузере, не попадают в резервные копии и Excel. */
 const AI_URL="https://models.github.ai/inference/chat/completions",AI_TKEY="djigit_crm_gh_token",AI_MKEY="djigit_crm_ai_model";
-const ANT_URL="https://api.anthropic.com/v1/messages",ANT_KEY="djigit_crm_anthropic_key";
-const AI_MODELS=[["claude-opus-5-5","Claude Opus 5.5 — самая умная","ant"],["claude-sonnet-5-5","Claude Sonnet 5.5 — баланс","ant"],["claude-haiku-5-5","Claude Haiku 5.5 — быстрая и дешёвая","ant"],
-  ["openai/gpt-4.1-mini","GPT-4.1 mini (быстрая)","gh"],["openai/gpt-4.1","GPT-4.1","gh"],["openai/gpt-4o-mini","GPT-4o mini","gh"],["meta/Llama-4-Scout-17B-16E-Instruct","Llama 4 Scout","gh"],["deepseek/DeepSeek-V3-0324","DeepSeek V3","gh"],["mistral-ai/mistral-small-2503","Mistral Small","gh"]];
-const AI_DEF="openai/gpt-4.1-mini";
-const aiModel=()=>{const m=aiGet(AI_MKEY);return AI_MODELS.some(x=>x[0]===m)?m:AI_DEF};
-const aiProv=(m=aiModel())=>(AI_MODELS.find(x=>x[0]===m)||[])[2]||"gh";
-const aiTokKey=(p=aiProv())=>p==="ant"?ANT_KEY:AI_TKEY;
+const ANT_URL="https://api.anthropic.com/v1/messages",ANT_KEY="djigit_crm_anthropic_key",AI_PAIDKEY="djigit_crm_ai_paid",AI_UKEY="djigit_crm_ai_usage";
+// [id, название, провайдер, примерный бесплатный лимит в день (0 — без дневного лимита, платно)]
+const AI_MODELS=[["openai/gpt-4.1-mini","GPT-4.1 mini","gh",150],["openai/gpt-4o-mini","GPT-4o mini","gh",150],["meta/Llama-4-Scout-17B-16E-Instruct","Llama 4 Scout","gh",150],["mistral-ai/mistral-small-2503","Mistral Small","gh",150],["openai/gpt-4.1","GPT-4.1","gh",50],["deepseek/DeepSeek-V3-0324","DeepSeek V3","gh",50],
+  ["claude-haiku-5-5","Claude Haiku 5.5 — дешёвая","ant",0],["claude-sonnet-5-5","Claude Sonnet 5.5 — баланс","ant",0],["claude-opus-5-5","Claude Opus 5.5 — самая умная","ant",0]];
 const aiGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}};
 const aiSet=(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}};
+const aiInfo=id=>AI_MODELS.find(x=>x[0]===id)||[id,id,"gh",0];
+const aiPref=()=>{const m=aiGet(AI_MKEY);return AI_MODELS.some(x=>x[0]===m)?m:"auto"};
+const aiPaidOn=()=>aiGet(AI_PAIDKEY)!=="0";
+const aiDay=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+function aiUsage(){let u;try{u=JSON.parse(aiGet(AI_UKEY))}catch(e){}u=u&&typeof u==="object"?u:{};
+  if(u.day!==aiDay()){u.day=aiDay();u.n={}}u.n=u.n||{};u.block=u.block||{};u.why=u.why||{};return u}
+const aiSaveUsage=u=>aiSet(AI_UKEY,JSON.stringify(u));
+function aiPause(id,sec,why){const u=aiUsage();u.block[id]=Date.now()+sec*1000;u.why[id]=why;aiSaveUsage(u)}
+const aiPausedTill=(id,u=aiUsage())=>(u.block[id]||0)>Date.now()?u.block[id]:0;
+/* Очередь моделей для одного вопроса: выбранная вручную (если есть) → бесплатные по возрастанию
+   доли израсходованного лимита → платные Claude от дешёвой к дорогой. */
+function aiPlan(){
+  const u=aiUsage(),gh=!!aiGet(AI_TKEY),ant=!!aiGet(ANT_KEY),pref=aiPref();
+  const ok=([id,,p,lim])=>(p==="gh"?gh:ant)&&!aiPausedTill(id,u)&&!(lim&&(u.n[id]||0)>=lim);
+  const free=AI_MODELS.filter(m=>m[2]==="gh"&&ok(m)).sort((a,b)=>(u.n[a[0]]||0)/a[3]-(u.n[b[0]]||0)/b[3]);
+  const paid=aiPaidOn()||aiInfo(pref)[2]==="ant"?AI_MODELS.filter(m=>m[2]==="ant"&&ok(m)):[];
+  const list=[...free,...paid].map(m=>m[0]);
+  if(pref!=="auto"&&list.includes(pref))list.splice(list.indexOf(pref),1),list.unshift(pref);
+  return list}
+class AiErr extends Error{constructor(msg,o={}){super(msg);Object.assign(this,o)}}
+const aiWait=m=>{const x=/(?:wait|after|in)\s+(\d+)\s*(?:seconds?|sec|s\b)/i.exec(m||"")||/(\d+)\s*(?:seconds?|sec)\b/i.exec(m||"");return x?Number(x[1]):0};
+async function aiFetch(url,opt,host){
+  let r;try{r=await fetch(url,opt)}catch(e){throw new AiErr("нет связи с "+host,{pause:30})}
+  const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(_){}return {r,j,t}}
+/* Разбор ошибки в решение: pause — сек. паузы для модели, provider — выключить весь провайдер, day — дневной лимит */
+function aiFail(r,j,t,who){
+  const m=j?.error?.message||j?.message||t.slice(0,200),s=r.status,code=String(j?.error?.code||j?.error?.type||"");
+  if(s===401)throw new AiErr(who+": ключ недействителен",{provider:600});
+  if(s===403)throw new AiErr(who+": нет доступа ("+m+")",{provider:600});
+  if(/credit|balance|billing/i.test(m))throw new AiErr(who+": закончились деньги на балансе",{provider:3600});
+  if(s===429){const w=aiWait(m),day=/day|86400|daily/i.test(m)||w>3600;throw new AiErr(who+": лимит запросов",{pause:w||(day?6*3600:60),day})}
+  if(s===413||/tokens_limit|too large|too long|context/i.test(code+" "+m))throw new AiErr(who+": слишком длинный запрос",{});
+  if(s===404||/unknown_model|not found|unavailable/i.test(code+" "+m))throw new AiErr(who+": модель недоступна",{pause:24*3600});
+  if(s>=500)throw new AiErr(who+": сервис перегружен ("+s+")",{pause:60});
+  throw new AiErr(who+": ошибка "+s+" — "+m,{})}
+async function ghCall(model,messages,max){
+  const tok=aiGet(AI_TKEY);
+  const {r,j,t}=await aiFetch(AI_URL,{method:"POST",headers:{"Authorization":"Bearer "+tok,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"},body:JSON.stringify({model,messages,max_tokens:max,temperature:.4})},"models.github.ai");
+  if(!r.ok)aiFail(r,j,t,aiInfo(model)[1]);
+  const out=j?.choices?.[0]?.message?.content;if(!out)throw new AiErr(aiInfo(model)[1]+": пустой ответ",{pause:60});return out}
+/* Anthropic Messages API напрямую из браузера (статичная страница без сборки, поэтому fetch, а не SDK).
+   System — отдельным полем; история должна начинаться с user, подряд идущие реплики одной роли склеиваем. */
+async function antCall(model,messages){
+  const system=messages.filter(m=>m.role==="system").map(m=>m.content).join("\n\n"),msgs=[];
+  messages.filter(m=>m.role!=="system").forEach(m=>{const l=msgs[msgs.length-1];if(l&&l.role===m.role)l.content+="\n\n"+m.content;else msgs.push({role:m.role,content:m.content})});
+  while(msgs.length&&msgs[0].role!=="user")msgs.shift();
+  const body={model,max_tokens:16000,messages:msgs,output_config:{effort:"low"}},headers={"x-api-key":aiGet(ANT_KEY),"anthropic-version":"2026-10-21","anthropic-dangerous-direct-browser-access":"true","content-type":"application/json"};
+  if(system)body.system=system;
+  // Если классификатор безопасности откажет, сервер сам переспросит у запасной модели (у Haiku такой опции нет)
+  if(model!=="claude-haiku-5-5"){body.fallbacks="default";headers["anthropic-beta"]="server-side-fallback-2026-07-01"}
+  const {r,j,t}=await aiFetch(ANT_URL,{method:"POST",headers,body:JSON.stringify(body)},"api.anthropic.com");
+  if(!r.ok)aiFail(r,j,t,aiInfo(model)[1]);
+  if(j?.stop_reason==="refusal")throw new AiErr(aiInfo(model)[1]+": отказ отвечать",{});
+  const out=(j?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").trim();
+  if(!out)throw new AiErr(aiInfo(model)[1]+": пустой ответ",{});
+  return out+(j?.stop_reason==="max_tokens"?"\n\n(ответ обрезан по длине)":"")}
+/* Перебор моделей по очереди aiPlan(); onTry(model) — чтобы показать, кто сейчас отвечает */
+async function aiCall(messages,{max=900,plan=aiPlan(),onTry}={}){
+  if(!aiGet(AI_TKEY)&&!aiGet(ANT_KEY))throw new Error("Сначала вставьте токен GitHub и/или API-ключ Anthropic и нажмите «Сохранить».");
+  const errs=[],deadProv=new Set();
+  for(const model of plan){const prov=aiInfo(model)[2];if(deadProv.has(prov))continue;
+    onTry&&onTry(model);
+    try{const text=prov==="ant"?await antCall(model,messages):await ghCall(model,messages,max);
+      const u=aiUsage();u.n[model]=(u.n[model]||0)+1;delete u.block[model];delete u.why[model];aiSaveUsage(u);return {text,model}}
+    catch(e){errs.push(e.message);
+      if(e.provider){deadProv.add(prov);AI_MODELS.filter(m=>m[2]===prov).forEach(m=>aiPause(m[0],e.provider,e.message))}
+      else if(e.pause){aiPause(model,e.pause,e.message);if(e.day){const u=aiUsage();u.n[model]=Math.max(u.n[model]||0,aiInfo(model)[3]);aiSaveUsage(u)}}}}
+  throw new Error(plan.length?"Все доступные модели не ответили:\n• "+errs.join("\n• "):"Сейчас нет доступных моделей: бесплатные лимиты на паузе"+(aiGet(ANT_KEY)?(aiPaidOn()?"":", а платный Claude выключен"):" и ключ Anthropic не задан")+". Посмотрите таблицу «Лимиты на сегодня».")}
 let aiChat=[],aiBusy=false;
 function aiContext(){
   const L=db.leads.filter(inBranch),S=db.students.filter(inBranch),Pm=db.payments.filter(inBranch),ym=new Date().toISOString().slice(0,7);
@@ -1593,63 +1663,56 @@ function aiContext(){
     "Новые заявки без обработки: "+L.filter(x=>x.stage===STAGES[0]).slice(0,40).map(x=>x.name+" ("+(x.source||"—")+")").join(", ")];
   return lines.join("\n");
 }
-function aiMsgs(){return aiChat.map(m=>`<div class="aimsg ${m.role==="user"?"u":"a"}${m.err?" err":""}">${esc(m.content)}</div>`).join("")||`<div class="hint">Спросите, например: «Какой источник заявок самый эффективный?», «Почему растут отказы?», «Напиши сообщение ученикам с долгом по оплате».</div>`}
-views["ИИ-помощник"]=()=>{const mdl=aiModel(),ant=aiProv(mdl)==="ant",tok=aiGet(aiTokKey());
-  const opts=(p,lbl)=>`<optgroup label="${lbl}">${AI_MODELS.filter(x=>x[2]===p).map(([v,t])=>`<option value="${v}" ${v===mdl?"selected":""}>${t}</option>`).join("")}</optgroup>`;return `
-  <div class="card" style="margin-bottom:16px"><h3>Подключение ${ant?"Anthropic Claude":"GitHub Models"}</h3>
-  <div class="formfield"><label for="aiModel">Модель</label><select class="field" id="aiModel">${opts("gh","GitHub Models — бесплатно")}${opts("ant","Anthropic Claude — платно, по API-ключу")}</select></div>
-  <div class="hint">${ant?`Платный API Anthropic: оплата за токены с баланса аккаунта, лимиты зависят от уровня аккаунта и намного выше бесплатных. Создайте ключ: console.anthropic.com → Settings → API Keys и пополните баланс (Billing). Ключ хранится только в этом браузере и не попадает в резервные копии — но любой, у кого есть доступ к этому браузеру, может его увидеть, поэтому поставьте лимит расходов в консоли Anthropic.`:`Бесплатный LLM API от GitHub. Создайте токен: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token с правом <b>Models: Read-only</b> (github.com/settings/personal-access-tokens/new). Токен хранится только в этом браузере и не попадает в резервные копии. Бесплатный лимит — около 50–150 запросов в день в зависимости от модели.`}</div>
-  <div class="formfield"><label for="aiTok">${ant?"API-ключ Anthropic":"Токен GitHub"}</label><input class="field" id="aiTok" type="password" autocomplete="off" placeholder="${ant?"sk-ant-…":"github_pat_…"}" value="${esc(tok)}"></div>
-  <div class="actions"><button class="btn" data-act="aisave">Сохранить</button><button class="btn secondary" data-act="aitest">Проверить связь</button>${tok?`<button class="btn secondary" data-act="aidel">Удалить токен</button>`:""}</div></div>
-  <div class="card"><h3>Чат</h3><div class="hint">К вопросу прикладывается сводка CRM: количества, этапы, источники, финансы по месяцам и имена (без телефонов).</div>
+function aiMsgs(){return aiChat.map(m=>`<div class="aimsg ${m.role==="user"?"u":"a"}${m.err?" err":""}">${esc(m.content)}${m.model?`<div class="aimeta">${esc(aiInfo(m.model)[1])}</div>`:""}</div>`).join("")||`<div class="hint">Спросите, например: «Какой источник заявок самый эффективный?», «Почему растут отказы?», «Напиши сообщение ученикам с долгом по оплате».</div>`}
+function aiLimits(){const u=aiUsage(),gh=!!aiGet(AI_TKEY),ant=!!aiGet(ANT_KEY),hm=t=>{const d=new Date(t);return (d.toDateString()===new Date().toDateString()?"":d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"})+" ")+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})};
+  return `<div class="tablewrap"><table class="table"><thead><tr><th>Модель</th><th>Сегодня</th><th>Состояние</th></tr></thead><tbody>${AI_MODELS.map(([id,name,p,lim])=>{const n=u.n[id]||0,till=aiPausedTill(id,u);
+    const st=!(p==="gh"?gh:ant)?`<span style="color:var(--muted)">нет ${p==="gh"?"токена GitHub":"ключа Anthropic"}</span>`:till?`<span title="${esc(u.why[id]||"")}">пауза до ${hm(till)}</span>`:lim&&n>=lim?"лимит исчерпан":p==="ant"&&!aiPaidOn()&&aiPref()!==id?`<span style="color:var(--muted)">резерв выключен</span>`:"доступна";
+    return `<tr><td>${esc(name)}</td><td>${lim?n+" / ~"+lim:n+" (платно)"}</td><td>${st}</td></tr>`}).join("")}</tbody></table></div>`}
+views["ИИ-помощник"]=()=>{const pref=aiPref(),gt=aiGet(AI_TKEY),ak=aiGet(ANT_KEY);
+  const opts=(p,lbl)=>`<optgroup label="${lbl}">${AI_MODELS.filter(x=>x[2]===p).map(([v,t])=>`<option value="${v}" ${v===pref?"selected":""}>Сначала ${t}, затем остальные</option>`).join("")}</optgroup>`;return `
+  <div class="card" style="margin-bottom:16px"><h3>Подключение</h3>
+  <div class="hint">В режиме «Авто» вопросы распределяются по всем бесплатным моделям GitHub — у каждой свой дневной лимит, поэтому вместе их хватает примерно на ${AI_MODELS.reduce((s,m)=>s+m[3],0)} вопросов в день. Если модель упёрлась в лимит или не отвечает, вопрос сразу уходит следующей. Платный Claude подключается только когда бесплатные закончились — сначала дешёвый Haiku.</div>
+  <div class="formfield"><label for="aiModel">Режим</label><select class="field" id="aiModel"><option value="auto" ${pref==="auto"?"selected":""}>Авто — балансировка между всеми моделями (рекомендуется)</option>${opts("gh","GitHub Models — бесплатно")}${opts("ant","Anthropic Claude — платно")}</select></div>
+  <div class="formfield"><label for="aiTok">Токен GitHub (бесплатно)</label><input class="field" id="aiTok" type="password" autocomplete="off" placeholder="github_pat_…" value="${esc(gt)}"></div>
+  <div class="hint">GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token с правом <b>Models: Read-only</b> (github.com/settings/personal-access-tokens/new). Лимиты считаются на аккаунт GitHub — если у сотрудников свои токены, у каждого свой запас.</div>
+  <div class="formfield"><label for="aiAnt">API-ключ Anthropic (платно, необязательно)</label><input class="field" id="aiAnt" type="password" autocomplete="off" placeholder="sk-ant-…" value="${esc(ak)}"></div>
+  <div class="hint">console.anthropic.com → Settings → API Keys, баланс пополняется в Billing. Ключ виден любому, у кого есть доступ к этому браузеру, — поставьте лимит расходов в консоли Anthropic.</div>
+  <label class="chk" style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="aiPaid" ${aiPaidOn()?"checked":""}> Подключать платный Claude, когда бесплатные лимиты закончились</label>
+  <div class="actions"><button class="btn" data-act="aisave">Сохранить</button><button class="btn secondary" data-act="aitest">Проверить связь</button>${gt||ak?`<button class="btn secondary" data-act="aidel">Удалить ключи</button>`:""}</div></div>
+  <div class="card" style="margin-bottom:16px"><h3>Лимиты на сегодня</h3><div class="hint">Счётчики ведутся в этом браузере; если тем же токеном пользуются другие, реальный остаток меньше — тогда сработает автопереключение.</div>
+  <div id="aiLim">${aiLimits()}</div><div class="actions" style="margin-top:8px"><button class="btn secondary" data-act="aireset">Снять паузы</button></div></div>
+  <div class="card"><h3>Чат</h3><div class="hint">К вопросу прикладывается сводка CRM: количества, этапы, источники, финансы по месяцам и имена (без телефонов). Чтобы экономить лимиты, в запрос уходят только последние реплики чата.</div>
   <div class="aichat" id="aiLog">${aiMsgs()}</div>
   <form class="aiform" id="aiForm"><textarea class="field" id="aiQ" placeholder="Ваш вопрос… (Ctrl+Enter — отправить)"></textarea><button class="btn" type="submit" id="aiSend">Отправить</button></form>
   <div class="actions" style="margin-top:8px"><button class="btn secondary" data-act="aiclear">Очистить чат</button></div></div>`};
-async function aiCall(messages,max=900){
-  if(aiProv()==="ant")return antCall(messages);
-  const tok=aiGet(AI_TKEY);if(!tok)throw new Error("Сначала вставьте токен GitHub и нажмите «Сохранить».");
-  let r;try{r=await fetch(AI_URL,{method:"POST",headers:{"Authorization":"Bearer "+tok,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"},body:JSON.stringify({model:aiModel(),messages,max_tokens:max,temperature:.4})})}
-  catch(e){throw new Error("Нет связи с models.github.ai (сеть или блокировка браузером).")}
-  const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(_){}
-  if(!r.ok){const m=j?.error?.message||j?.message||t.slice(0,200);throw new Error(r.status===401?"Токен недействителен или без права Models: Read.":r.status===429?"Исчерпан бесплатный лимит запросов. Попробуйте позже или другую модель.":"Ошибка "+r.status+": "+m)}
-  return j?.choices?.[0]?.message?.content||"(пустой ответ)";
-}
-/* Anthropic Messages API напрямую из браузера (статичная страница без сборки, поэтому fetch, а не SDK).
-   System — отдельным полем; история должна начинаться с user, подряд идущие реплики одной роли склеиваем. */
-async function antCall(messages){
-  const key=aiGet(ANT_KEY);if(!key)throw new Error("Сначала вставьте API-ключ Anthropic и нажмите «Сохранить».");
-  const model=aiModel(),system=messages.filter(m=>m.role==="system").map(m=>m.content).join("\n\n"),msgs=[];
-  messages.filter(m=>m.role!=="system").forEach(m=>{const l=msgs[msgs.length-1];if(l&&l.role===m.role)l.content+="\n\n"+m.content;else msgs.push({role:m.role,content:m.content})});
-  while(msgs.length&&msgs[0].role!=="user")msgs.shift();
-  const body={model,max_tokens:16000,messages:msgs,output_config:{effort:"low"}},headers={"x-api-key":key,"anthropic-version":"2026-10-21","anthropic-dangerous-direct-browser-access":"true","content-type":"application/json"};
-  if(system)body.system=system;
-  // Если классификатор безопасности откажет, сервер сам переспросит у запасной модели (у Haiku такой опции нет)
-  if(model!=="claude-haiku-5-5"){body.fallbacks="default";headers["anthropic-beta"]="server-side-fallback-2026-07-01"}
-  let r;try{r=await fetch(ANT_URL,{method:"POST",headers,body:JSON.stringify(body)})}
-  catch(e){throw new Error("Нет связи с api.anthropic.com (сеть или блокировка браузером).")}
-  const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(_){}
-  if(!r.ok){const m=j?.error?.message||t.slice(0,200);throw new Error(r.status===401?"API-ключ Anthropic недействителен.":r.status===403?"Ключу Anthropic запрещён доступ: "+m:r.status===429?"Превышен лимит запросов Anthropic. Подождите минуту.":r.status===529?"Anthropic перегружен, попробуйте чуть позже.":/credit|balance/i.test(m)?"На балансе Anthropic закончились деньги — пополните в console.anthropic.com → Billing.":"Ошибка Anthropic "+r.status+": "+m)}
-  if(j?.stop_reason==="refusal")throw new Error("Модель отказалась отвечать на этот запрос. Переформулируйте вопрос.");
-  const out=(j?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").trim();
-  return out+(j?.stop_reason==="max_tokens"?"\n\n(ответ обрезан по длине)":"")||"(пустой ответ)";
-}
+/* История для запроса: последние реплики без ошибок, не больше ~6000 символов — бесплатные модели
+   GitHub принимают около 8000 токенов на запрос вместе со сводкой CRM. */
+function aiHistory(){const out=[];let len=0;
+  for(const m of aiChat.slice(0,-1).filter(m=>!m.err).reverse()){if(out.length>=8||(out.length&&len+m.content.length>6000))break;len+=m.content.length;out.unshift({role:m.role,content:m.content})}
+  return out}
 function wireAI(){
-  const log=$("aiLog"),q=$("aiQ"),draw=()=>{log.innerHTML=aiMsgs();log.scrollTop=log.scrollHeight};draw();
-  const save=()=>{aiSet(aiTokKey(),$("aiTok").value.trim())};
+  const log=$("aiLog"),q=$("aiQ"),draw=()=>{log.innerHTML=aiMsgs();log.scrollTop=log.scrollHeight},lim=()=>{if($("aiLim"))$("aiLim").innerHTML=aiLimits()};draw();
+  const save=()=>{aiSet(AI_TKEY,$("aiTok").value.trim());aiSet(ANT_KEY,$("aiAnt").value.trim());aiSet(AI_MKEY,$("aiModel").value==="auto"?"":$("aiModel").value);aiSet(AI_PAIDKEY,$("aiPaid").checked?"":"0")};
   document.querySelector('[data-act="aisave"]').onclick=()=>{save();toast("Подключение сохранено");render()};
-  $("aiModel").onchange=()=>{const was=aiProv();save();aiSet(AI_MKEY,$("aiModel").value);if(aiProv()!==was)render()};
-  document.querySelector('[data-act="aidel"]')?.addEventListener("click",()=>{aiSet(aiTokKey(),"");toast("Токен удалён");render()});
+  $("aiModel").onchange=()=>{save();lim()};$("aiPaid").onchange=()=>{save();lim()};
+  document.querySelector('[data-act="aidel"]')?.addEventListener("click",()=>{aiSet(AI_TKEY,"");aiSet(ANT_KEY,"");toast("Ключи удалены");render()});
+  document.querySelector('[data-act="aireset"]').onclick=()=>{const u=aiUsage();u.block={};u.why={};aiSaveUsage(u);lim();toast("Паузы сняты")};
   document.querySelector('[data-act="aiclear"]').onclick=()=>{aiChat=[];draw()};
-  document.querySelector('[data-act="aitest"]').onclick=async e=>{save();e.target.disabled=true;
-    try{await aiCall([{role:"user",content:"Ответь одним словом: ок"}],5);toast("Связь есть: модель отвечает")}catch(err){toast(err.message)}e.target.disabled=false};
+  // Проверка: по одному запросу к самой «лёгкой» доступной модели каждого провайдера
+  document.querySelector('[data-act="aitest"]').onclick=async e=>{save();e.target.disabled=true;const res=[];
+    for(const p of ["gh","ant"]){if(!aiGet(p==="gh"?AI_TKEY:ANT_KEY))continue;const plan=AI_MODELS.filter(m=>m[2]===p&&!aiPausedTill(m[0])).map(m=>m[0]);
+      try{const r=await aiCall([{role:"user",content:"Ответь одним словом: ок"}],{max:5,plan});res.push((p==="gh"?"GitHub":"Anthropic")+": работает ("+aiInfo(r.model)[1]+")")}
+      catch(err){res.push((p==="gh"?"GitHub":"Anthropic")+": "+err.message.replace(/^Все доступные модели не ответили:\n• /,"").split("\n")[0])}}
+    toast(res.join(" · ")||"Сначала вставьте ключ");lim();e.target.disabled=false};
   q.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))$("aiForm").requestSubmit()};
   $("aiForm").onsubmit=async e=>{e.preventDefault();const text=q.value.trim();if(!text||aiBusy)return;
     aiBusy=true;$("aiSend").disabled=true;q.value="";aiChat.push({role:"user",content:text});aiChat.push({role:"assistant",content:"Думаю…"});draw();
-    const hist=aiChat.slice(0,-1).filter(m=>!m.err).slice(-12).map(({role,content})=>({role,content}));
+    const hist=aiHistory();
     const sys={role:"system",content:"Ты — ИИ-помощник CRM студии кавказских танцев «DJIGIT TAU» (Казахстан, валюта ₸). Отвечай по-русски, кратко и по делу, с конкретными цифрами и рекомендациями. Опирайся на сводку данных; если данных не хватает — так и скажи, ничего не выдумывай.\n\nСводка CRM:\n"+aiContext()};
     const slot=aiChat[aiChat.length-1];
-    try{slot.content=await aiCall([sys,...hist])}catch(err){slot.content=err.message;slot.err=true}
-    aiBusy=false;if($("aiLog")){draw();$("aiSend").disabled=false;$("aiQ").focus()}};
+    try{const r=await aiCall([sys,...hist],{onTry:m=>{slot.content="Думаю… ("+aiInfo(m)[1]+")";if($("aiLog"))draw()}});slot.content=r.text;slot.model=r.model}
+    catch(err){slot.content=err.message;slot.err=true}
+    aiBusy=false;if($("aiLog")){draw();lim();$("aiSend").disabled=false;$("aiQ").focus()}};
 }
 after["ИИ-помощник"]=wireAI;
 (async function boot(){
