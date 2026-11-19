@@ -622,7 +622,7 @@ async function gz(str){const cs=new Blob([str]).stream().pipeThrough(new Compres
 async function gunz(b64){const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"))).text()}
 function persistWarn(){if(!persist.warned){persist.warned=1;setTimeout(()=>toast("Браузер не сохранил данные: не хватает места. Выгрузите копию в Настройках."),300)}}
 /* Сохранение откладывается на 300 мс: серия правок пишется в хранилище один раз */
-function persist(){clearTimeout(persist.t);persist.t=setTimeout(persistNow,300)}
+function persist(){_ltvIdx=null;clearTimeout(persist.t);persist.t=setTimeout(persistNow,300)}
 addEventListener("pagehide",()=>{if(persist.t){clearTimeout(persist.t);persistNow(true)}});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&persist.t){clearTimeout(persist.t);persistNow(true)}});
 function persistNow(sync){persist.t=0;const json=JSON.stringify({db,users,settings}),seq=++persistSeq;
@@ -1755,9 +1755,11 @@ function wireEcon(){
 /* ===== LTV и профиль ученика ===== */
 /* LTV: фактические оплаты ученика (доходы минус возвраты) или сумма цен его абонементов — что больше
    (часть старых оплат может быть не привязана к ученику, тогда выручают цены абонементов) */
-function ltv(id){const ps=db.payments.filter(p=>p.student===id);
-  const paid=total(ps.filter(isInc))-total(ps.filter(p=>isExp(p)&&p.action==="Возвраты"));
-  return Math.max(paid,db.memberships.filter(m=>m.student===id).reduce((a,m)=>a+Number(m.price||0),0))}
+let _ltvIdx=null;   // индекс сумм по ученикам; сбрасывается при каждом сохранении
+function ltvIndex(){if(_ltvIdx)return _ltvIdx;const paid={},memb={};
+  db.payments.forEach(p=>{if(!p.student)return;const v=Number(p.amount||0);if(isInc(p))paid[p.student]=(paid[p.student]||0)+v;else if(isExp(p)&&p.action==="Возвраты")paid[p.student]=(paid[p.student]||0)-v});
+  db.memberships.forEach(m=>{memb[m.student]=(memb[m.student]||0)+Number(m.price||0)});return _ltvIdx={paid,memb}}
+function ltv(id){const x=ltvIndex();return Math.max(x.paid[id]||0,x.memb[id]||0)}
 function canLtv(){return allowed("Финансы")||allowed("Абонементы")}
 /* Средний LTV платящего ученика: на него опирается прогноз по воронке */
 function avgLtv(list=db.students){const v=list.map(s=>ltv(s.id)).filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0}
@@ -1997,7 +1999,7 @@ function importXls(){
   settings.accounts=XLS.accounts.map(a=>({...a}));
   XLS.payments.forEach(([date,type,category,description,amount,b,account,teacher,client,action,to])=>db.payments.push({id:++id,date,type,action,category,description,amount,branch:B(b),account:account||XLS.accounts[0].name,teacher,client,src}));
   XLS.payments.forEach((p,i)=>{if(p[10])db.payments[db.payments.length-XLS.payments.length+i].toAccount=p[10]});
-  settings.xlsVersion=XLS.v;logAct("Загружены данные из таблицы студии");
+  settings.xlsVersion=XLS.v;logAct("Загружены данные из таблицы студии");linkPayments();
 }
 
 /* ===== Запуск ===== */
