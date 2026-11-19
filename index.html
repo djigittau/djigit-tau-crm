@@ -545,7 +545,7 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-const sections=[["Продажи",["Главная","Заявки и воронка","Задачи","ИИ-помощник","Автоматизация"]],["Студия",["Ученики","Группы","Расписание","Посещаемость","Абонементы","Тренеры","Филиалы"]],["Деньги",["Финансы","Экономика","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
+const sections=[["Продажи",["Главная","Заявки и воронка","Задачи","ИИ-помощник","Автоматизация"]],["Студия",["Ученики","Группы","Расписание","Посещаемость","Абонементы","Тренеры","Филиалы"]],["Деньги",["Финансы","Экономика","Таблица УО","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
 const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
@@ -572,7 +572,7 @@ const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="
   xc:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
   robot:'<rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/><circle cx="12" cy="3.5" r="1"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/>'};
-const icons={"Экономика":"chart","Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
+const icons={"Таблица УО":"list","Экономика":"chart","Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
 const ico=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[icons[n]]||P.grid}</svg>`;
 const svg=(k,st="")=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${st?`style="${st}"`:""}>${P[k]}</svg>`;
 /* Какие разделы видит каждая роль. null = всё. */
@@ -651,7 +651,7 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
+const subs={"Таблица УО":"Все 17 листов таблицы «Камран_УО» — как в Google Таблице, с поиском и выгрузкой в Excel","Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
@@ -698,6 +698,7 @@ const views={
 "Группы":()=>tablePage("groups",["Название","Вид танца","Филиал","Возраст","Тренер","Дни","Время","Заполняемость"],x=>{const f=groupFill(x,new Date().toISOString().slice(0,7));return [`<b>${esc(x.name)}</b>`,esc(x.dance||"—"),esc(branchName(x.branch)),esc(x.age),esc(x.teacher),esc(x.days),esc(x.time),f.cap?`<span class="num">${f.listed}/${f.cap}</span> ${marginPill(f.listed/f.cap)}`:`<span class="sub">${f.listed} уч. · укажите вместимость</span>`]}),
 "Тренеры":()=>tablePage("teachers",["Тренер","Телефон","Филиал","Роль","Оплата"],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone||"—"),esc(branchName(x.branch)),esc(x.role),x.payType&&x.payType!=="Не задано"?payLabel(x):"—"]),
 "Экономика":()=>econView(),
+"Таблица УО":()=>sheetsView(),
 "Абонементы":()=>tablePage("memberships",["Ученик","Абонемент","Занятия","Цена","Филиал","До"],x=>[esc(db.students.find(s=>s.id===x.student)?.name||"—"),`<b>${esc(x.title)}</b>`,`<span class="num">${x.used}/${x.total}</span>`,`<span class="num">${money(x.price)}</span>`,esc(branchName(x.branch)),esc(x.expires||"—")]),
 "Филиалы":()=>tablePage("branches",["Филиал","Адрес","Учеников","Групп"],x=>[`<b>${esc(x.name)}</b>`,esc(x.address||"—"),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
 "Финансы":()=>`<div class="stats">${statsCard("Доходы",money(sum("Доход")),"Поступления")}${statsCard("Расходы",money(sum("Расход")),"Расходные операции")}${statsCard("Баланс",money(sum("Доход")-sum("Расход")),"Доход минус расходы")}${statsCard("Операции",db.payments.filter(inBranch).length,sum("Вывод")?"Вывод дивидендов: "+money(sum("Вывод")):"Всего записей")}</div>${tablePage("payments",["Дата","Тип","Категория","Описание","Сумма","Счёт","Филиал","Тренер"],x=>[esc(x.date),status(x.type),esc(x.category||"—"),esc(x.description),`<span class="num">${money(x.amount)}</span>`,esc((x.account||"—")+(x.toAccount?" → "+x.toAccount:"")),esc(branchName(x.branch)),esc(x.teacher||"—")])}`,
@@ -1975,6 +1976,29 @@ function demoSeed(){
 }
 
 
+/* ===== «Таблица УО»: все листы таблицы студии как есть =====
+   Листы приходят вместе с данными студии (зашифрованный файл или файл данных) и хранятся
+   в этом браузере сжатыми под отдельным ключом, чтобы не утяжелять основную базу. */
+const SHEETS_KEY="djigit_crm_sheets_gz";let sheetsCache=null,sheetTab=0,sheetQ="",sheetLim=200;
+async function saveSheets(arr){sheetsCache=arr;try{localStorage.setItem(SHEETS_KEY,await gz(JSON.stringify(arr)))}catch(e){toast("Листы таблицы не поместились в память браузера — они видны до перезагрузки страницы")}}
+async function loadSheets(){if(sheetsCache)return sheetsCache;try{const z=localStorage.getItem(SHEETS_KEY);if(z)sheetsCache=JSON.parse(await gunz(z))}catch(e){}return sheetsCache}
+const isNumCell=v=>/^[-−]?[\d ]+([.,]\d+)?\s*(₸|т|%)?$/.test(v)&&/\d/.test(v);
+function sheetsView(){return `<div id="sheetsBox"><div class="card"><div class="empty">Загружаю листы…</div></div></div>`}
+async function wireSheets(){const box=$("sheetsBox");if(!box)return;const sh=await loadSheets();if(!$("sheetsBox"))return;
+  if(!sh||!sh.length){box.innerHTML=`<div class="card"><h3>Листы таблицы ещё не загружены</h3><div class="hint">Все листы таблицы «Камран_УО» приходят вместе с данными студии. Загрузите их паролем данных.</div><div class="actions"><button class="btn" data-act="encload">Загрузить данные студии</button></div></div>`;
+    box.querySelector('[data-act="encload"]').onclick=()=>{encLater=false;showEncPrompt()};return}
+  const draw=()=>{const s=sh[Math.min(sheetTab,sh.length-1)],q=sheetQ.trim().toLowerCase(),hdr=s.rows[0]||[];
+    const body=s.rows.slice(1).map((r,i)=>[i+2,r]).filter(([,r])=>!q||r.some(c=>c.toLowerCase().includes(q))),shown=body.slice(0,sheetLim);
+    box.innerHTML=`<div class="ptabs" style="margin-bottom:12px">${sh.map((x,i)=>`<button data-sheet="${i}" class="${i===sheetTab?"on":""}">${esc(x.name)}<b>${Math.max(0,x.rows.length-1)}</b></button>`).join("")}</div>
+    <div class="card" style="padding:0"><div class="toolbar" style="padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input class="field" id="sheetQ" placeholder="Поиск по листу «${esc(s.name)}»" value="${esc(sheetQ)}" style="max-width:340px"><span class="sub">${q?`найдено ${body.length} из ${s.rows.length-1}`:`${s.rows.length-1} строк · ${hdr.length} столбцов`}</span><span style="flex:1"></span><button class="btn secondary mini" data-act="sheetxls">Скачать лист в Excel</button></div>
+    <div class="tablewrap" style="max-height:70vh;overflow:auto"><table class="table sheet"><thead><tr><th class="num" style="position:sticky;left:0;z-index:2">#</th>${hdr.map(h=>`<th style="position:sticky;top:0;white-space:pre-line">${esc(h)}</th>`).join("")}</tr></thead>
+    <tbody>${shown.map(([n,r])=>`<tr><td class="sub num" style="position:sticky;left:0;background:var(--panel,#fff)">${n}</td>${r.map(c=>`<td class="${isNumCell(c)?"right num":""}" style="white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis" title="${esc(c)}">${esc(c)}</td>`).join("")}</tr>`).join("")||`<tr><td colspan="${hdr.length+1}" class="empty">Ничего не найдено</td></tr>`}</tbody></table></div>
+    ${body.length>shown.length?`<div style="padding:12px 14px"><button class="btn secondary" data-act="sheetmore">Показать ещё ${Math.min(500,body.length-shown.length)} из ${body.length-shown.length}</button></div>`:""}</div>`;
+    box.querySelectorAll("[data-sheet]").forEach(b=>b.onclick=()=>{sheetTab=+b.dataset.sheet;sheetQ="";sheetLim=200;draw()});
+    const qi=$("sheetQ");qi.oninput=()=>{clearTimeout(draw.t);draw.t=setTimeout(()=>{sheetQ=qi.value;sheetLim=200;draw();const n=$("sheetQ");n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)};
+    box.querySelector('[data-act="sheetmore"]')?.addEventListener("click",()=>{sheetLim+=500;draw()});
+    box.querySelector('[data-act="sheetxls"]').onclick=()=>{const cols=hdr.map((h,i)=>({h:h||"Столбец "+(i+1)}));try{saveFile("Камран_УО — "+s.name+".xlsx",XL.book([{name:s.name.slice(0,31),cols:cols.map(c=>C(c.h)),rows:s.rows.slice(1)}]))}catch(e){toast("Не удалось выгрузить лист")}}};
+  draw()}
 /* ===== Данные студии из репозитория (зашифрованы) =====
    Репозиторий публичный, поэтому таблица лежит в studio-data.enc.json только в виде шифра
    (gzip → AES-256-GCM, ключ из пароля через PBKDF2-SHA256). Пароль знает только студия;
@@ -1982,7 +2006,7 @@ function demoSeed(){
 let encData=null,encLater=false;
 async function loadEnc(){if(encData!==null)return encData;try{const r=await fetch("studio-data.enc.json",{cache:"no-cache"});encData=r.ok?await r.json():false}catch(e){encData=false}return encData}
 function encBanner(){if(!encData||settings.xlsVersion===encData.v)return"";
-  return `<div class="notice" style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:220px"><b>Таблица студии ещё не загружена на это устройство.</b> Ученики, оплаты, группы и операции из таблицы «Камран_УО» ждут загрузки — нужен пароль данных.</span><button class="btn" data-act="encload">Загрузить данные студии</button></div>`}
+  return `<div class="notice" style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:220px"><b>Таблица студии ещё не загружена на это устройство.</b> Все 17 листов таблицы «Камран_УО» (ученики, оплаты, группы, операции, отчёты ОПУ и ДДС) ждут загрузки — нужен пароль данных.</span><button class="btn" data-act="encload">Загрузить данные студии</button></div>`}
 async function checkEncData(){if(!me)return;const e=await loadEnc();if(!e||settings.xlsVersion===e.v)return;if(current==="Главная")render();if(!encLater)showEncPrompt()}
 async function decryptEnc(e,pass){const u=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0)),S=crypto.subtle;
   const base=await S.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
@@ -2024,6 +2048,7 @@ function importXls(){
   settings.accounts=XLS.accounts.map(a=>({...a}));
   XLS.payments.forEach(([date,type,category,description,amount,b,account,teacher,client,action,to])=>db.payments.push({id:++id,date,type,action,category,description,amount,branch:B(b),account:account||XLS.accounts[0].name,teacher,client,src}));
   XLS.payments.forEach((p,i)=>{if(p[10])db.payments[db.payments.length-XLS.payments.length+i].toAccount=p[10]});
+  if(Array.isArray(XLS.sheets))saveSheets(XLS.sheets);
   settings.xlsVersion=XLS.v;logAct("Загружены данные из таблицы студии");linkPayments();
 }
 
@@ -2203,6 +2228,7 @@ function wireAI(){
 }
 after["ИИ-помощник"]=wireAI;
 after["Экономика"]=wireEcon;
+after["Таблица УО"]=wireSheets;
 after["Автоматизация"]=()=>{wireAuto();wireAgents()};
 after["Посещаемость"]=()=>{$("deductSw").onchange=e=>{settings.deduct=e.target.checked;persist();toast(e.target.checked?"Списание включено":"Списание выключено")}};
 /* ===== ИИ в карточке сделки ===== */
