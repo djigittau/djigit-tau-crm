@@ -483,7 +483,7 @@ const ROLES={
 const STAGES=["Новая заявка","Связались","Пробное занятие","Купили абонемент"];
 const LOST="Отказ";
 const STAGE_BG=["var(--s1)","var(--s2)","var(--s3)","var(--s4)"];
-const COLS=["branches","students","leads","renewals","tasks","groups","teachers","memberships","attendance","payments","lessons","planned","log"];
+const COLS=["branches","students","leads","renewals","tasks","groups","teachers","memberships","attendance","payments","lessons","planned","payslips","log"];
 const ACC_COLORS=["#D2A744","#3D6680","#4E7B36","#8E2A35","#7A6A4A"];
 const EXP_CATS=["Зарплата тренеров","Аренда","Реклама","Налоги","ЗП персонала и бонусы","Комиссия банка","Костюмы и инвентарь","Прочее"];
 const PAY_TYPES=["Не задано","За занятие","За ученика (каждое посещение)","% от выручки групп","Только оклад"];
@@ -589,13 +589,13 @@ const views={
 },
 "Ученики":()=>tablePage("students",["Ученик","Тип","Телефон","Филиал","Группа","Статус","LTV"],x=>[`<b>${esc(x.name)}</b>`,esc(x.kind||"—"),esc(x.phone),esc(branchName(x.branch)),esc(x.group||"—"),status(x.status),canLtv()?`<span class="num">${money(ltv(x.id))}</span>`:"—"]),
 "Заявки и воронка":()=>pipelineView(),
-"Группы":()=>tablePage("groups",["Название","Вид танца","Филиал","Возраст","Тренер","Дни","Время"],x=>[`<b>${esc(x.name)}</b>`,esc(x.dance||"—"),esc(branchName(x.branch)),esc(x.age),esc(x.teacher),esc(x.days),esc(x.time)]),
+"Группы":()=>tablePage("groups",["Название","Вид танца","Филиал","Возраст","Тренер","Дни","Время","Заполняемость"],x=>{const f=groupFill(x,new Date().toISOString().slice(0,7));return [`<b>${esc(x.name)}</b>`,esc(x.dance||"—"),esc(branchName(x.branch)),esc(x.age),esc(x.teacher),esc(x.days),esc(x.time),f.cap?`<span class="num">${f.listed}/${f.cap}</span> ${marginPill(f.listed/f.cap)}`:`<span class="sub">${f.listed} уч. · укажите вместимость</span>`]}),
 "Тренеры":()=>tablePage("teachers",["Тренер","Телефон","Филиал","Роль","Оплата"],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone||"—"),esc(branchName(x.branch)),esc(x.role),x.payType&&x.payType!=="Не задано"?payLabel(x):"—"]),
 "Экономика":()=>econView(),
 "Абонементы":()=>tablePage("memberships",["Ученик","Абонемент","Занятия","Цена","Филиал","До"],x=>[esc(db.students.find(s=>s.id===x.student)?.name||"—"),`<b>${esc(x.title)}</b>`,`<span class="num">${x.used}/${x.total}</span>`,`<span class="num">${money(x.price)}</span>`,esc(branchName(x.branch)),esc(x.expires||"—")]),
 "Филиалы":()=>tablePage("branches",["Филиал","Адрес","Учеников","Групп"],x=>[`<b>${esc(x.name)}</b>`,esc(x.address||"—"),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
 "Финансы":()=>`<div class="stats">${statsCard("Доходы",money(sum("Доход")),"Поступления")}${statsCard("Расходы",money(sum("Расход")),"Расходные операции")}${statsCard("Баланс",money(sum("Доход")-sum("Расход")),"Доход минус расходы")}${statsCard("Операции",db.payments.filter(inBranch).length,sum("Вывод")?"Вывод дивидендов: "+money(sum("Вывод")):"Всего записей")}</div>${tablePage("payments",["Дата","Тип","Категория","Описание","Сумма","Счёт","Филиал","Тренер"],x=>[esc(x.date),status(x.type),esc(x.category||"—"),esc(x.description),`<span class="num">${money(x.amount)}</span>`,esc((x.account||"—")+(x.toAccount?" → "+x.toAccount:"")),esc(branchName(x.branch)),esc(x.teacher||"—")])}`,
-"Посещаемость":()=>`<div class="notice">Отметить присутствие можно кнопкой «Отметить» в разделе «Ученики» или кнопкой «+ Отметка» здесь. Списание занятия с абонемента включите после проверки правил студии.</div>${tablePage("attendance",["Дата","Ученик","Группа","Филиал","Статус"],x=>[esc(x.date),esc(db.students.find(s=>s.id===x.student)?.name||"—"),esc(x.group||"—"),esc(branchName(x.branch)),status(x.status)])}`,
+"Посещаемость":()=>`<div class="notice">Отметить присутствие можно кнопкой «Отметить» в разделе «Ученики» или кнопкой «+ Отметка» здесь.<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="deductSw" ${settings.deduct===false?"":"checked"}> Списывать занятие с абонемента при отметке «Присутствовал» или «Опоздал». Когда занятия кончились, ученик получает статус «Нужна оплата».</label></div>${tablePage("attendance",["Дата","Ученик","Группа","Филиал","Статус"],x=>[esc(x.date),esc(db.students.find(s=>s.id===x.student)?.name||"—"),esc(x.group||"—"),esc(branchName(x.branch)),status(x.status)])}`,
 "Расписание":()=>{const ls=db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
   return `<div class="card"><h3>Занятия</h3><div class="hint">Добавляйте занятия кнопкой «+ Занятие»</div>${ls.map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher||"—")} · ${esc(x.room||"—")} <button class="mini" data-edit-any="lessons:${x.id}">Изменить</button>${isBoss()?` <button class="mini del" data-del-any="lessons:${x.id}">Удалить</button>`:""}</span></div>`).join("")||'<div class="empty">Занятий пока нет</div>'}</div>`},
 "Команда":()=>`<div class="notice">Демо: пароли хранятся открыто в этом браузере. В рабочей версии вход должен проверять сервер.</div>
@@ -669,7 +669,7 @@ function homeView(){
   const firstDay=upcoming[0]?.date;upcoming=upcoming.filter(l=>l.date===firstDay).slice(0,5);
   const stIcon=st=>st===STAGES[3]?svg("okc","color:var(--green)"):st===LOST?svg("xc","color:var(--red)"):svg("clockc","color:var(--gold)");
   const stLabel=st=>st===STAGES[3]?"Оплата (абонемент)":st===STAGES[2]?"Пробное занятие":st===STAGES[1]?"Связались":st===LOST?"Отказ":"Новая заявка";
-  return `<div class="kpis">
+  return weeklyCard()+`<div class="kpis">
     <div class="kpi"><span class="ic">${svg("users")}</span><div><label>Активные ученики</label><strong class="num">${stNow}</strong>${delta(stNow,stPrev)} <small>к прошлому месяцу</small></div></div>
     <div class="kpi"><span class="ic">${svg("userplus")}</span><div><label>Новые заявки</label><strong class="num">${lNow}</strong>${delta(lNow,lPrev)}</div></div>
     <div class="kpi"><span class="ic">${svg("coins")}</span><div><label>Выручка (месяц)</label><strong class="num">${money(rNow)}</strong>${delta(rNow,rPrev)}</div></div>
@@ -697,6 +697,7 @@ function homeView(){
   </div>`;
 }
 function wireHome(){
+  document.querySelector('[data-act="weekly"]')?.addEventListener("click",()=>makeWeekly(true));
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   document.querySelectorAll("[data-lead]").forEach(d=>d.onclick=()=>{if(allowed("Заявки и воронка"))editItem("leads",+d.dataset.lead)});
 }
@@ -899,11 +900,24 @@ function ltvBadge(x){
 let pipe="sales";
 const pipeColl=()=>pipe==="renew"?db.renewals:db.leads;
 const pipeStages=()=>pipe==="renew"?RSTAGES:STAGES;
+/* Сохранённые фильтры воронки — рабочий экран администратора */
+let leadFilter="all";
+const LFILTERS=[["all","Все"],["inbox","Неразобранные"],["notask","Без задачи"],["late","Просрочена задача"],["trial","Пробное сегодня","sales"],["expiring","Абонемент истекает ≤ 7 дн.","renew"],["mine","Мои"]];
+function leadMatch(x,f){const won=x.stage===(x.pipeline==="renew"?RSTAGES[3]:STAGES[3]),t=nextTask(x.id);
+  if(f==="inbox")return x.stage===(x.pipeline==="renew"?RSTAGES[0]:STAGES[0])&&!x.firstContactAt;
+  if(f==="notask")return !won&&!t;
+  if(f==="late")return !!t&&isLateT(t);
+  if(f==="trial")return !!x.trial&&new Date(x.trial).toDateString()===new Date().toDateString();
+  if(f==="expiring")return !won&&!!x.expires&&x.expires>=today()&&x.expires<=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+  if(f==="mine")return (x.manager||"")===(me?.name||"");
+  return true}
 function pipelineView(){
-  const coll=pipeColl().filter(inBranch),st=pipeStages(),act=coll.filter(x=>x.stage!==LOST),show=canLtv()&&pipe==="sales",avg=avgLtv();
+  const coll=pipeColl().filter(inBranch),st=pipeStages(),all=coll.filter(x=>x.stage!==LOST),act=all.filter(x=>leadMatch(x,leadFilter)),show=canLtv()&&pipe==="sales",avg=avgLtv();
+  const fl=LFILTERS.filter(f=>!f[2]||f[2]===pipe),chips=`<div class="ptabs" style="margin-top:-4px">${fl.map(([k,l])=>{const n=k==="all"?all.length:all.filter(x=>leadMatch(x,k)).length;
+    return `<button data-lf="${k}" class="${leadFilter===k?"on":""}" ${(k==="notask"||k==="late"||k==="inbox")&&n?'style="border-color:var(--red);color:var(--red)"':""}>${l}<b>${n}</b></button>`}).join("")}</div>`;
   const open=act.filter(x=>x.stage!==st[3]);
   const tabs=`<div class="ptabs" role="tablist"><button role="tab" data-pipe="sales" class="${pipe==="sales"?"on":""}">Набор учеников<b>${db.leads.filter(inBranch).filter(x=>x.stage!==LOST&&x.stage!==STAGES[3]).length}</b></button><button role="tab" data-pipe="renew" class="${pipe==="renew"?"on":""}">Продления<b>${db.renewals.filter(inBranch).filter(x=>x.stage!==LOST&&x.stage!==RSTAGES[3]).length}</b></button></div>`;
-  return tabs+`<div class="pipebar"><span class="sub">${pipe==="renew"?"Сделка создаётся сама за 14 дней до конца абонемента. ":""}Нажмите на карточку, чтобы открыть её. Перетащите в другой этап; внизу появится зона «Отказ».</span><span class="total">${plural(act.length,"сделка","сделки","сделок")} · <b class="num">${money(act.reduce((a,x)=>a+Number(x.price||0),0))}</b>${show?` · прогноз LTV <b class="num" title="Заявки в работе × средний LTV платящего ученика (${money(avg)})">${money(open.length*avg)}</b>`:""}</span></div>
+  return tabs+chips+`<div class="pipebar"><span class="sub">${pipe==="renew"?"Сделка создаётся сама за 14 дней до конца абонемента. ":""}Нажмите на карточку, чтобы открыть её. Перетащите в другой этап; внизу появится зона «Отказ».</span><span class="total">${plural(act.length,"сделка","сделки","сделок")} · <b class="num">${money(act.reduce((a,x)=>a+Number(x.price||0),0))}</b>${show?` · прогноз LTV <b class="num" title="Заявки в работе × средний LTV платящего ученика (${money(avg)})">${money(open.length*avg)}</b>`:""}</span></div>
   <div class="columns">${st.map((sn,i)=>{const arr=act.filter(x=>x.stage===sn).sort((a,b)=>(b.updated||b.created||"").localeCompare(a.updated||a.created||""));const tot=arr.reduce((a,x)=>a+Number(x.price||0),0);
   return `<section class="col" aria-label="${sn}"><div class="colhead" style="background:${STAGE_BG[i]}"><div class="n"><span>${sn}</span></div><div class="m num">${plural(arr.length,"сделка","сделки","сделок")}: ${money(tot)}</div>${show?`<div class="f num">${i===3?"LTV купивших: "+money(arr.reduce((a,x)=>a+clientsByPhone(x.phone).reduce((b,s)=>b+ltv(s.id),0),0)):"Прогноз LTV: "+money(arr.length*avg)}</div>`:""}</div>
   <div class="colbody" data-stage="${sn}">${i===0&&pipe==="sales"?'<button class="quick" data-act="newlead">+ Быстрое добавление</button>':""}${arr.map(cardHTML).join("")||'<div class="empty" style="padding:12px">Пусто</div>'}</div></section>`}).join("")}</div>
@@ -922,7 +936,8 @@ function cardHTML(x){
 function fmtDT(iso){if(!iso)return"";const d=new Date(iso),t0=new Date();t0.setHours(0,0,0,0);const dd=Math.round((new Date(d).setHours(0,0,0,0)-t0)/864e5);
   const hm=String(iso).length>10?d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}):"";return (dd===0?"сегодня":dd===1?"завтра":dd===-1?"вчера":d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"}))+(hm?" "+hm:"")}
 function wirePipeline(){
-  document.querySelectorAll("[data-pipe]").forEach(b=>b.onclick=()=>{pipe=b.dataset.pipe;render()});
+  document.querySelectorAll("[data-pipe]").forEach(b=>b.onclick=()=>{pipe=b.dataset.pipe;if(LFILTERS.find(f=>f[0]===leadFilter)?.[2]&&LFILTERS.find(f=>f[0]===leadFilter)[2]!==pipe)leadFilter="all";render()});
+  document.querySelectorAll("[data-lf]").forEach(b=>b.onclick=()=>{leadFilter=b.dataset.lf;render()});
   document.querySelectorAll("[data-open]").forEach(c=>c.addEventListener("click",()=>openDeal(+c.dataset.open)));
   const bar=$("dropbar");bar.classList.toggle("nodel",!isBoss());
   let dragId=null;
@@ -978,6 +993,8 @@ const DEFAULT_TPL={
   noshow:{name:"Неявка на пробное",text:"{имя}, не увидели вас на пробном. Всё в порядке? Можем подобрать другое время на этой неделе."},
   welcome:{name:"Добро пожаловать",text:"{имя}, добро пожаловать в DJIGIT TAU! Абонемент оформлен. Расписание группы пришлём отдельным сообщением."},
   renew:{name:"Напоминание о продлении",text:"{имя}, абонемент заканчивается {дата}. Продлим, чтобы не прерывать занятия? Стоимость {сумма}."},
+  debt:{name:"Напоминание о долге",text:"{имя}, напоминаем об оплате абонемента на {сумма}: {ссылка_оплаты}. Если уже оплатили — пришлите, пожалуйста, чек, и мы всё отметим."},
+  miss:{name:"Мы скучаем",text:"{имя}, мы скучаем! Не видели вас на двух последних занятиях. Всё в порядке? Если стало неудобно время, подберём другую группу."},
   pay:{name:"Ссылка на оплату",text:"{имя}, ссылка для оплаты абонемента на {сумма}: {ссылка_оплаты}. После оплаты пришлите, пожалуйста, чек."}
 };
 const tpl=k=>({...DEFAULT_TPL[k],...(settings.templates[k]||{})});
@@ -994,6 +1011,8 @@ const ROBOTS=[
   {id:"r_won",pipe:"sales",stage:STAGES[3],name:"Ученик и приветствие",desc:"Создаёт ученика в базе и готовит сообщение «Добро пожаловать»."},
   {id:"r_renew",pipe:"renew",stage:RSTAGES[0],name:"Сделка за 14 дней до конца",desc:"Сама создаёт сделку продления, готовит напоминание и задачу позвонить."},
   {id:"r_pay",pipe:"renew",stage:RSTAGES[2],name:"Ссылка на оплату",desc:"Готовит сообщение со ссылкой на оплату Kaspi."},
+  {id:"r_miss",pipe:"renew",stage:RSTAGES[0],name:"«Мы скучаем» после 2 пропусков",desc:"Если ученик пропустил два занятия подряд, создаёт сделку удержания, готовит сообщение и задачу позвонить."},
+  {id:"r_debt",pipe:"renew",stage:RSTAGES[2],name:"Напоминания о долге 1/7/14 дней",desc:"Пока сделка в «Ждём оплату», готовит напоминание через 1, 7 и 14 дней; на 14-й день — задача решить с руководителем."},
   {id:"r_renewed",pipe:"renew",stage:RSTAGES[3],name:"Продлить абонемент",desc:"Создаёт новый абонемент на 8 занятий и доход в «Финансах»."}
 ];
 const robotOn=id=>settings.robots[id]!==false;
@@ -1005,10 +1024,10 @@ function onEnterStage(x){
     if(st===STAGES[2]&&robotOn("r_trial")){if(!x.trial)x.trial=at(1,17);queueMsg(x,"confirm");addTask(x,"Напомнить о пробном",new Date(new Date(x.trial).getTime()-3*3600e3).toISOString(),true)}
     if(st===STAGES[3]&&robotOn("r_won"))queueMsg(x,"welcome");
   }else{
-    if(st===RSTAGES[2]&&robotOn("r_pay"))queueMsg(x,"pay");
+    if(st===RSTAGES[2]){x.payAt=nowISO();x.debtSteps=[];if(robotOn("r_pay"))queueMsg(x,"pay")}
     if(st===RSTAGES[3]&&robotOn("r_renewed")&&x.student){const s=db.students.find(y=>y.id===x.student);
-      db.memberships.push({id:nid(),student:x.student,title:"8 занятий",total:8,used:0,price:Number(x.price||0),expires:new Date(Date.now()+35*864e5).toISOString().slice(0,10),branch:x.branch});
-      db.payments.push({id:nid(),date:today(),type:"Доход",action:"Продажи",category:"Групповые",description:"Продление абонемента "+(s?.name||x.name),amount:Number(x.price||0),branch:x.branch,account:settings.accounts[0]?.name});
+      const mid=nid();db.memberships.push({id:mid,student:x.student,title:"8 занятий",total:8,used:0,price:Number(x.price||0),sold:today(),expires:new Date(Date.now()+35*864e5).toISOString().slice(0,10),branch:x.branch});
+      db.payments.push({id:nid(),date:today(),type:"Доход",action:"Продажи",category:"Групповые",description:"Продление абонемента "+(s?.name||x.name),amount:Number(x.price||0),branch:x.branch,account:settings.accounts[0]?.name,student:x.student,membership:mid});
       if(s&&s.status==="Нужна оплата")s.status="Активен";feedAdd(x,"sys","Робот: создан абонемент и доход "+money(x.price))}
   }
   db.tasks.filter(t=>t.dealId===x.id&&!t.done&&t.auto&&(st===LOST||st===(x.pipeline==="renew"?RSTAGES[3]:STAGES[3]))).forEach(t=>t.done=true);
@@ -1022,7 +1041,9 @@ function runRobots(){
     db.renewals.push(x);m.renewDeal=x.id;feedAdd(x,"sys","Робот создал сделку: абонемент заканчивается "+m.expires);queueMsg(x,"renew");addTask(x,"Позвонить: продление абонемента",at(0,Math.max(new Date().getHours()+1,11)),true);ch=true});
   if(robotOn("r_noshow"))db.leads.forEach(x=>{if(x.stage!==STAGES[2]||!x.trial||x.noshowDone)return;if(Date.now()-new Date(x.trial).getTime()<864e5)return;
     x.noshowDone=true;queueMsg(x,"noshow");addTask(x,"Неявка: предложить перенос пробного",plusMin(30),true);ch=true});
+  if(robotDebt())ch=true;if(robotMiss())ch=true;
   if(ch)persist();
+  if(isBoss())setTimeout(()=>makeWeekly(false),0);
 }
 /* Причина отказа обязательна */
 function askReason(x){return new Promise(res=>{$("reasonSel").innerHTML=LOST_REASONS.map(r=>`<option ${r===x.reason?"selected":""}>${r}</option>`).join("");$("reasonTxt").value="";
@@ -1055,11 +1076,12 @@ function openDeal(id){
     <div class="da">${x.stage!==won?`<button class="btn won" data-set="${won}">${x.pipeline==="renew"?"Продлили":"Купили абонемент"}</button>`:""}${x.stage!==LOST?`<button class="btn lostb" data-set="${LOST}">${x.pipeline==="renew"?"Не продлили":"Закрыть: отказ"}</button>`:`<button class="btn secondary" data-set="${st[0]}">Вернуть в работу</button>`}${isBoss()?`<button class="btn secondary" data-del>Удалить</button>`:""}</div></div>
   <div class="dr"><div class="feed" id="feed">${evs.map(evHTML(x)).join("")||'<div class="empty">Здесь будет история: этапы, примечания, задачи, сообщения</div>'}</div>
     <div class="comp"><div class="tabs" role="tablist">${[["note","Примечание"],["task","Задача"],["wa","WhatsApp"]].map(([k,l])=>`<button role="tab" class="${compMode===k?"on":""}" data-mode="${k}">${l}</button>`).join("")}</div>
-      <form id="cForm">${compMode==="wa"?`<select class="field" id="cTpl" style="margin-bottom:8px" aria-label="Шаблон">${Object.keys(DEFAULT_TPL).map(k=>`<option value="${k}">${esc(tpl(k).name)}</option>`).join("")}</select>`:""}
+      <form id="cForm">${compMode==="wa"?`<div style="display:flex;gap:8px;margin-bottom:8px"><select class="field" id="cTpl" aria-label="Шаблон">${Object.keys(DEFAULT_TPL).map(k=>`<option value="${k}">${esc(tpl(k).name)}</option>`).join("")}</select><button type="button" class="btn secondary" id="cAi" style="white-space:nowrap">ИИ-черновик</button></div>`:""}
       <textarea id="cText" aria-label="Текст" placeholder="${compMode==="note"?"Например: мама просит группу по выходным":compMode==="task"?"Что сделать? Например: перезвонить после 18:00":"Текст сообщения"}"></textarea>
       <div class="row2">${compMode==="task"?`<label class="sub" for="cDue">Срок</label><input class="field" style="width:auto" id="cDue" type="datetime-local" value="${at(1,11).slice(0,16)}">`:""}<span class="grow"></span>
       <button class="btn">${compMode==="note"?"Добавить примечание":compMode==="task"?"Поставить задачу":"Открыть в WhatsApp"}</button></div></form></div></div>`;
-  if(compMode==="wa"){const fillT=()=>{$("cText").value=fillTpl(tpl($("cTpl").value).text,x)};$("cTpl").onchange=fillT;fillT()}
+  if(compMode==="wa"){const fillT=()=>{$("cText").value=fillTpl(tpl($("cTpl").value).text,x)};$("cTpl").onchange=fillT;fillT();
+    $("cAi").onclick=async()=>{const b=$("cAi"),t=$("cText");b.disabled=true;b.textContent="ИИ пишет…";try{t.value=await aiDraft(x)}catch(e){toast(e.message.split("\n")[0])}if($("cAi")){b.disabled=false;b.textContent="ИИ-черновик"}}}
   $("deal").classList.add("on");$("dealbg").classList.add("on");const fd=$("feed");fd.scrollTop=fd.scrollHeight;
   const D=$("deal");
   D.querySelector("[data-x]").onclick=closeDeal;
@@ -1100,13 +1122,14 @@ function autoView(){
   return `<div class="notice">Роботы срабатывают, когда сделка попадает на этап, а проверки по времени (продления, неявки) идут при каждом открытии CRM. Сообщения готовятся в карточке сделки: менеджер нажимает «Отправить в WhatsApp». Чтобы отправка шла сама, подключают WhatsApp Business через сервис вроде Wazzup; это следующий шаг.</div>
   <section class="card" style="margin-bottom:16px"><h3>Набор учеников</h3><div class="hint">Что происходит само на каждом этапе</div><div class="dp">${STAGES.map(s=>col("sales",s)).join("")}</div></section>
   <section class="card" style="margin-bottom:16px"><h3>Продления</h3><div class="hint">Сделка создаётся за 14 дней до окончания абонемента</div><div class="dp">${RSTAGES.map(s=>col("renew",s)).join("")}</div></section>
+  ${agentsCard()}
   <section class="card"><h3>Шаблоны сообщений и нормативы</h3><div class="hint">Подстановки: {имя}, {филиал}, {дата}, {сумма}, {ссылка_оплаты}</div>
     <div class="formgrid"><div class="formfield"><label for="slaIn">Норматив первого ответа, минут</label><input class="field num" id="slaIn" inputmode="numeric" value="${settings.sla}"></div><div class="formfield"><label for="payIn">Ссылка на оплату (Kaspi Pay)</label><input class="field" id="payIn" placeholder="https://pay.kaspi.kz/..." value="${esc(settings.payLink||"")}"></div></div>
     <div class="tpl">${Object.keys(DEFAULT_TPL).map(k=>`<div><label for="tp_${k}">${esc(tpl(k).name)}</label><textarea id="tp_${k}" data-tpl="${k}">${esc(tpl(k).text)}</textarea></div>`).join("")}</div>
     <div class="modalfoot"><button class="btn secondary" data-act="tplreset">Вернуть стандартные</button><button class="btn" data-act="tplsave">Сохранить</button></div></section>`;
 }
 function wireAuto(){
-  document.querySelectorAll("[data-robot]").forEach(c=>c.onchange=()=>{settings.robots[c.dataset.robot]=c.checked;logAct("Робот «"+ROBOTS.find(r=>r.id===c.dataset.robot).name+"» "+(c.checked?"включён":"выключен"));persist();render();toast(c.checked?"Робот включён":"Робот выключен")});
+  document.querySelectorAll("[data-robot]").forEach(c=>c.onchange=()=>{settings.robots[c.dataset.robot]=c.checked;logAct("Робот «"+(ROBOTS.find(r=>r.id===c.dataset.robot)?.name||"Недельная сводка")+"» "+(c.checked?"включён":"выключен"));persist();render();toast(c.checked?"Робот включён":"Робот выключен")});
   document.querySelector('[data-act="tplsave"]').onclick=()=>{document.querySelectorAll("[data-tpl]").forEach(t=>{settings.templates[t.dataset.tpl]={text:t.value}});settings.sla=Math.max(1,Number($("slaIn").value)||15);settings.payLink=$("payIn").value.trim();persist();toast("Шаблоны сохранены")};
   document.querySelector('[data-act="tplreset"]').onclick=async()=>{if(await ask("Вернуть стандартные тексты всех шаблонов?","Вернуть")){settings.templates={};persist();render();toast("Стандартные шаблоны")}};
 }
@@ -1116,11 +1139,11 @@ views["Задачи"]=tasksView;views["Автоматизация"]=autoView;
 const forms={
   student:[["name","ФИО ученика","text",1],["phone","Телефон","tel",1],["branch","Филиал","branch",1],["group","Группа","group"],["kind","Тип","select:Новенький|Действующий"],["since","Занимается с","date"],["birth","Дата рождения","date"],["parent","Родитель","text"],["status","Статус","select:Активен|Пробное|Нужна оплата|Пауза|Архив"],["source","Откуда пришёл","select:—|Instagram|TikTok|WhatsApp|Звонок|2ГИС|Сарафан|Вывеска"]],
   lead:[["name","Имя клиента","text",1],["phone","Телефон","tel",1],["branch","Филиал","branch",1],["stage","Этап","select:"+STAGES.join("|")],["price","Бюджет, ₸","number"],["source","Источник заявки","select:Instagram|TikTok|WhatsApp|Звонок|2ГИС|Сарафан|Вывеска"],["age","Возраст ребёнка","text"],["manager","Ответственный","text"]],
-  group:[["name","Название группы","text",1],["branch","Филиал","branch",1],["age","Возраст","text"],["teacher","Тренер","teacher"],["dance","Вид танца","select:Лезгинка|Игра на барабане|Индивидуальные"],["days","Дни занятий","text"],["time","Время","time"]],
+  group:[["name","Название группы","text",1],["branch","Филиал","branch",1],["age","Возраст","text"],["teacher","Тренер","teacher"],["dance","Вид танца","select:Лезгинка|Игра на барабане|Индивидуальные"],["days","Дни занятий","text"],["time","Время","time"],["cap","Вместимость группы, чел.","number"]],
   teacher:[["name","ФИО тренера","text",1],["phone","Телефон","tel"],["branch","Филиал","branch",1],["role","Роль","text"],["payType","Модель оплаты","select:"+PAY_TYPES.join("|")],["rate","Ставка: ₸ за занятие / ₸ за посещение / % от выручки","number"],["fixed","Оклад в месяц, ₸","number"]],
   branch:[["name","Название филиала","text",1],["address","Адрес","text"]],
-  membership:[["student","Ученик","student",1],["title","Название абонемента","text",1],["total","Всего занятий","number",1],["used","Использовано","number"],["price","Цена, ₸","number",1],["branch","Филиал","branch",1],["expires","Действует до","date"]],
-  payment:[["date","Дата","date",1],["type","Тип операции","select:Доход|Расход|Вывод",1],["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],["category","Категория","select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца|"+EXP_CATS.join("|")],["description","Описание","text",1],["amount","Сумма, ₸","number",1],["branch","Филиал","branch",1],["account","Счёт","account"],["teacher","Тренер (для зарплаты)","teacher"],["channel","Канал рекламы (для статьи «Реклама»)","select:—|"+AD_SRC.join("|")]],
+  membership:[["student","Ученик","student",1],["title","Название абонемента","text",1],["total","Всего занятий","number",1],["used","Использовано","number"],["price","Цена, ₸","number",1],["branch","Филиал","branch",1],["sold","Дата продажи","date"],["expires","Действует до","date"],["payNow","Оплата","select:Записать доход в Финансы|Не записывать (оплата уже внесена)"]],
+  payment:[["date","Дата","date",1],["type","Тип операции","select:Доход|Расход|Вывод",1],["action","Действие","select:Продажи|Возвраты|Скидки|Себестоимость"],["category","Категория","select:Групповые|Индивидуальные|Мини группа|Семейный тариф|Постановка танца|"+EXP_CATS.join("|")],["description","Описание","text",1],["amount","Сумма, ₸","number",1],["branch","Филиал","branch",1],["account","Счёт","account"],["student","Ученик (для LTV)","student"],["teacher","Тренер (для зарплаты)","teacher"],["channel","Канал рекламы (для статьи «Реклама»)","select:—|"+AD_SRC.join("|")]],
   planned:[["date","Дата платежа","date",1],["title","Что оплатить","text",1],["category","Статья","select:"+EXP_CATS.join("|")],["amount","Сумма, ₸","number",1],["account","Со счёта","account"],["branch","Филиал","branch",1]],
   attendance:[["student","Ученик","student",1],["date","Дата","date",1],["group","Группа","group"],["branch","Филиал","branch",1],["status","Статус","select:Присутствовал|Отсутствовал|Опоздал|Уважительная причина",1]],
   lesson:[["date","Дата","date",1],["time","Время","time",1],["group","Группа","group",1],["teacher","Тренер","teacher"],["branch","Филиал","branch",1],["room","Зал","text"]]
@@ -1128,21 +1151,21 @@ const forms={
 const T2K={student:"students",lead:"leads",group:"groups",teacher:"teachers",branch:"branches",membership:"memberships",payment:"payments",attendance:"attendance",lesson:"lessons",planned:"planned",renewal:"renewals"};
 const K2T=Object.fromEntries(Object.entries(T2K).map(([a,b])=>[b,a]));
 const NAMES={student:"ученик",lead:"заявка",group:"группа",teacher:"тренер",branch:"филиал",membership:"абонемент",payment:"операция",attendance:"посещение",lesson:"занятие",planned:"платёж",renewal:"сделку продления"};
-const NUMS=["branch","student","total","used","price","amount","rate","fixed"];
+const NUMS=["branch","student","total","used","price","amount","rate","fixed","cap"];
 function openCreate(){formType=FORM_OF[current];if(!formType)return;editing=null;showForm()}
 function editItem(key,id){if(key==="leads"||key==="renewals"){openDeal(id);return}formType=K2T[key];editing={key,id};showForm()}
 function showForm(){
   const key=T2K[formType],old=editing?db[key].find(x=>x.id===editing.id)||{}:{};
   const curBranch=$("branchFilter").value;
   $("modalTitle").textContent=(editing?"Изменить: ":"Добавить: ")+NAMES[formType];
-  $("formFields").innerHTML=`<div class="formgrid">${forms[formType].map(([name,label,type,req])=>{
+  $("formFields").innerHTML=`<div class="formgrid">${forms[formType].filter(f=>!(editing&&f[0]==="payNow")).map(([name,label,type,req])=>{
     let val=old[name];
     if(val===undefined||val===null){val=type==="date"&&name!=="birth"&&name!=="expires"?today():name==="branch"&&curBranch!=="all"?curBranch:"";}
     const id="ff_"+name,r=req?"required":"";
     let input;
     if(type.startsWith("select:"))input=`<select class="field" id="${id}" name="${name}">${type.slice(7).split("|").map(v=>`<option ${v===val?"selected":""}>${v}</option>`).join("")}</select>`;
     else if(type==="branch")input=`<select class="field" id="${id}" name="${name}" ${r}>${db.branches.map(b=>`<option value="${b.id}" ${b.id==val?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`;
-    else if(type==="student")input=`<select class="field" id="${id}" name="${name}" ${r}>${db.students.map(s=>`<option value="${s.id}" ${s.id==val?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`;
+    else if(type==="student")input=`<select class="field" id="${id}" name="${name}" ${r}>${req?"":`<option value="">—</option>`}${db.students.map(s=>`<option value="${s.id}" ${s.id==val?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`;
     else if(type==="group")input=`<select class="field" id="${id}" name="${name}" ${r}><option value="">—</option>${db.groups.map(g=>`<option ${g.name===val?"selected":""}>${esc(g.name)}</option>`).join("")}${val&&!db.groups.some(g=>g.name===val)?`<option selected>${esc(val)}</option>`:""}</select>`;
     else if(type==="teacher")input=`<select class="field" id="${id}" name="${name}"><option value="">—</option>${db.teachers.map(t=>`<option ${t.name===val?"selected":""}>${esc(t.name)}</option>`).join("")}${val&&!db.teachers.some(t=>t.name===val)?`<option selected>${esc(val)}</option>`:""}</select>`;
     else if(type==="account")input=`<select class="field" id="${id}" name="${name}">${settings.accounts.map(a=>`<option ${a.name===val?"selected":""}>${esc(a.name)}</option>`).join("")}</select>`;
@@ -1152,15 +1175,18 @@ function showForm(){
   $("modalbg").style.display="grid";setTimeout(()=>$("formFields").querySelector("input,select")?.focus(),30);
 }
 function closeModal(){$("modalbg").style.display="none"}
-function saveForm(e){
+async function saveForm(e){
   e.preventDefault();
   const key=T2K[formType],obj={};
   new FormData(e.target).forEach((v,k)=>obj[k]=typeof v==="string"?v.trim():v);
+  // Защита от дублей: спрашиваем до создания заявки
+  if(key==="leads"&&!editing){const dp=dupOf({id:-1,phone:obj.phone});if(dp.length&&!await ask(`Этот номер уже есть в базе: ${dp.map(d=>d.k.toLowerCase()+" «"+d.n+"» ("+d.st+")").join(", ")}. Всё равно создать новую заявку?`,"Создать"))return}
   NUMS.forEach(k=>{if(obj[k]!==undefined)obj[k]=Number(obj[k])||0});
   if(formType==="membership"&&obj.used>obj.total){toast("Использовано больше, чем всего занятий");return}
   let rec;
   if(editing){const i=db[key].findIndex(x=>x.id===editing.id);db[key][i]=rec={...db[key][i],...obj}}
   else{rec={...obj,id:nid()};if(key==="leads"){rec.created=rec.updated=today();rec.createdAt=nowISO();rec.pipeline="sales";rec.feed=[];feedAdd(rec,"sys","Заявка создана · "+(rec.source||"источник не указан"));const dp=dupOf(rec);if(dp.length)feedAdd(rec,"sys","Внимание, номер уже есть в базе: "+dp.map(d=>d.n).join(", "));onEnterStage(rec)}db[key].push(rec)}
+  afterSave(key,rec,!editing);
   logAct((editing?"Изменено: ":"Добавлено: ")+NAMES[formType]+(obj.name||obj.title?" «"+(obj.name||obj.title)+"»":""));
   const added=key==="leads"&&leadToStudent(rec);
   persist();closeModal();init();
@@ -1171,6 +1197,7 @@ async function deleteItem(key,id){
   const x=db[key].find(i=>i.id===id);if(!x)return;
   if(!await ask(`Удалить ${NAMES[K2T[key]]}${x.name?" «"+x.name+"»":""}? Это действие нельзя отменить.`))return;
   db[key]=db[key].filter(i=>i.id!==id);
+  if(key==="attendance")undoVisit(x);
   if(key==="students"){db.memberships=db.memberships.filter(m=>m.student!==id);db.attendance=db.attendance.filter(a=>a.student!==id)}
   if(key==="leads"||key==="renewals")db.tasks=db.tasks.filter(t=>t.dealId!==id);
   logAct("Удалено: "+NAMES[K2T[key]]+(x.name?" «"+x.name+"»":""));
@@ -1179,7 +1206,7 @@ async function deleteItem(key,id){
 function quickAttendance(id){
   const s=db.students.find(x=>x.id===id);if(!s)return;
   if(db.attendance.some(a=>a.student===id&&a.date===today())){toast("Сегодня уже отмечен");return}
-  db.attendance.push({id:nid(),student:id,date:today(),group:s.group,branch:s.branch,status:"Присутствовал"});
+  const a={id:nid(),student:id,date:today(),group:s.group,branch:s.branch,status:"Присутствовал"};db.attendance.push(a);deductVisit(a);
   logAct("Посещение: "+s.name);persist();toast("Посещение отмечено");
   if(allowed("Посещаемость"))go("Посещаемость");
 }
@@ -1205,7 +1232,7 @@ async function resetDemo(){
   demoSeed();settings.robots=keepRobots||{};settings.templates=keepTpl||{};persist();init();toast("Демо-данные загружены");
 }
 /* Чистая CRM: только филиалы и тренеры */
-const CLEAR_COLS=["students","leads","renewals","tasks","memberships","attendance","payments","lessons","planned","groups","log"];
+const CLEAR_COLS=["students","leads","renewals","tasks","memberships","attendance","payments","lessons","planned","payslips","groups","log"];
 function cleanSeed(){demoSeed();CLEAR_COLS.forEach(k=>db[k]=[]);settings=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));settings.sla=15}
 async function wipeData(){
   if(!isBoss())return;
@@ -1310,6 +1337,143 @@ function visitValue(a){
   const ms=db.memberships.filter(m=>m.student===a.student&&Number(m.total)>0&&Number(m.price)>0);if(!ms.length)return 0;
   const m=ms.filter(m=>!m.expires||m.expires>=a.date).sort((x,y)=>(x.expires||"9").localeCompare(y.expires||"9"))[0]||ms[ms.length-1];
   return Number(m.price)/Number(m.total)}
+/* Импортированные оплаты с именем клиента привязываем к ученику с таким же ФИО (однозначное совпадение) */
+function linkPayments(){const key=n=>String(n||"").toLowerCase().replace(/ё/g,"е").replace(/\s+/g," ").trim(),by={};
+  db.students.forEach(s=>{const k=key(s.name);if(k)(by[k]=by[k]||[]).push(s.id)});let n=0;
+  db.payments.forEach(p=>{if(p.student||!p.client)return;const ids=by[key(p.client)];if(ids&&ids.length===1){p.student=ids[0];n++}});
+  if(n)persist()}
+/* ===== Расчётные листы: черновик → утверждён → выплачен ===== */
+const bonusSale=()=>settings.bonusSale===undefined?2000:Number(settings.bonusSale),bonusRenew=()=>settings.bonusRenew===undefined?1000:Number(settings.bonusRenew);
+const staffPeople=()=>users.filter(u=>u.role==="Администратор"||u.role==="Отдел продаж");
+/* Бонусы сотрудника: продажи абонементов по заявкам и продления, где он ответственный */
+function staffCalc(u,ym){const won=(arr,w)=>arr.filter(x=>x.stage===w&&(x.manager||"")===u.name&&(x.updated||"").startsWith(ym)).length;
+  const sales=won(db.leads,STAGES[3]),ren=won(db.renewals,RSTAGES[3]);return {sales,ren,base:Number(u.salary||0),bonus:sales*bonusSale()+ren*bonusRenew()}}
+const slipOf=(who,ym)=>db.payslips.find(p=>p.who===who&&p.ym===ym);
+const slipAccrued=p=>Number(p.base||0)+Number(p.bonus||0)-Number(p.deduct||0);
+const slipTotal=p=>Math.max(0,Math.round(slipAccrued(p)-Number(p.advance||0)));
+/* Авансы: выплаты сотруднику за месяц, внесённые вручную в Финансы (не по этому листу) */
+const advanceOf=(who,cat,ym)=>total(db.payments.filter(p=>isExp(p)&&p.category===cat&&p.teacher===who&&(p.date||"").startsWith(ym)&&!p.slip));
+/* Все, кому начисляется зарплата за месяц */
+function payPeople(ym){
+  const T=db.teachers.filter(inBranch).map(t=>{const p=payroll(t,ym);return {who:t.name,kind:"teacher",cat:"Зарплата тренеров",branch:t.branch,ref:t,calc:p,base:p.set?p.acc:0,bonus:0,
+    detail:Object.entries(p.groups).map(([g,v])=>`${g}: ${v.lessons} зан., ${v.visits} посещ., выручка ${money(v.rev)}`),model:p.set?payLabel(t):"ставка не задана"}});
+  const S=staffPeople().map(u=>{const c=staffCalc(u,ym);return {who:u.name,kind:"staff",cat:"ЗП персонала и бонусы",branch:db.branches[0]?.id,ref:u,calc:c,base:c.base,bonus:c.bonus,
+    detail:[`Продажи абонементов: ${c.sales} × ${money(bonusSale())}`,`Продления: ${c.ren} × ${money(bonusRenew())}`],model:esc(u.role)+(c.base?" · оклад "+money(c.base):"")}});
+  return [...T,...S]}
+function slipsCard(M){
+  const ppl=payPeople(M),cell=(p,f)=>p.status==="Черновик"?`<input class="field num" style="width:105px;padding:4px 6px" type="number" data-slip="${p.id}" data-f="${f}" value="${Number(p[f]||0)}">`:money(p[f]);
+  const rows=ppl.map(x=>{const p=slipOf(x.who,M);
+    if(!p)return `<tr><td><b>${esc(x.who)}</b><div class="sub">${x.model}${x.detail.length?"<br>"+x.detail.map(esc).join("<br>"):""}</div></td><td class="right num">${money(x.base)}</td><td class="right num">${money(x.bonus)}</td><td class="right num">—</td><td class="right num">${money(advanceOf(x.who,x.cat,M))}</td><td class="right num"><b>${money(Math.max(0,x.base+x.bonus-advanceOf(x.who,x.cat,M)))}</b></td><td><span class="sub">не создан</span></td>
+      <td>${x.kind==="teacher"&&!x.calc.set?`<a href="#" data-tedit="${x.ref.id}">задать ставку</a>`:`<button class="btn mini" data-mkslip="${esc(x.who)}">Создать лист</button>`}</td></tr>`;
+    return `<tr><td><b>${esc(x.who)}</b><div class="sub">${x.model}${(p.detail||[]).length?"<br>"+p.detail.map(esc).join("<br>"):""}</div></td><td class="right num">${cell(p,"base")}</td><td class="right num">${cell(p,"bonus")}</td><td class="right num">${cell(p,"deduct")}</td><td class="right num">${cell(p,"advance")}</td>
+      <td class="right num"><b>${money(slipTotal(p))}</b></td><td>${status(p.status)}${p.paidAt?`<div class="sub">${esc(p.paidAt)}</div>`:""}</td>
+      <td style="white-space:nowrap">${p.status==="Черновик"?`<button class="btn mini" data-slipact="recalc:${p.id}">Пересчитать</button> <button class="btn mini" data-slipact="approve:${p.id}">Утвердить</button>`:p.status==="Утверждён"?`<button class="btn mini" data-slipact="pay:${p.id}">Выплатить</button> <button class="mini" data-slipact="draft:${p.id}">В черновик</button>`:""} <button class="mini" data-slipact="print:${p.id}">Лист</button></td></tr>`}).join("");
+  const sl=db.payslips.filter(p=>p.ym===M),sum=f=>sl.reduce((a,p)=>a+f(p),0);
+  return `<div class="card" style="margin-bottom:16px"><h3>Зарплаты и расчётные листы за ${esc(M)}</h3>
+  <div class="hint">Тренерам начисляется по ставке из карточки тренера, по занятиям из «Расписания» и отметкам в «Посещаемости». Администраторам и менеджерам — оклад и бонус за продажи и продления, где они ответственные в сделке. Аванс — выплаты за месяц, уже внесённые в Финансы с этим сотрудником. Порядок: создать лист → проверить и поправить → утвердить → выплатить (расход появится в Финансах). Утверждённый лист не редактируется.</div>
+  <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px"><label for="bSale">Бонус за продажу абонемента, ₸</label><input class="field" id="bSale" type="number" style="width:100px" value="${bonusSale()}"><label for="bRen">за продление, ₸</label><input class="field" id="bRen" type="number" style="width:100px" value="${bonusRenew()}">
+  ${ppl.some(x=>!slipOf(x.who,M))?`<button class="btn secondary" data-act="mkallslips">Создать все листы</button>`:""}</div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Сотрудник</th><th class="right">Начислено</th><th class="right">Бонус</th><th class="right">Удержания</th><th class="right">Аванс</th><th class="right">К выплате</th><th>Статус</th><th></th></tr></thead><tbody>
+  ${rows||`<tr><td colspan="8" class="empty">Нет тренеров и сотрудников</td></tr>`}</tbody></table></div>
+  ${sl.length?`<p class="sub" style="margin-top:8px">Листов: ${sl.length} · начислено ${money(sum(slipAccrued))} · выплачено по листам ${money(sum(p=>p.status==="Выплачен"?slipTotal(p):0))}</p>`:""}</div>`}
+function makeSlip(who,M){if(slipOf(who,M))return;const x=payPeople(M).find(y=>y.who===who);if(!x)return;
+  db.payslips.push({id:nid(),ym:M,who,kind:x.kind,cat:x.cat,branch:x.branch,base:Math.round(x.base),bonus:Math.round(x.bonus),deduct:0,advance:advanceOf(who,x.cat,M),detail:x.detail,status:"Черновик",created:today()})}
+function printSlip(p){const w=window.open("","_blank");if(!w){toast("Разрешите всплывающие окна");return}
+  const R=(l,v,b)=>`<tr><td>${l}</td><td style="text-align:right;${b?"font-weight:700":""}">${v}</td></tr>`;
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Расчётный лист — ${esc(p.who)}</title><style>body{font:14px system-ui,sans-serif;max-width:640px;margin:32px auto}table{width:100%;border-collapse:collapse}td{padding:6px 4px;border-bottom:1px solid #ddd}h2{margin:0 0 4px}</style></head><body>
+  <h2>Расчётный лист</h2><p>Студия кавказского танца «DJIGIT TAU»<br>Сотрудник: <b>${esc(p.who)}</b><br>Период: ${esc(p.ym)} · Статус: ${esc(p.status)}</p>
+  <p>${(p.detail||[]).map(esc).join("<br>")}</p><table>${R("Начислено",money(p.base))}${R("Бонус",money(p.bonus))}${R("Удержания","− "+money(p.deduct))}${R("Аванс (выплачено ранее)","− "+money(p.advance))}${R("К выплате",money(slipTotal(p)),1)}</table>
+  <p style="margin-top:40px">Выдал: ____________ &nbsp;&nbsp; Получил: ____________</p><script>print()<\/script></body></html>`);w.document.close()}
+function wireSlips(){
+  const M=panelMonth;
+  $("bSale").onchange=e=>{settings.bonusSale=Number(e.target.value)||0;persist();render()};$("bRen").onchange=e=>{settings.bonusRenew=Number(e.target.value)||0;persist();render()};
+  document.querySelector('[data-act="mkallslips"]')?.addEventListener("click",()=>{payPeople(M).forEach(x=>{if(x.kind==="staff"||x.calc.set)makeSlip(x.who,M)});logAct("Созданы расчётные листы за "+M);persist();render();toast("Листы созданы")});
+  document.querySelectorAll("[data-mkslip]").forEach(b=>b.onclick=()=>{makeSlip(b.dataset.mkslip,M);persist();render();toast("Черновик листа создан")});
+  document.querySelectorAll("[data-slip]").forEach(i=>i.onchange=()=>{const p=db.payslips.find(x=>x.id===Number(i.dataset.slip));if(!p||p.status!=="Черновик")return;p[i.dataset.f]=Number(i.value)||0;
+    if(i.dataset.f==="base"&&p.kind==="staff"){const u=users.find(x=>x.name===p.who);if(u)u.salary=p.base}persist();render()});
+  document.querySelectorAll("[data-slipact]").forEach(b=>b.onclick=async()=>{const[a,id]=b.dataset.slipact.split(":"),p=db.payslips.find(x=>x.id===Number(id));if(!p)return;
+    if(a==="print")return printSlip(p);
+    if(a==="recalc"){const x=payPeople(p.ym).find(y=>y.who===p.who);if(x){p.base=Math.round(x.base);p.bonus=Math.round(x.bonus);p.detail=x.detail;p.advance=advanceOf(p.who,p.cat,p.ym)}toast("Пересчитано")}
+    if(a==="approve"){p.status="Утверждён";p.approvedAt=today();logAct("Утверждён расчётный лист: "+p.who+" "+p.ym)}
+    if(a==="draft")p.status="Черновик";
+    if(a==="pay"){const sum=slipTotal(p);if(!await ask(`Выплатить ${p.who} ${money(sum)} за ${p.ym}? В Финансах появится расход «${p.cat}».`,"Выплатить"))return;
+      if(sum>0)db.payments.push({id:nid(),date:today(),type:"Расход",action:"Себестоимость",category:p.cat,description:"Зарплата за "+p.ym+" — "+p.who,amount:sum,branch:p.branch,account:settings.accounts[0]?.name||"",teacher:p.who,slip:p.id});
+      p.status="Выплачен";p.paidAt=today();logAct("Выплата по листу: "+p.who+" "+money(sum))}
+    persist();render()});
+}
+/* ===== ИИ-агенты: долги, «мы скучаем», недельная сводка, черновик ответа клиенту ===== */
+/* Напоминания о долге: через 1, 7 и 14 дней на этапе «Ждём оплату»; на 14-й день — задача руководителю */
+function robotDebt(){let ch=false;if(!robotOn("r_debt"))return ch;const now=Date.now();
+  db.renewals.forEach(x=>{if(x.stage!==RSTAGES[2])return;if(!x.payAt){x.payAt=nowISO();ch=true;return}
+    const days=(now-new Date(x.payAt).getTime())/864e5;x.debtSteps=x.debtSteps||[];
+    [1,7,14].forEach(d=>{if(days>=d&&!x.debtSteps.includes(d)){x.debtSteps.push(d);queueMsg(x,"debt");feedAdd(x,"sys",`Робот: напоминание о долге (день ${d})`);
+      if(d===14)addTask(x,"Долг 14 дней: решить с руководителем",plusMin(60),true);ch=true}})});
+  return ch}
+/* Риск ухода: две последние отметки ученика — «Отсутствовал» */
+function robotMiss(){let ch=false;if(!robotOn("r_miss"))return ch;
+  db.students.forEach(s=>{if(s.status!=="Активен"&&s.status!=="Нужна оплата")return;
+    const at=db.attendance.filter(a=>a.student===s.id).sort((a,b)=>(a.date||"").localeCompare(b.date||"")).slice(-2);
+    if(at.length<2||at.some(a=>a.status!=="Отсутствовал"))return;const last=at[1].date;if(s.missAt&&s.missAt>=last)return;s.missAt=last;
+    let x=db.renewals.find(r=>r.student===s.id&&r.stage!==LOST&&r.stage!==RSTAGES[3]);
+    if(!x){const t=today();x={id:nid(),pipeline:"renew",name:s.name,phone:s.phone,branch:s.branch,stage:RSTAGES[0],price:0,student:s.id,source:s.source||"",manager:"",created:t,updated:t,createdAt:nowISO(),feed:[]};db.renewals.push(x)}
+    feedAdd(x,"sys","Робот: риск ухода — 2 пропуска подряд (последний "+last+")");queueMsg(x,"miss");addTask(x,"Позвонить: 2 пропуска подряд",plusMin(60),true);ch=true});
+  return ch}
+/* Недельная сводка владельцу: раз в неделю (с понедельника) при открытии CRM руководителем */
+let weeklyBusy=false,weeklyTried=false;
+function weekStart(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.toISOString().slice(0,10)}
+function weeklyText(){const t=today(),w=new Date(Date.now()-7*864e5).toISOString().slice(0,10),L=db.leads.filter(inBranch);
+  const lw=L.filter(l=>(l.created||"")>=w),won=L.filter(l=>l.stage===STAGES[3]&&(l.updated||"")>=w).length,lost=L.filter(l=>l.stage===LOST&&(l.updated||"")>=w).length;
+  const att=db.attendance.filter(inBranch).filter(a=>(a.date||"")>=w),rate=att.length?Math.round(att.filter(cameIn).length/att.length*100):0;
+  const late=myTasks().filter(isLateT).length;
+  return `Неделя ${w} — ${t}. Новых заявок ${lw.length} (по источникам ${JSON.stringify(lw.reduce((m,l)=>{m[l.source||"—"]=(m[l.source||"—"]||0)+1;return m},{}))}), купили абонемент ${won}, отказов ${lost}. Посещаемость ${rate}% (${att.length} отметок). Должников ${debts().length}. Просроченных задач ${late}.\n`+econText(today().slice(0,7))}
+async function makeWeekly(force){
+  if(weeklyBusy||!isBoss()||(!aiGet(AI_TKEY)&&!aiGet(ANT_KEY)))return;if(!force&&(weeklyTried||!robotOn("r_weekly")||(settings.weekly&&settings.weekly.date>=weekStart())))return;
+  weeklyBusy=true;weeklyTried=true;if(current==="Главная"&&$("weeklyBox"))$("weeklyBox").textContent="ИИ готовит сводку…";
+  try{const r=await aiCall([{role:"system",content:"Ты — ИИ-аналитик сети студий кавказских танцев «DJIGIT TAU» (Казахстан, ₸). Напиши владельцу короткую недельную сводку по-русски: 1) 3–4 главных цифры недели, 2) что тревожит, 3) 3 конкретных действия на эту неделю. Не выдумывай данных."},{role:"user",content:weeklyText()}]);
+    settings.weekly={date:today(),text:r.text,model:r.model};persist()}catch(e){settings.weekly={date:settings.weekly?.date||"",text:"Не удалось подготовить сводку: "+e.message,err:true}}
+  weeklyBusy=false;if(current==="Главная")render()}
+function weeklyCard(){if(!isBoss())return"";const w=settings.weekly,has=aiGet(AI_TKEY)||aiGet(ANT_KEY);
+  return `<div class="card" style="margin-bottom:16px"><h3>ИИ-сводка недели</h3><div class="hint">${has?`Готовится сама раз в неделю, с понедельника, при входе руководителя${w&&w.date?" · обновлена "+esc(w.date)+(w.model?" · "+esc(aiInfo(w.model)[1]):""):""}`:"Подключите ключ в разделе «ИИ-помощник», и сводка будет приходить каждую неделю"}</div>
+    <div id="weeklyBox" class="aimsg a${w&&w.err?" err":""}" style="max-width:100%;${w&&w.text?"":"display:none"}">${esc(w?.text||"")}</div>
+    ${has?`<div class="actions" style="margin-top:8px"><button class="btn secondary" data-act="weekly">Обновить сейчас</button></div>`:""}</div>`}
+/* Черновик ответа клиенту в карточке сделки: ИИ видит заявку, переписку, группы филиала и базу знаний студии */
+async function aiDraft(x){
+  const groups=db.groups.filter(g=>g.branch===x.branch).map(g=>`${g.name} (${g.dance||""}, ${g.age||""}): ${g.days||""} ${g.time||""}, тренер ${g.teacher||"—"}`).join("\n")||"нет данных";
+  const prices=[...new Set(db.memberships.filter(m=>m.branch===x.branch||!m.branch).map(m=>`${m.title} — ${money(m.price)}`))].slice(0,8).join("; ");
+  const hist=(x.feed||[]).filter(f=>f.type==="note"||f.type==="msg").slice(-6).map(f=>(f.type==="note"?"Примечание: ":"Сообщение клиенту: ")+f.text).join("\n");
+  const r=await aiCall([{role:"system",content:"Ты — администратор студии кавказских танцев «DJIGIT TAU». Напиши одно короткое тёплое сообщение клиенту в WhatsApp по-русски (3–5 предложений), без markdown. Цель — довести до следующего шага воронки (записать на пробное, подтвердить, продлить абонемент). Используй только факты из данных ниже; цену и расписание называй, только если они есть.\n\nБаза знаний студии:\n"+(settings.kb||"—")+"\n\nГруппы филиала "+branchName(x.branch)+":\n"+groups+"\n\nАбонементы: "+(prices||"—")},
+    {role:"user",content:`Сделка: ${x.pipeline==="renew"?"продление абонемента":"новая заявка"}, этап «${x.stage}». Клиент: ${x.name}. Возраст ребёнка: ${x.age||"—"}. Источник: ${x.source||"—"}. ${x.trial?"Пробное: "+fmtDT(x.trial)+".":""} ${x.expires?"Абонемент до "+x.expires+".":""}\nИстория:\n${hist||"—"}`}],{max:400});
+  return r.text.trim()}
+function agentsCard(){const on=id=>robotOn(id)?"checked":"";
+  return `<section class="card" style="margin-bottom:16px"><h3>ИИ-агенты</h3><div class="hint">Работают через ключи из раздела «ИИ-помощник» (бесплатные модели с автопереключением, платный Claude — резерв).</div>
+  <div class="rb"><div class="h"><span>Недельная сводка владельцу</span><label class="sw"><input type="checkbox" data-robot="r_weekly" ${on("r_weekly")}><span></span></label></div><p>Каждый понедельник при входе руководителя ИИ разбирает неделю: заявки, продажи, посещаемость, долги, прибыль — и даёт 3 действия. Сводка на «Главной».</p></div>
+  <div class="rb"><div class="h"><span>Черновик ответа клиенту</span></div><p>В карточке сделки на вкладке WhatsApp кнопка «ИИ-черновик» пишет сообщение по этапу сделки, переписке, расписанию групп филиала и базе знаний ниже. Менеджер проверяет и отправляет.</p></div>
+  <div class="formfield"><label for="kbIn">База знаний студии для ИИ: цены, скидки, что взять на занятие, адреса, правила</label><textarea class="field" id="kbIn" rows="5" placeholder="Например: Пробное занятие бесплатно. Абонемент 8 занятий — 20 000 ₸, 12 занятий — 27 000 ₸. Скидка 10% второму ребёнку. Форма: удобная одежда, чешки…">${esc(settings.kb||"")}</textarea></div>
+  <div class="modalfoot"><button class="btn" data-act="kbsave">Сохранить базу знаний</button></div></section>`}
+function wireAgents(){document.querySelector('[data-act="kbsave"]').onclick=()=>{settings.kb=$("kbIn").value.trim();persist();toast("База знаний сохранена")}}
+/* ===== Связи данных: абонемент ↔ оплата ↔ посещения ===== */
+function afterSave(key,rec,isNew){
+  if(key==="memberships"){if(isNew&&!rec.sold)rec.sold=today();
+    if(isNew&&rec.payNow!=="Не записывать (оплата уже внесена)"&&Number(rec.price)>0){const s=db.students.find(x=>x.id===rec.student);
+      db.payments.push({id:nid(),date:rec.sold||today(),type:"Доход",action:"Продажи",category:"Групповые",description:"Абонемент «"+rec.title+"» — "+(s?.name||""),amount:Number(rec.price),branch:rec.branch,account:settings.accounts[0]?.name||"",student:rec.student,membership:rec.id});
+      if(s&&s.status==="Нужна оплата")s.status="Активен"}
+    delete rec.payNow}
+  if(key==="students"){if(rec.status==="Архив"){if(!rec.left)rec.left=today()}else delete rec.left}
+  if(key==="attendance"&&isNew)deductVisit(rec);
+}
+/* Списание занятия: берём абонемент, который раньше всех кончается и где ещё есть занятия */
+function deductVisit(a){
+  if(settings.deduct===false||!cameIn(a)||a.membership)return;
+  const ms=db.memberships.filter(m=>m.student===a.student&&Number(m.used||0)<Number(m.total||0)&&(!m.expires||m.expires>=a.date)).sort((x,y)=>(x.expires||"9").localeCompare(y.expires||"9"));
+  const m=ms[0];if(!m)return;m.used=Number(m.used||0)+1;a.membership=m.id;
+  if(m.used>=m.total&&ms.length===1){const s=db.students.find(x=>x.id===a.student);if(s&&s.status==="Активен")s.status="Нужна оплата"}}
+function undoVisit(a){const m=a.membership&&db.memberships.find(x=>x.id===a.membership);if(m&&m.used>0)m.used--}
+/* Заполняемость группы за месяц: в списке / вместимость и посещения / (вместимость × занятия) */
+function groupFill(g,ym){
+  const cap=Number(g.cap)||0,listed=db.students.filter(s=>s.group===g.name&&s.status!=="Архив").length;
+  const lessons=db.lessons.filter(l=>l.group===g.name&&(l.date||"").startsWith(ym)&&l.date<=today()).length;
+  const visits=db.attendance.filter(a=>a.group===g.name&&(a.date||"").startsWith(ym)&&cameIn(a)).length;
+  return {g,cap,listed,lessons,visits,fill:cap&&lessons?visits/(cap*lessons):null}}
 function payLabel(t){const ty=t.payType,f=Number(t.fixed)?"оклад "+money(t.fixed):"";
   if(ty==="Только оклад")return esc(f||"оклад не указан");
   return esc(ty+" · "+(ty.startsWith("%")?Number(t.rate||0)+"%":money(t.rate))+(f?" + "+f:""))}
@@ -1328,7 +1492,7 @@ function pnl(bid,ym){
   const cat=c=>total(exp.filter(p=>(EXP_CATS.includes(p.category)?p.category:"Прочее")===c));
   const rev=total(ps.filter(isInc));
   const pr=db.teachers.filter(t=>bid==null?inBranch(t):t.branch===bid).map(t=>payroll(t,ym)),useAcc=pr.some(x=>x.set);
-  const fot=useAcc?pr.reduce((s,x)=>s+(x.set?x.acc:x.paid),0):cat("Зарплата тренеров");
+  const fot=useAcc?pr.reduce((s,x)=>{const sl=slipOf(x.t.name,ym);return s+(sl?slipAccrued(sl):x.set?x.acc:x.paid)},0):cat("Зарплата тренеров");
   const rent=cat("Аренда"),gross=rev-fot-rent,staff=cat("ЗП персонала и бонусы"),ads=cat("Реклама");
   const other=cat("Комиссия банка")+cat("Костюмы и инвентарь")+cat("Прочее");
   const taxFact=cat("Налоги"),tax=taxFact||Math.round(rev*taxRate()/100),net=gross-staff-ads-other-tax;
@@ -1346,7 +1510,11 @@ function marketing(ym){
 /* Отток (оценка по датам окончания абонементов): был активен в начале месяца, абонемент кончился в месяце и не продлён */
 function churn(ym){
   const s0=ym+"-01",e=monthEnd(ym),t=today();let base=0,lost=0,names=[];
-  db.students.filter(inBranch).forEach(s=>{const ex=db.memberships.filter(m=>m.student===s.id&&m.expires).map(m=>m.expires);if(!ex.some(x=>x>=s0))return;if(s.since&&s.since>=s0)return;
+  db.students.filter(inBranch).forEach(s=>{if(s.since&&s.since>=s0)return;
+    // Явный уход: ученик переведён в архив в этом месяце
+    if(s.left&&s.left>=s0&&s.left<e){base++;lost++;names.push(s.name);return}
+    if(s.left&&s.left<s0)return;
+    const ex=db.memberships.filter(m=>m.student===s.id&&m.expires).map(m=>m.expires);if(!ex.some(x=>x>=s0))return;
     base++;const last=ex.sort().pop();if(last<e&&last<t){lost++;names.push(s.name)}});
   return {base,lost,rate:base?lost/base:0,names}}
 function econText(ym){const P=pnl(null,ym),M=marketing(ym),C=churn(ym);
@@ -1364,9 +1532,11 @@ function econView(){
   const row=(l,f,o={})=>`<tr${o.b?' style="font-weight:700"':""}><td>${l}</td>${cols.map(([,x])=>`<td class="right num">${o.m?marginPill(x.m):money(f(x))+(o.p?pct(f(x),x):"")+(o.n?o.n(x):"")}</td>`).join("")}</tr>`;
   const pr=db.teachers.filter(inBranch).map(t=>payroll(t,M)),mk=marketing(M),ch=churn(M);
   const warn=[];cols.forEach(([n,x])=>{if(!x.rev)return;if(x.fot/x.rev>.45)warn.push(`${n}: ФОТ тренеров ${Math.round(x.fot/x.rev*100)}% выручки (норма 30–40%)`);if(x.rent/x.rev>.2)warn.push(`${n}: аренда ${Math.round(x.rent/x.rev*100)}% выручки (норма 10–15%)`);if(x.m<.1)warn.push(`${n}: чистая маржа ${Math.round(x.m*100)}% — ниже 10%`)});
+  const fills=db.groups.filter(inBranch).map(g=>groupFill(g,M)).sort((a,b)=>(a.fill??9)-(b.fill??9));
+  fills.forEach(f=>{if(f.fill!=null&&f.lessons>=3&&f.fill<.5)warn.push(`Группа «${f.g.name}»: заполняемость ${Math.round(f.fill*100)}% — объедините, перенесите время или запустите рекламу`)});
   if(ch.rate>.08)warn.push(`Отток ${Math.round(ch.rate*100)}% за месяц — выше 8%`);
   mk.rows.forEach(r=>{if(r.romi!=null&&r.romi<0)warn.push(`${r.src}: реклама не окупается (ROMI ${Math.round(r.romi*100)}%)`)});
-  if(pr.length&&!pr.some(x=>x.set))warn.push("У тренеров не заданы ставки — откройте «Тренеры» и укажите модель оплаты, тогда зарплата посчитается сама");
+  const pr2=pr;if(pr2.length&&!pr2.some(x=>x.set))warn.push("У тренеров не заданы ставки — откройте «Тренеры» и укажите модель оплаты, тогда зарплата посчитается сама");
   return `${warn.length?`<div class="notice" style="margin-bottom:16px"><b>Требует внимания:</b><br>${warn.map(esc).join("<br>")}</div>`:""}
   <div class="card" style="margin-bottom:16px"><h3>Прибыль и убытки за ${esc(M)}</h3><div class="hint">ФОТ тренеров — начислено по ставкам, если они заданы, иначе фактические выплаты. Налог — фактический или оценка по ставке упрощёнки.</div>
   <div class="tablewrap"><table class="table"><thead><tr><th>Статья</th>${cols.map(([n])=>`<th class="right">${esc(n)}</th>`).join("")}</tr></thead><tbody>
@@ -1375,18 +1545,16 @@ function econView(){
   ${row("− Налоги",x=>x.tax,{n:x=>x.taxEst?' <span class="sub">оценка</span>':""})}${row("= Чистая прибыль",x=>x.net,{b:1})}${row("Маржа",x=>0,{m:1})}
   </tbody></table></div>
   <div class="row" style="gap:8px;align-items:center;margin-top:10px"><label for="taxRate">Ставка налога, % от выручки (упрощёнка ИП с 2026 г. — 4%, уточните у бухгалтера)</label><input class="field" id="taxRate" type="number" step="0.1" min="0" style="width:90px" value="${taxRate()}"></div></div>
-  <div class="card" style="margin-bottom:16px"><h3>Зарплаты тренеров за ${esc(M)}</h3><div class="hint">Считается по проведённым занятиям из «Расписания» и отметкам в «Посещаемости». «Выплатить» создаёт расход «Зарплата тренеров» в Финансах.</div>
-  <div class="tablewrap"><table class="table"><thead><tr><th>Тренер</th><th>Модель оплаты</th><th class="right">Занятий</th><th class="right">Посещений</th><th class="right">Выручка групп</th><th class="right">Начислено</th><th class="right">Выплачено</th><th class="right">К выплате</th><th></th></tr></thead><tbody>
-  ${pr.map(x=>`<tr><td><b>${esc(x.t.name)}</b>${Object.keys(x.groups).length?`<div class="sub">${Object.entries(x.groups).map(([g,v])=>`${esc(g)}: ${v.lessons} зан., ${v.visits} пос., ${money(v.rev)}`).join("<br>")}</div>`:""}</td>
-    <td>${x.set?payLabel(x.t):`<a href="#" data-tedit="${x.t.id}">задать ставку</a>`}</td>
-    <td class="right num">${x.lessons}</td><td class="right num">${x.visits}</td><td class="right num">${money(x.rev)}</td><td class="right num">${x.set?money(x.acc):"—"}</td><td class="right num">${money(x.paid)}</td>
-    <td class="right num"><b>${x.set?money(x.due):"—"}</b></td><td>${x.set&&x.due>0?`<button class="btn mini" data-paysal="${x.t.id}">Выплатить</button>`:""}</td></tr>`).join("")||`<tr><td colspan="9" class="empty">Нет тренеров</td></tr>`}
-  </tbody></table></div></div>
+  ${slipsCard(M)}
   <div class="card" style="margin-bottom:16px"><h3>Реклама: CAC, LTV и ROMI по каналам</h3><div class="hint">Расход — операции «Реклама» с указанным каналом. Новые ученики — купившие абонемент заявки месяца или ученики, начавшие заниматься в этом месяце. LTV — средняя сумма абонементов ученика из канала за всё время. LTV/CAC выше 3 — реклама выгодна.${mk.unassigned?` <b>Без канала: ${money(mk.unassigned)}</b> — укажите канал в операциях, чтобы посчитать окупаемость.`:""}</div>
   <div class="tablewrap"><table class="table"><thead><tr><th>Канал</th><th class="right">Расход</th><th class="right">Заявок</th><th class="right">Новых учеников</th><th class="right">CAC</th><th class="right">LTV</th><th class="right">LTV/CAC</th><th class="right">ROMI</th></tr></thead><tbody>
   ${mk.rows.map(r=>`<tr><td>${esc(r.src)}</td><td class="right num">${money(r.spend)}</td><td class="right num">${r.leads}</td><td class="right num">${r.payers}</td><td class="right num">${r.cac?money(r.cac):"—"}</td><td class="right num">${money(r.ltv)}</td><td class="right num">${r.ratio?r.ratio.toFixed(1):"—"}</td><td class="right num">${r.romi==null?"—":Math.round(r.romi*100)+"%"}</td></tr>`).join("")||`<tr><td colspan="8" class="empty">Нет заявок и рекламных расходов за месяц</td></tr>`}
   </tbody></table></div></div>
-  <div class="grid2"><div class="card"><h3>Отток учеников</h3><div class="hint">Оценка: абонемент закончился в этом месяце и не продлён. Норма — до 8% в месяц.</div>
+  <div class="card" style="margin-bottom:16px"><h3>Заполняемость групп за ${esc(M)}</h3><div class="hint">Посещения / (вместимость × проведённые занятия). Хорошо — 75–85%, ниже 50% — группа работает в убыток. Вместимость задаётся в карточке группы.</div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Группа</th><th>Тренер</th><th class="right">В списке / мест</th><th class="right">Занятий</th><th class="right">Посещений</th><th class="right">Заполняемость</th></tr></thead><tbody>
+  ${fills.map(f=>`<tr><td><b>${esc(f.g.name)}</b><div class="sub">${esc(branchName(f.g.branch))}</div></td><td>${esc(f.g.teacher||"—")}</td><td class="right num">${f.listed} / ${f.cap||"?"}</td><td class="right num">${f.lessons}</td><td class="right num">${f.visits}</td><td class="right">${f.fill==null?`<span class="sub">${f.cap?"нет занятий":"нет вместимости"}</span>`:marginPill(f.fill)}</td></tr>`).join("")||`<tr><td colspan="6" class="empty">Групп нет</td></tr>`}
+  </tbody></table></div></div>
+  <div class="grid2"><div class="card"><h3>Отток учеников</h3><div class="hint">Ушли — переведены в архив в этом месяце или абонемент закончился и не продлён. Норма — до 8% в месяц.</div>
     <div class="big num">${Math.round(ch.rate*100)}%</div><p>Ушли ${ch.lost} из ${ch.base} активных на начало месяца</p>${ch.names.length?`<div class="sub">${ch.names.slice(0,15).map(esc).join(", ")}${ch.names.length>15?"…":""}</div>`:""}</div>
   <div class="card"><h3>ИИ-разбор месяца</h3><div class="hint">ИИ-помощник получает цифры этой страницы (без телефонов) и даёт выводы и 3–5 действий. Работает через раздел «ИИ-помощник».</div>
     <div id="econAi" class="aimsg a" style="max-width:100%;${econAiText?"":"display:none"}">${esc(econAiText)}</div>
@@ -1395,10 +1563,7 @@ let econAiText="";
 function wireEcon(){
   $("taxRate").onchange=e=>{settings.taxRate=e.target.value===""?"":Number(e.target.value);persist();render();toast("Ставка налога сохранена")};
   document.querySelectorAll("[data-tedit]").forEach(a=>a.onclick=e=>{e.preventDefault();editItem("teachers",Number(a.dataset.tedit))});
-  document.querySelectorAll("[data-paysal]").forEach(b=>b.onclick=async()=>{const t=db.teachers.find(x=>x.id===Number(b.dataset.paysal)),p=payroll(t,panelMonth);
-    if(!await ask(`Выплатить ${t.name} ${money(p.due)} за ${panelMonth}? Будет создан расход «Зарплата тренеров».`,"Выплатить"))return;
-    db.payments.push({id:nid(),date:today(),type:"Расход",action:"Себестоимость",category:"Зарплата тренеров",description:"Зарплата за "+panelMonth+" — "+t.name,amount:p.due,branch:t.branch,account:settings.accounts[0]?.name||"",teacher:t.name});
-    logAct("Выплата зарплаты: "+t.name+" "+money(p.due));persist();render();toast("Выплата записана в Финансы")});
+  wireSlips();
   document.querySelector('[data-act="econai"]').onclick=async e=>{const box=$("econAi");e.target.disabled=true;box.style.display="";box.textContent="Думаю…";
     try{const r=await aiCall([{role:"system",content:"Ты — финансовый аналитик сети студий кавказских танцев «DJIGIT TAU» (Казахстан, ₸). Ориентиры отрасли: ФОТ тренеров 30–40% выручки, аренда 10–15%, отток до 8% в месяц, LTV/CAC больше 3, чистая маржа 15–25%. Дай по-русски: 1) 3–4 главных вывода с цифрами, 2) 3–5 конкретных действий на следующий месяц. Не выдумывай данных, которых нет."},{role:"user",content:econText(panelMonth)}],{onTry:m=>box.textContent="Думаю… ("+aiInfo(m)[1]+")"});
       econAiText=r.text+"\n\n— "+aiInfo(r.model)[1];}catch(err){econAiText=err.message}
@@ -1406,7 +1571,11 @@ function wireEcon(){
 }
 
 /* ===== LTV и профиль ученика ===== */
-function ltv(id){return db.memberships.filter(m=>m.student===id).reduce((a,m)=>a+Number(m.price||0),0)}
+/* LTV: фактические оплаты ученика (доходы минус возвраты) или сумма цен его абонементов — что больше
+   (часть старых оплат может быть не привязана к ученику, тогда выручают цены абонементов) */
+function ltv(id){const ps=db.payments.filter(p=>p.student===id);
+  const paid=total(ps.filter(isInc))-total(ps.filter(p=>isExp(p)&&p.action==="Возвраты"));
+  return Math.max(paid,db.memberships.filter(m=>m.student===id).reduce((a,m)=>a+Number(m.price||0),0))}
 function canLtv(){return allowed("Финансы")||allowed("Абонементы")}
 /* Средний LTV платящего ученика: на него опирается прогноз по воронке */
 function avgLtv(list=db.students){const v=list.map(s=>ltv(s.id)).filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0}
@@ -1824,6 +1993,8 @@ function wireAI(){
 }
 after["ИИ-помощник"]=wireAI;
 after["Экономика"]=wireEcon;
+after["Автоматизация"]=()=>{wireAuto();wireAgents()};
+after["Посещаемость"]=()=>{$("deductSw").onchange=e=>{settings.deduct=e.target.checked;persist();toast(e.target.checked?"Списание включено":"Списание выключено")}};
 (async function boot(){
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
@@ -1831,6 +2002,7 @@ after["Экономика"]=wireEcon;
   db.leads.forEach(l=>{if(l.price===undefined)l.price=0;l.pipeline=l.pipeline||"sales";l.feed=l.feed||[];if(l.stage===LOST&&!l.reason)l.reason="Другое"});
   settings.robots=settings.robots||{};settings.templates=settings.templates||{};if(!settings.sla)settings.sla=15;
   if(XLS&&settings.xlsVersion!==XLS.v){importXls();persist()}
+  linkPayments();
   {const cm=new Date().toISOString().slice(0,7);if(!db.payments.some(p=>isInc(p)&&(p.date||"").startsWith(cm))){const last=db.payments.filter(isInc).map(p=>(p.date||"").slice(0,7)).filter(Boolean).sort().pop();if(last)panelMonth=last}}
   let sp=null;try{sp=sessionStorage.getItem(SKEY)}catch(e){}
   const u=users.find(x=>x.phone===sp);
