@@ -722,7 +722,7 @@ const views={
   ${isBoss()?`<div class="card" style="margin-top:16px"><h3>Счета</h3><div class="hint">Названия счетов и остаток на дату начала учёта. Баланс на панели владельца считается от этого остатка.</div>
   ${settings.accounts.map((a,i)=>`<div class="formgrid"><div class="formfield"><label for="an${i}">Счёт ${i+1}</label><input class="field" id="an${i}" data-accname value="${esc(a.name)}"></div><div class="formfield"><label for="as${i}">Начальный остаток, ₸</label><input class="field num" id="as${i}" data-accstart inputmode="numeric" value="${a.start||0}"></div></div>`).join("")}
   <div class="actions"><button class="btn" data-act="saveacc">Сохранить счета</button></div></div>
-  <div class="card" style="margin-top:16px"><h3>Данные из таблицы студии</h3><div class="hint">Из Excel-таблицы перенесены ученики (лист «ПРОЕКТЫ», выбывшие — из листа «ст»), группы, тренеры, оплаченные месяцы как абонементы и операции из листа «ОПЕРАЦИИ». Повторная загрузка заменит только эти записи; ваши заявки, задачи и операции, добавленные вручную, останутся.</div>${xlsStats()}<div class="actions"><label class="btn" for="xlsFile" style="cursor:pointer">Загрузить файл данных студии</label><input type="file" id="xlsFile" accept=".json,application/json" hidden></div><div class="sub" style="margin-top:8px">Файл djigit-data.json хранится у вас, на GitHub его не выкладывайте. Данные сохраняются только в этом браузере.</div></div>
+  <div class="card" style="margin-top:16px"><h3>Данные из таблицы студии</h3><div class="hint">Из Excel-таблицы перенесены ученики (лист «ПРОЕКТЫ», выбывшие — из листа «ст»), группы, тренеры, оплаченные месяцы как абонементы и операции из листа «ОПЕРАЦИИ». Повторная загрузка заменит только эти записи; ваши заявки, задачи и операции, добавленные вручную, останутся.</div>${xlsStats()}<div class="actions"><button class="btn" data-act="encload">Загрузить из репозитория (нужен пароль)</button><label class="btn secondary" for="xlsFile" style="cursor:pointer">Загрузить файл данных студии</label><input type="file" id="xlsFile" accept=".json,application/json" hidden></div><div class="sub" style="margin-top:8px">Таблица лежит в репозитории только в зашифрованном виде (studio-data.enc.json). Открытый файл данных на GitHub не выкладывайте. Данные сохраняются только в этом браузере.</div></div>
   <div class="card" style="margin-top:16px"><h3>Загрузить операции из таблицы</h3><div class="hint">Сохраните лист Excel или Google Таблицы как CSV. Нужны столбцы «Дата» и «Сумма»; ещё понимаются «Тип» (доход или расход), «Описание», «Статья», «Филиал» и «Счёт». Строки без типа считаются расходом.</div>
   <label class="btn secondary" for="csvFile" style="cursor:pointer">Выбрать CSV-файл</label><input type="file" id="csvFile" accept=".csv,text/csv" hidden>${settings.lastImport?`<span class="sub" style="margin-left:10px">Последняя загрузка: ${esc(settings.lastImport)}</span>`:""}</div>`:""}
   ${isBoss()?`<div class="card" style="margin-top:16px"><h3>Очистить CRM</h3><div class="hint">Удалит учеников, заявки, продления, задачи, абонементы, финансы, посещения, расписание, группы и журнал. Останутся филиалы, тренеры, сотрудники, шаблоны сообщений и настройки роботов. Перед очисткой можно выгрузить всё в Excel.</div><button class="btn danger" data-act="wipe">Очистить CRM</button></div>
@@ -982,7 +982,7 @@ const after={
   "Панель владельца":wirePanel,
   "Заявки и воронка":wirePipeline,
   "Команда":()=>{document.querySelector('[data-act="adduser"]').onclick=addUser;document.querySelectorAll("[data-deluser]").forEach(b=>b.onclick=()=>removeUser(b.dataset.deluser))},
-  "Настройки":()=>{document.querySelector('[data-act="xlsall"]').onclick=exportExcelAll;document.querySelector('[data-act="export"]').onclick=exportData;document.querySelector('[data-act="copy"]').onclick=copyData;$("impFile").onchange=importData;document.querySelector('[data-act="reset"]')?.addEventListener("click",resetDemo);document.querySelector('[data-act="wipe"]')?.addEventListener("click",wipeData);if($("xlsFile"))$("xlsFile").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;f.text().then(async t=>{let d;try{d=JSON.parse(t);if(!d.students||!d.payments)throw 0}catch(_){toast("Это не файл данных студии");return}
+  "Настройки":()=>{document.querySelector('[data-act="encload"]')?.addEventListener("click",()=>{encLater=false;showEncPrompt()});document.querySelector('[data-act="xlsall"]').onclick=exportExcelAll;document.querySelector('[data-act="export"]').onclick=exportData;document.querySelector('[data-act="copy"]').onclick=copyData;$("impFile").onchange=importData;document.querySelector('[data-act="reset"]')?.addEventListener("click",resetDemo);document.querySelector('[data-act="wipe"]')?.addEventListener("click",wipeData);if($("xlsFile"))$("xlsFile").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;f.text().then(async t=>{let d;try{d=JSON.parse(t);if(!d.students||!d.payments)throw 0}catch(_){toast("Это не файл данных студии");return}
   if(db.students.some(x=>x.src==="xls")&&!await ask("Заменить ранее загруженные данные студии? Записи, добавленные вручную, останутся.","Заменить"))return;
   XLS=d;importXls();persist();init();toast("Данные студии загружены")})};if($("csvFile")){$("csvFile").onchange=importCSV;document.querySelector('[data-act="saveacc"]').onclick=saveAccounts}},
   "Расписание":()=>{document.querySelectorAll("[data-edit-any]").forEach(b=>b.onclick=()=>{const[k,id]=b.dataset.editAny.split(":");editItem(k,+id)});document.querySelectorAll("[data-del-any]").forEach(b=>b.onclick=()=>{const[k,id]=b.dataset.delAny.split(":");deleteItem(k,+id)})}
@@ -1834,7 +1834,7 @@ function enter(u){
   me=u;role=u.role;
   $("login")?.remove();
   current=sections.flatMap(g=>g[1]).find(allowed);
-  init();
+  init();setTimeout(checkEncData,300);
 }
 function addUser(){
   const g=id=>$(id).value.trim();
@@ -1974,6 +1974,28 @@ function demoSeed(){
 }
 
 
+/* ===== Данные студии из репозитория (зашифрованы) =====
+   Репозиторий публичный, поэтому таблица лежит в studio-data.enc.json только в виде шифра
+   (gzip → AES-256-GCM, ключ из пароля через PBKDF2-SHA256). Пароль знает только студия;
+   он вводится один раз на устройстве, нигде не сохраняется. */
+let encData=null,encLater=false;
+async function loadEnc(){if(encData!==null)return encData;try{const r=await fetch("studio-data.enc.json",{cache:"no-cache"});encData=r.ok?await r.json():false}catch(e){encData=false}return encData}
+async function checkEncData(){if(encLater||!me)return;const e=await loadEnc();if(!e||settings.xlsVersion===e.v)return;showEncPrompt()}
+async function decryptEnc(e,pass){const u=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0)),S=crypto.subtle;
+  const base=await S.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  const key=await S.deriveKey({name:"PBKDF2",salt:u(e.salt),iterations:e.iter,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
+  const raw=await S.decrypt({name:"AES-GCM",iv:u(e.iv)},key,u(e.ct));
+  return JSON.parse(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream("gzip"))).text())}
+async function showEncPrompt(){const e=await loadEnc();if(!e){toast("Файл данных студии в репозитории не найден");return}if($("encbg"))return;
+  const d=document.createElement("div");d.className="modalbg";d.id="encbg";d.style.display="grid";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
+  d.innerHTML=`<form class="modal" style="width:min(420px,100%)"><h2>Данные студии</h2><p class="hint" style="margin:0 0 10px">В CRM есть таблица студии (обновлена ${esc(e.v.replace("sheet-",""))}): ученики, оплаты, группы, операции. Она зашифрована, потому что сайт открыт всем. Введите пароль данных — его достаточно ввести один раз на этом устройстве.</p>
+    <input class="field" id="encPass" type="password" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="Пароль данных"><div class="sub" id="encErr" style="color:var(--red);min-height:18px;margin-top:6px"></div>
+    <div class="modalfoot"><button type="button" class="btn secondary" id="encLater">Позже</button><button class="btn" id="encGo">Загрузить</button></div></form>`;
+  document.body.append(d);$("encPass").focus();
+  $("encLater").onclick=()=>{encLater=true;d.remove()};
+  d.querySelector("form").onsubmit=async ev=>{ev.preventDefault();const p=$("encPass").value.trim().toUpperCase();if(!p)return;$("encGo").disabled=true;$("encGo").textContent="Расшифровка…";$("encErr").textContent="";
+    let data;try{data=await decryptEnc(e,p)}catch(_){$("encErr").textContent="Неверный пароль";$("encGo").disabled=false;$("encGo").textContent="Загрузить";return}
+    XLS=data;importXls();persist();d.remove();init();toast("Данные студии загружены: "+data.students.length+" учеников, "+data.payments.length+" операций")}}
 /* ===== Данные из Excel-таблицы студии ===== */
 let XLS=null;
 function xlsStats(){const st=db.students.filter(x=>x.src==="xls"),ps=db.payments.filter(x=>x.src==="xls"),ds=ps.map(p=>p.date).sort();
