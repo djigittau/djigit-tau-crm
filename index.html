@@ -1648,19 +1648,19 @@ after["ИИ-помощник"]=wireAI;
 /* ===== Город агентов: у каждого агента своё здание, своя зона ответственности и свой обход данных.
    Обход работает локально без интернета; «Спросить» и «Совет» используют модель из раздела «ИИ-помощник». */
 const CITY=[
-  {id:"sales",nm:"Аслан",role:"Агент продаж",house:"Торговый двор",color:"#B8924B",wall:"#F4E8C8",x:160,y:120,sec:"Заявки и воронка",
+  {id:"sales",nm:"Аслан",role:"Агент продаж",house:"Продажи",color:"#B8924B",wall:"#F4E8C8",x:160,y:120,sec:"Заявки и воронка",
    persona:"Ты — Аслан, агент продаж в CRM студии кавказских танцев «DJIGIT TAU». Твоя зона: заявки, скорость первого ответа, пробные занятия и конверсия в абонемент."},
-  {id:"cash",nm:"Мурат",role:"Казначей",house:"Казна",color:"#3D6680",wall:"#E2ECF5",x:500,y:120,sec:"Панель владельца",
+  {id:"cash",nm:"Мурат",role:"Казначей",house:"Финансы",color:"#3D6680",wall:"#E2ECF5",x:500,y:120,sec:"Панель владельца",
    persona:"Ты — Мурат, казначей студии «DJIGIT TAU». Твоя зона: доходы, расходы, выполнение плана, маржа филиалов и ближайшие платежи."},
-  {id:"keep",nm:"Лейла",role:"Хранитель учеников",house:"Дом учеников",color:"#4E7B36",wall:"#E5F3E6",x:840,y:120,sec:"Ученики",
+  {id:"keep",nm:"Лейла",role:"Хранитель учеников",house:"Ученики",color:"#4E7B36",wall:"#E5F3E6",x:840,y:120,sec:"Ученики",
    persona:"Ты — Лейла, хранитель учеников студии «DJIGIT TAU». Твоя зона: удержание, долги по оплате, заканчивающиеся абонементы и ученики, которые перестали ходить."},
-  {id:"sched",nm:"Тимур",role:"Диспетчер",house:"Часовая башня",color:"#7A6A4A",wall:"#EFE7D6",x:160,y:470,sec:"Расписание",
+  {id:"sched",nm:"Тимур",role:"Диспетчер",house:"Расписание",color:"#7A6A4A",wall:"#EFE7D6",x:160,y:470,sec:"Расписание",
    persona:"Ты — Тимур, диспетчер расписания студии «DJIGIT TAU». Твоя зона: занятия, посещаемость групп, наполняемость и загрузка тренеров."},
-  {id:"mkt",nm:"Амина",role:"Маркетолог",house:"Дом глашатая",color:"#8E2A35",wall:"#F6E1E3",x:500,y:470,sec:"Аналитика",
+  {id:"mkt",nm:"Амина",role:"Маркетолог",house:"Маркетинг",color:"#8E2A35",wall:"#F6E1E3",x:500,y:470,sec:"Аналитика",
    persona:"Ты — Амина, маркетолог студии «DJIGIT TAU». Твоя зона: источники заявок, стоимость заявки и продажи, причины отказов."},
-  {id:"tasks",nm:"Расул",role:"Курьер задач",house:"Почта",color:"#C79B35",wall:"#FFF6DC",x:840,y:470,sec:"Задачи",
+  {id:"tasks",nm:"Расул",role:"Курьер задач",house:"Задачи",color:"#C79B35",wall:"#FFF6DC",x:840,y:470,sec:"Задачи",
    persona:"Ты — Расул, курьер задач студии «DJIGIT TAU». Твоя зона: просроченные и сегодняшние задачи менеджеров и сделки без следующего шага."}];
-const MAYOR={id:"mayor",nm:"Аксакал",role:"Старейшина города",house:"Ратуша",color:"#1A1916"};
+const MAYOR={id:"mayor",nm:"Аксакал",role:"Старейшина города",house:"Штаб",color:"#1A1916"};
 let citySel="mayor",cityRes={},cityAI={},cityBusy=false;
 const cNames=(a,k=4)=>a.slice(0,k).map(x=>x.name).join(", ")+(a.length>k?" и ещё "+(a.length-k):"");
 const cSum=a=>a.reduce((s,p)=>s+Number(p.amount||0),0);
@@ -1770,9 +1770,9 @@ function citySVG(){const tree=(x,y,s=1)=>`<g transform="translate(${x},${y}) sca
   <g stroke="#fff" stroke-width="2" stroke-dasharray="10 12" opacity=".7"><path d="M0 300H1000"/></g>
   ${[[50,240],[275,215],[725,215],[955,240],[268,410,.9],[735,410,.9],[50,420,.85],[955,420,.85],[395,560,.7],[605,560,.7],[110,560,.8],[930,560,.8]].map(t=>tree(...t)).join("")}
   <ellipse cx="500" cy="300" rx="112" ry="62" fill="#EADFC4" stroke="#D8C9A3"/>
-  <g class="bld hall${citySel==="mayor"?" sel":""}" data-agent="mayor" id="bld-mayor" tabindex="0" role="button" aria-label="Ратуша: Аксакал, старейшина города">
+  <g class="bld hall${citySel==="mayor"?" sel":""}" data-agent="mayor" id="bld-mayor" tabindex="0" role="button" aria-label="Штаб: Аксакал, старейшина города">
    <rect class="wall" x="440" y="252" width="120" height="66" fill="#FBF7EC" stroke="#1A1916" stroke-opacity=".2"/>
-   <path d="M430 254L500 216L570 254Z" fill="#1A1916"/><text x="500" y="247" text-anchor="middle" font-size="11" font-weight="600" fill="#E9D6A6">РАТУША</text>
+   <path d="M430 254L500 216L570 254Z" fill="#1A1916"/><text x="500" y="247" text-anchor="middle" font-size="11" font-weight="600" fill="#E9D6A6">ШТАБ</text>
    ${[452,476,516,540].map(x=>`<rect x="${x}" y="262" width="8" height="48" fill="#E9D6A6"/>`).join("")}
    <rect x="490" y="286" width="20" height="32" fill="#1A1916" opacity=".85"/>
    <path d="M500 216V196" stroke="#1A1916" stroke-width="2"/><path d="M500 196h18l-5 5 5 5h-18z" fill="#C79B35"/>
@@ -1802,14 +1802,14 @@ function cityPanel(){
     ${CITY.map(a=>{const is=cIssues(a),red=is.filter(x=>x.lv==="red").length;return `<button class="crow2" data-agent="${a.id}"><span class="cav sm" style="background:${a.color}">${a.nm[0]}</span><span><b>${a.nm}</b> · ${a.role}</span><span class="tag ${red?"red":is.length?"warn":""}">${red?red+" срочно":is.length?is.length+" к вниманию":"всё спокойно"}</span></button>`}).join("")}
     <h3 style="margin-top:14px">Главное на сегодня</h3>
     ${all.length?all.slice(0,6).map(({a,x})=>`<div class="cfind ${x.lv}"><span class="dot"></span><div><small style="color:var(--muted)">${a.nm}, ${a.role.toLowerCase()}</small><br>${esc(x.t)}</div></div>`).join(""):`<div class="empty">Агенты не нашли проблем</div>`}
-    <h3 style="margin-top:14px">Совет города</h3><div class="hint">Все агенты идут в ратушу, а Аксакал по их отчётам составляет план на день.</div>
+    <h3 style="margin-top:14px">Совет города</h3><div class="hint">Все агенты идут в штаб, а Аксакал по их отчётам составляет план на день.</div>
     ${cityAIBlock("mayor","Вопрос совету, например: «Что сделать, чтобы выполнить план месяца?» (пусто — план на день)")}`}
   const a=CITY.find(x=>x.id===citySel),r=cityRes[a.id]||cityScan(a);
-  return `<div class="chead"><span class="cav" style="background:${a.color}">${a.nm[0]}</span><div><b>${a.nm}</b><small>${a.role} · ${a.house}</small></div><button class="mini" data-cgo="${a.sec}" style="margin-left:auto">${esc(lbl(a.sec))} →</button></div>
+  return `<div class="chead"><span class="cav" style="background:${a.color}">${a.nm[0]}</span><div><b>${a.nm}</b><small>${a.role} · зона «${a.house}»</small></div><button class="mini" data-cgo="${a.sec}" style="margin-left:auto">${esc(lbl(a.sec))} →</button></div>
   <div class="hint">Обход: ${new Date(r.at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}</div>
   ${r.f.map((x,i)=>cityItem(x,i,a.id)).join("")||`<div class="empty">Нечего докладывать</div>`}
   <h3 style="margin-top:14px">Вопрос агенту</h3>${cityAIBlock(a.id,"Пусто — 3–5 действий на сегодня. Или свой вопрос, например: «Как вернуть тех, кто пропал?»")}
-  <div class="actions"><button class="btn secondary" data-cback="1">← В ратушу</button></div>`}
+  <div class="actions"><button class="btn secondary" data-cback="1">← В штаб</button></div>`}
 function cityRefresh(){const p=$("cityPanel");if(!p)return;p.innerHTML=cityPanel();
   document.querySelectorAll(".citysvg .bld").forEach(b=>b.classList.toggle("sel",b.dataset.agent===citySel));
   CITY.forEach(a=>{const g=$("bdg-"+a.id);if(g)g.innerHTML=cityBadge(a)});const m=$("bdg-mayor");if(m)m.innerHTML=cityMayorBadge();
@@ -1849,7 +1849,7 @@ function wireCityPanel(){const p=$("cityPanel");if(!p)return;
   const f=$("cityForm"),q=$("cityQ");if(f){q.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))f.requestSubmit()};
     f.onsubmit=e=>{e.preventDefault();cityAskAI(citySel,q.value.trim())};if(cityBusy)$("cityAsk").disabled=true}}
 views["Город агентов"]=()=>{CITY.forEach(cityScan);return `
-  <div class="card citybar"><div><h3>Шесть агентов и старейшина</h3><div class="hint">Каждый агент живёт в своём здании и следит за своей зоной CRM. «Обход города» — агенты проверяют данные и приносят находки в ратушу. Нажмите на здание, чтобы открыть агента.</div></div>
+  <div class="card citybar"><div><h3>Шесть агентов и старейшина</h3><div class="hint">Каждый агент живёт в своём здании и следит за своей зоной CRM. «Обход города» — агенты проверяют данные и приносят находки в штаб. Нажмите на здание, чтобы открыть агента.</div></div>
   <div class="actions" style="margin:0"><button class="btn" data-act="cityrun">Обход города</button><button class="btn secondary" data-act="citycouncil">Совет у Аксакала</button></div></div>
   <div class="citywrap"><div class="card citymap">${citySVG()}<div class="clegend"><span><i style="background:#C7392F"></i>срочно</span><span><i style="background:#D99A2B"></i>к вниманию</span><span><i style="background:#3E8E4E"></i>спокойно</span></div></div>
   <div class="card cpanel" id="cityPanel">${cityPanel()}</div></div>
