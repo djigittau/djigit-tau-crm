@@ -152,6 +152,16 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .lead{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 10px 8px;box-shadow:var(--shadow);cursor:grab}
 .lead:hover{border-color:var(--gold)}
 .lead.dragging{opacity:.45}
+.lead.waiting{border-color:#E7A0A8;box-shadow:0 0 0 1px #F3CDD1 inset}
+.lead .lbadges{display:flex;gap:6px;margin-bottom:5px;flex-wrap:wrap}.lead .wait{font-size:11px;font-weight:600;padding:1px 8px;border-radius:9px;background:var(--red-bg);color:var(--red)}.lead .stu{font-size:11px;padding:1px 8px;border-radius:9px;background:var(--green-bg);color:var(--green)}
+.lead .last{margin-top:5px;font-size:12.5px;color:var(--ink);opacity:.85;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lead .mgr{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11.5px;color:var(--muted)}.lead .mgr i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--pale);display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--ink)}.lead .mgr span{margin-left:auto;color:var(--faint)}
+.cguide{font-size:12px;color:var(--muted);padding:6px 8px 4px;cursor:pointer}.cguide .rl{margin-bottom:3px}.cguide .wd{font-weight:600;color:var(--ink)}.cguide .gt{display:none;margin-top:4px;line-height:1.45}.cguide.open .gt{display:block}.cguide.open .wd{color:var(--gold-deep)}
+.dtiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}@media(max-width:800px){.dtiles{grid-template-columns:repeat(2,1fr)}}
+.dtile{border:0;border-radius:14px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;cursor:pointer;color:var(--ink)}.dtile span{font-size:12.5px;opacity:.8}.dtile b{font-size:26px;font-weight:700}
+.dtile.t1{background:#F6D9E0}.dtile.t2{background:#DCE8F5}.dtile.t3{background:#F7E3D3}.dtile.t4{background:#E3EEDB}
+[data-theme=dark] .dtile.t1{background:#4a2e35}[data-theme=dark] .dtile.t2{background:#2c3a4a}[data-theme=dark] .dtile.t3{background:#4a3a2c}[data-theme=dark] .dtile.t4{background:#33422c}
+.qr{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .lead .t{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .lead b{font-weight:600}
 .lead .d{font-size:11.5px;color:var(--faint);white-space:nowrap}
@@ -1021,9 +1031,11 @@ const pipeColl=()=>pipe==="renew"?db.renewals:db.leads;
 const pipeStages=()=>pipe==="renew"?RSTAGES:STAGES;
 /* Сохранённые фильтры воронки — рабочий экран администратора */
 let leadFilter="all";
-const LFILTERS=[["all","Все"],["inbox","Неразобранные"],["notask","Без задачи"],["late","Просрочена задача"],["trial","Пробное сегодня","sales"],["expiring","Абонемент истекает ≤ 7 дн.","renew"],["mine","Мои"]];
+const LFILTERS=[["all","Все"],["inbox","Неразобранные"],["today","Новые сегодня","sales"],["trialall","На пробном","sales"],["notask","Без задачи"],["late","Просрочена задача"],["trial","Пробное сегодня","sales"],["expiring","Абонемент истекает ≤ 7 дн.","renew"],["mine","Мои"]];
 function leadMatch(x,f){const won=x.stage===(x.pipeline==="renew"?RSTAGES[3]:STAGES[3]),t=nextTask(x.id);
   if(f==="inbox")return x.stage===(x.pipeline==="renew"?RSTAGES[0]:STAGES[0])&&!x.firstContactAt;
+  if(f==="today")return x.created===today();
+  if(f==="trialall")return x.stage===STAGES[2];
   if(f==="notask")return !won&&!t;
   if(f==="late")return !!t&&isLateT(t);
   if(f==="trial")return !!x.trial&&new Date(x.trial).toDateString()===new Date().toDateString();
@@ -1061,6 +1073,7 @@ function pipelineView(){
   const tabs=`<div class="ptabs" role="tablist"><button role="tab" data-pipe="sales" class="${pipe==="sales"?"on":""}">Набор учеников<b>${db.leads.filter(inBranch).filter(x=>x.stage!==LOST&&x.stage!==STAGES[3]).length}</b></button><button role="tab" data-pipe="renew" class="${pipe==="renew"?"on":""}">Продления<b>${db.renewals.filter(inBranch).filter(x=>x.stage!==LOST&&x.stage!==RSTAGES[3]).length}</b></button></div>`;
   const body=PF.view==="list"?pListView(act,st):`<div class="columns">${st.map((sn,i)=>{const arr=act.filter(x=>x.stage===sn);const tot=arr.reduce((a,x)=>a+Number(x.price||0),0),lim=colLimit[sn]||COL_STEP;
   return `<section class="col" aria-label="${sn}"><div class="colhead" style="background:${STAGE_BG[i]}"><div class="n"><span>${sn}</span></div><div class="m num">${plural(arr.length,"сделка","сделки","сделок")}: ${money(tot)}</div>${show?`<div class="f num">${i===3?"LTV купивших: "+money(arr.reduce((a,x)=>a+clientsByPhone(x.phone).reduce((b,s)=>b+ltv(s.id),0),0)):"Прогноз LTV: "+money(arr.length*avg)}</div>`:""}</div>
+  <div class="cguide" data-guide>${robotLine(pipe,sn)?`<div class="rl">● DJIGIT CRM: ${esc(robotLine(pipe,sn))}</div>`:""}<div class="wd">Что делать ›</div><div class="gt">${esc(guideOf(sn))}</div></div>
   <div class="colbody" data-stage="${sn}">${i===0&&pipe==="sales"?'<button class="quick" data-act="newlead">+ Быстрое добавление</button>':""}${arr.slice(0,lim).map(cardHTML).join("")||'<div class="empty" style="padding:12px">'+(pActive()?"Нет сделок по фильтру":"Пусто")+'</div>'}${arr.length>lim?`<button class="quick" data-more="${esc(sn)}">Показать ещё ${Math.min(COL_STEP,arr.length-lim)} из ${arr.length-lim}</button>`:""}</div></section>`}).join("")}</div>`;
   return tabs+pToolbar(actAll)+chips+`<div class="pipebar"><span class="sub">${PF.view==="list"?"Отметьте галочками, чтобы изменить сразу несколько.":(pipe==="renew"?"Сделка создаётся сама за 14 дней до конца абонемента. ":"")+"Откройте карточку кликом или перетащите её в другой этап."}</span><span class="total">${pActive()?`по фильтру ${act.length} из ${actAll.length} · `:""}${plural(act.length,"сделка","сделки","сделок")} · <b class="num">${money(act.reduce((a,x)=>a+Number(x.price||0),0))}</b>${show?` · прогноз LTV <b class="num" title="Заявки в работе × средний LTV платящего ученика (${money(avg)})">${money(open.length*avg)}</b>`:""}</span></div>
   ${body}
@@ -1085,12 +1098,15 @@ const aiPill=v=>`<span class="aip ${v>=65?"hi":v>=35?"mid":"lo"}" title="Шан�
 function nextTask(id){return db.tasks.filter(t=>t.dealId===id&&!t.done).sort((a,b)=>a.due.localeCompare(b.due))[0]}
 const isLateT=t=>!t.done&&new Date(t.due).getTime()<Date.now();
 function cardHTML(x){
-  const t=nextTask(x.id);
-  return `<article class="lead" draggable="true" data-id="${x.id}" data-open="${x.id}" tabindex="0" aria-label="${esc(x.name)}">
+  const t=nextTask(x.id),w=waitingSince(x),lt=lastText(x),stu=x.pipeline!=="renew"&&clientsByPhone(x.phone).some(s=>s.status!=="Архив");
+  return `<article class="lead${w!=null?" waiting":""}" draggable="true" data-id="${x.id}" data-open="${x.id}" tabindex="0" aria-label="${esc(x.name)}">
+  ${w!=null||stu?`<div class="lbadges">${w!=null?`<span class="wait">Ждёт ответа · ${agoTxt(w)}</span>`:""}${stu?'<span class="stu">Ученик</span>':""}</div>`:""}
   <div class="t"><b>${esc(x.name)}</b><span class="d" title="Создана ${esc(relDay(x.created))}">${x.stageAt?`в этапе ${daysIn(x)} дн.`:esc(relDay(x.created))}</span></div><small>${esc(x.phone)}${x.age?` · ребёнку ${esc(x.age)}`:""}</small>${x.price?`<div class="price num">${money(x.price)}</div>`:""}
   ${pipe==="sales"&&canLtv()?ltvBadge(x):""}${x.trial&&x.stage===STAGES[2]?`<small>Пробное: ${esc(fmtDT(x.trial))}</small>`:""}${x.expires?`<small>Абонемент до ${esc(x.expires)}</small>`:""}
   ${(x.tags||[]).length||x.aiScore!=null?`<div class="tags">${x.aiScore!=null?aiPill(x.aiScore):""}${(x.tags||[]).map(g=>`<span class="tg">#${esc(g)}</span>`).join("")}</div>`:""}
-  <div class="tags"><span>${esc(branchName(x.branch))}</span>${x.source?`<span>${esc(x.source)}</span>`:""}${x.manager?`<span>${esc(x.manager)}</span>`:""}</div>
+  ${lt?`<div class="last">${lt.me?"Вы: ":""}${esc(lt.t.slice(0,90))}${lt.t.length>90?"…":""}</div>`:""}
+  <div class="tags"><span>${esc(branchName(x.branch))}</span>${x.source?`<span>${esc(x.source)}</span>`:""}</div>
+  ${x.manager||lt?`<div class="mgr">${x.manager?`<i>${esc(initials(x.manager))}</i>${esc(x.manager)}`:""}<span>${lt?esc(fmtDT(lt.at)):""}</span></div>`:""}
   ${x.stage===(x.pipeline==="renew"?RSTAGES[3]:STAGES[3])?"":t?`<div class="task"><span class="tdot ${isLateT(t)?"late":""}"></span><span>${esc(fmtDT(t.due))}: ${esc(t.text)}</span></div>`:`<div class="task"><span class="tdot none"></span><span class="sub">Нет задач</span></div>`}</article>`;
 }
 function fmtDT(iso){if(!iso)return"";const d=new Date(iso),t0=new Date();t0.setHours(0,0,0,0);const dd=Math.round((new Date(d).setHours(0,0,0,0)-t0)/864e5);
@@ -1199,6 +1215,7 @@ function queueMsg(x,key){const t=tpl(key);feedAdd(x,"msg",fillTpl(t.text,x),{tpl
 /* Цифровая воронка: роботы */
 const ROBOTS=[
   {id:"r_new",pipe:"sales",stage:STAGES[0],name:"Задача «Связаться» по нормативу",desc:"Новой заявке сразу ставится задача с нормативом ответа. Просрочка видна руководителю."},
+  {id:"r_greet",pipe:"sales",stage:STAGES[0],name:"Приветствие от бота",desc:"Новой заявке сразу готовится приветствие из вкладки «Бот» — отправьте его во вкладке «WhatsApp» одной кнопкой."},
   {id:"r_invite",pipe:"sales",stage:STAGES[1],name:"Приглашение на пробное",desc:"Готовит сообщение «Приглашение на пробное» для WhatsApp."},
   {id:"r_trial",pipe:"sales",stage:STAGES[2],name:"Подтверждение и напоминание",desc:"Сообщение-подтверждение и задача напомнить за 3 часа до пробного."},
   {id:"r_noshow",pipe:"sales",stage:STAGES[2],name:"Сценарий неявки",desc:"Если через сутки после пробного сделка не сдвинулась, готовит сообщение и задачу «Перенести пробное»."},
@@ -1213,6 +1230,7 @@ const robotOn=id=>settings.robots[id]!==false;
 function onEnterStage(x){
   const st=x.stage;
   if(x.pipeline!=="renew"){
+    if(st===STAGES[0]&&robotOn("r_greet")&&!(x.feed||[]).some(f=>f.tplName==="Приветствие бота"))feedAdd(x,"msg",fillTpl(botCfg().greeting,x),{tplName:"Приветствие бота",auto:true,sent:false});
     if(st===STAGES[0]&&robotOn("r_new")&&!nextTask(x.id))addTask(x,"Связаться с клиентом",plusMin(settings.sla),true);
     if(st===STAGES[1]&&robotOn("r_invite"))queueMsg(x,"invite");
     if(st===STAGES[2]&&robotOn("r_trial")){if(!x.trial)x.trial=at(1,17);queueMsg(x,"confirm");addTask(x,"Напомнить о пробном",new Date(new Date(x.trial).getTime()-3*3600e3).toISOString(),true)}
@@ -1276,7 +1294,10 @@ function openDeal(id){
       <textarea id="cText" aria-label="Текст" placeholder="${compMode==="note"?"Например: мама просит группу по выходным":compMode==="task"?"Что сделать? Например: перезвонить после 18:00":"Текст сообщения"}"></textarea>
       <div class="row2">${compMode==="task"?`<label class="sub" for="cDue">Срок</label><input class="field" style="width:auto" id="cDue" type="datetime-local" value="${at(1,11).slice(0,16)}">`:""}<span class="grow"></span>
       <button class="btn">${compMode==="note"?"Добавить примечание":compMode==="task"?"Поставить задачу":"Открыть в WhatsApp"}</button></div></form>`}</div></div>`;
-  if(compMode==="wa"){const fillT=()=>{$("cText").value=fillTpl(tpl($("cTpl").value).text,x)};$("cTpl").onchange=fillT;fillT()}
+  if(compMode==="wa"){const fillT=()=>{$("cText").value=fillTpl(tpl($("cTpl").value).text,x)};$("cTpl").onchange=fillT;fillT();
+    const qr=document.createElement("div");qr.className="qr";qr.innerHTML=botCfg().faq.map(([q],i)=>`<button type="button" class="mini" data-qr="${i}">${esc(q)}</button>`).join("")+(scriptOf(x.stage)?`<button type="button" class="mini" data-qrs>📋 Скрипт этапа</button>`:"");
+    $("cText").before(qr);qr.querySelectorAll("[data-qr]").forEach(b=>b.onclick=()=>{$("cText").value=fillTpl(botCfg().faq[+b.dataset.qr][1],x);$("cText").focus()});
+    qr.querySelector("[data-qrs]")?.addEventListener("click",()=>askForm("Скрипт: "+x.stage,`<div style="white-space:pre-line;line-height:1.55">${esc(fillTpl(scriptOf(x.stage),x))}</div>`,"Закрыть"))}
   $("deal").classList.add("on");$("dealbg").classList.add("on");const fd=$("feed");fd.scrollTop=fd.scrollHeight;
   const D=$("deal");
   D.querySelector("[data-x]").onclick=closeDeal;
@@ -1538,6 +1559,75 @@ function linkPayments(){const key=n=>String(n||"").toLowerCase().replace(/ё/g,"
   db.students.forEach(s=>{const k=key(s.name);if(k)(by[k]=by[k]||[]).push(s.id)});let n=0;
   db.payments.forEach(p=>{if(p.student||!p.client)return;const ids=by[key(p.client)];if(ids&&ids.length===1){p.student=ids[0];n++}});
   if(n)persist()}
+/* ===== Рабочий стол менеджера в «Заявках»: плитки, подсказки по этапам, вкладки WhatsApp и Бот ===== */
+let deskTab="deals";
+const minsAgo=iso=>Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
+const agoTxt=m=>m<60?m+" мин":m<1440?Math.floor(m/60)+" ч":Math.floor(m/1440)+" дн";
+/* Ждёт ответа: новая заявка, менеджер ещё не отвечал */
+const waitingSince=x=>x.pipeline!=="renew"&&!x.firstContactAt&&x.stage===STAGES[0]&&x.createdAt?minsAgo(x.createdAt):null;
+const lastText=x=>{const f=[...(x.feed||[])].reverse().find(e=>e.type==="msg"||e.type==="note");return f?{t:f.text,at:f.at,me:f.type==="msg"}:null};
+const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+/* Что делать на этапе — подсказка менеджеру; меняется в «Автоматизации» */
+const STAGE_GUIDE={"Новая заявка":"Ответить в течение норматива: поздороваться, представиться, спросить возраст ребёнка и удобный филиал. Предложить бесплатное пробное.",
+  "Связались":"Выявить потребность (возраст, опыт, цель: для себя, к выступлениям), подобрать группу и время, записать на пробное с датой.",
+  "Пробное занятие":"За день и за 2 часа напомнить о пробном. После занятия — спросить впечатления и предложить абонемент со ссылкой на оплату.",
+  "Купили абонемент":"Добавить в группу, отправить расписание и правила студии, поставить задачу «как прошли первые занятия» через неделю.",
+  "Скоро окончание":"Напомнить об окончании абонемента, уточнить, продолжают ли занятия, назвать стоимость продления.",
+  "Напомнили":"Если нет ответа 2 дня — позвонить. Выяснить причину сомнений, предложить удобный вариант (меньше занятий, другая группа).",
+  "Ждём оплату":"Отправить ссылку на оплату, через день напомнить. После оплаты — перевести в «Продлили».",
+  "Продлили":"Поблагодарить, подтвердить расписание на следующий месяц."};
+const guideOf=st=>(settings.guides||{})[st]||STAGE_GUIDE[st]||"";
+const robotLine=(p,st)=>ROBOTS.filter(r=>r.pipe===p&&r.stage===st&&robotOn(r.id)).map(r=>r.name).join(" · ");
+function deskTiles(){const L=db.leads.filter(inBranch),t=today(),tasksToday=myTasks().filter(k=>!k.done&&k.due.slice(0,10)===t).length;
+  const T=(cls,label,n,act)=>`<button class="dtile ${cls}" data-dtile="${act}"><span>${label}</span><b class="num">${n}</b></button>`;
+  return `<div class="dtiles">${T("t1","Без ответа",L.filter(x=>waitingSince(x)!=null).length,"inbox")}${T("t2","Новые сегодня",L.filter(x=>x.created===t).length,"today")}${T("t3","Задачи на сегодня",tasksToday,"tasks")}${T("t4","Записаны на пробное",L.filter(x=>x.stage===STAGES[2]).length,"trialall")}</div>`}
+function deskTop(){const n=db.leads.filter(inBranch).filter(x=>x.stage!==LOST&&x.stage!==STAGES[3]).length,q=deskQueue().length;
+  return `<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px"><div class="seg">${[["deals","Заявки",n],["wa","WhatsApp",q],["bot","Бот",""]].map(([k,l,c])=>`<button data-desk="${k}" class="${deskTab===k?"on":""}">${l}${c!==""?` <b>${c}</b>`:""}</button>`).join("")}</div>
+  <span style="flex:1"></span><button class="mini" data-act="dreport">Отчёт</button><button class="mini" data-act="dscripts">Скрипты</button><button class="mini" data-act="dlearn">Обучение</button></div>`}
+/* --- WhatsApp: все сообщения по сделкам в одном месте --- */
+function deskQueue(){return [...db.leads,...db.renewals].filter(inBranch).flatMap(x=>(x.feed||[]).filter(f=>f.type==="msg"&&!f.sent).map(f=>({x,f})))}
+function waTab(){const q=deskQueue().sort((a,b)=>a.f.at.localeCompare(b.f.at)),sent=[...db.leads,...db.renewals].filter(inBranch).flatMap(x=>(x.feed||[]).filter(f=>f.type==="msg"&&f.sent).map(f=>({x,f}))).sort((a,b)=>b.f.at.localeCompare(a.f.at)).slice(0,40);
+  const row=({x,f},send)=>`<div class="row"><b style="min-width:180px"><a href="#" data-open="${x.id}">${esc(x.name)}</a><div class="sub">${esc(x.phone)} · ${esc(f.tplName||"сообщение")}</div></b><span style="flex:1;color:var(--muted);font-size:13px">${esc(f.text.slice(0,160))}${f.text.length>160?"…":""}</span>
+    <span>${send&&x.phone?`<a class="wa" data-dsend="${x.id}:${f.id}" href="${waURL(x.phone,f.text)}" target="_blank" rel="noopener">Отправить</a>`:`<span class="sub">${esc(fmtDT(f.at))}</span>`}</span></div>`;
+  return `<div class="card" style="margin-bottom:16px"><h3>Готово к отправке · ${q.length}</h3><div class="hint">Сообщения, которые подготовили роботы и ИИ: приветствия, напоминания о пробном, продления, долги. Нажмите «Отправить» — откроется WhatsApp, сообщение отметится отправленным, а заявка — обработанной.</div>${q.map(r=>row(r,1)).join("")||'<div class="empty">Всё отправлено</div>'}</div>
+  <div class="card"><h3>Отправленные</h3>${sent.map(r=>row(r,0)).join("")||'<div class="empty">Пока нет</div>'}</div>`}
+/* --- Бот: приветствие и быстрые ответы (вставляются в карточку сделки одним нажатием) --- */
+const BOT0={greeting:"Здравствуйте! Это студия кавказского танца DJIGIT TAU 👋 Подскажите, пожалуйста, возраст ребёнка и какой филиал вам удобен — подберём группу и запишем на бесплатное пробное занятие.",
+  faq:[["Сколько стоит?","Абонемент на месяц — от 25 000 ₸ (8 занятий). Первое пробное занятие бесплатно."],["С какого возраста?","Принимаем детей с 4 лет, есть группы для подростков и взрослых."],["Что взять на пробное?","Удобную одежду, сменную обувь (чешки или мягкие кроссовки) и воду."],["Где вы находитесь?","У нас несколько филиалов в Алматы и Астане — напишите, какой район удобен, подскажем ближайший."],["Есть скидки?","Да: семейная скидка второму ребёнку и скидка при оплате сразу за 3 месяца."]]};
+const botCfg=()=>({...BOT0,...(settings.bot||{})});
+function botTab(){const b=botCfg();return `<div class="card"><h3>Бот: приветствие и быстрые ответы</h3><div class="hint">Приветствие робот отправляет каждой новой заявке. Быстрые ответы появляются в карточке сделки на вкладке WhatsApp — менеджер вставляет готовый ответ одним нажатием. Автоответ прямо в WhatsApp заработает после подключения WhatsApp Business API.</div>
+  <div class="formfield"><label for="botG">Приветствие новой заявке</label><textarea class="field" id="botG" rows="3">${esc(b.greeting)}</textarea></div>
+  <h3 style="margin-top:12px">Быстрые ответы</h3>${b.faq.map(([q,a],i)=>`<div class="formgrid" style="grid-template-columns:1fr 2fr auto;align-items:end"><div class="formfield"><label>Вопрос</label><input class="field" data-faqq="${i}" value="${esc(q)}"></div><div class="formfield"><label>Ответ</label><input class="field" data-faqa="${i}" value="${esc(a)}"></div><button class="mini del" data-faqrm="${i}" style="margin-bottom:10px">×</button></div>`).join("")}
+  <div class="actions"><button class="btn secondary mini" data-act="faqadd">+ Ответ</button><button class="btn" data-act="botsave">Сохранить</button></div></div>`}
+function botSave(){const b=botCfg();b.greeting=$("botG").value.trim();b.faq=[...document.querySelectorAll("[data-faqq]")].map((q,i)=>[q.value.trim(),document.querySelector(`[data-faqa="${i}"]`).value.trim()]).filter(r=>r[0]||r[1]);settings.bot=b;persist()}
+/* --- Отчёт менеджера за день --- */
+function dayReport(){const t=today(),L=db.leads.filter(inBranch),me0=me?.name||"";
+  const c=f=>L.filter(f).length,fresh=c(x=>x.created===t),answered=c(x=>x.created===t&&x.firstContactAt),trial=c(x=>x.stage===STAGES[2]&&(x.updated||"")===t),won=c(x=>x.stage===STAGES[3]&&(x.updated||"")===t),lost=c(x=>x.stage===LOST&&(x.updated||"")===t);
+  const done=db.tasks.filter(k=>k.done&&(findDeal(k.dealId)?.updated||"")===t).length,late=myTasks().filter(isLateT).length,wait=L.filter(x=>waitingSince(x)!=null).length;
+  const rev=total(db.payments.filter(inBranch).filter(p=>isInc(p)&&p.date===t&&!p.noCash));
+  return `Отчёт за ${t} · ${me0}\nНовых заявок: ${fresh}, ответили: ${answered}\nЗаписаны на пробное: ${trial}\nКупили абонемент: ${won}\nОтказы: ${lost}\nВыполнено задач: ${done}, просрочено: ${late}\nБез ответа сейчас: ${wait}\nОплаты за день: ${money(rev)}`}
+/* --- Скрипты продаж по этапам и обучение --- */
+const SCRIPTS0={"Новая заявка":"1) Здравствуйте, {имя}! Меня зовут … , студия DJIGIT TAU.\n2) Подскажите, сколько лет ребёнку и занимался ли он танцами?\n3) Какой филиал и время вам удобнее?\n4) Приглашаем на бесплатное пробное — в … или в …?",
+  "Связались":"• Уточнить цель: для себя / выступления / дисциплина.\n• Рассказать про группу: тренер, расписание, концерты.\n• Закрыть на дату пробного: «Записываю на … в …, хорошо?»",
+  "Пробное занятие":"• После занятия: «Как вам первое занятие? Что понравилось?»\n• Отработка возражения «дорого»: стоимость одного занятия, семейная скидка, рассрочка по месяцам.\n• Предложить абонемент и отправить ссылку на оплату.",
+  "Купили абонемент":"• Поздравить, отправить расписание и правила.\n• Через неделю спросить, как прошли первые занятия."};
+const scriptOf=st=>(settings.scripts||{})[st]||SCRIPTS0[st]||"";
+const LEARN=["Отвечайте на новую заявку в течение норматива — плитка «Без ответа» должна быть 0.","У каждой сделки должна быть задача: фильтр «Без задачи» — тоже 0.","Сообщения роботов отправляйте из вкладки «WhatsApp» — одной кнопкой на каждое.","Используйте быстрые ответы из «Бота» и скрипт этапа — кнопка «Скрипты».","Перед закрытием сделки в «Отказ» укажите причину — по ней студия учится.","В конце дня нажмите «Отчёт» и отправьте его руководителю."];
+async function deskModal(kind){
+  if(kind==="report"){const r=dayReport();const v=await askForm("Отчёт за день",`<textarea class="field" rows="10" style="font-family:inherit" readonly>${esc(r)}</textarea>`,"Скопировать");if(v!==null)navigator.clipboard?.writeText(r).then(()=>toast("Отчёт скопирован — вставьте в WhatsApp руководителю"));return}
+  if(kind==="scripts"){const st=pipeStages();const v=await askForm("Скрипты продаж",st.map(s=>FF("sc_"+st.indexOf(s),esc(s),`<textarea class="field" rows="4">${esc(scriptOf(s))}</textarea>`)).join(""),"Сохранить");
+    if(v){settings.scripts=settings.scripts||{};st.forEach((s,i)=>{if(v["sc_"+i]!==undefined)settings.scripts[s]=v["sc_"+i]});persist();toast("Скрипты сохранены")}return}
+  await askForm("Обучение менеджера",`<ol style="padding-left:18px;line-height:1.6">${LEARN.map(x=>`<li>${esc(x)}</li>`).join("")}</ol><p class="hint">Этапы воронки и что на них делать — в подсказке «Что делать» над каждой колонкой.</p>`,"Понятно")}
+function wireDesk(){const C=$("content");
+  C.querySelectorAll("[data-desk]").forEach(b=>b.onclick=()=>{deskTab=b.dataset.desk;render()});
+  C.querySelectorAll("[data-dtile]").forEach(b=>b.onclick=()=>{const a=b.dataset.dtile;deskTab="deals";pipe="sales";if(a==="tasks"){go("Задачи");return}leadFilter=a;colLimit={};render()});
+  C.querySelector('[data-act="dreport"]').onclick=()=>deskModal("report");C.querySelector('[data-act="dscripts"]').onclick=()=>deskModal("scripts");C.querySelector('[data-act="dlearn"]').onclick=()=>deskModal("learn");
+  C.querySelectorAll("[data-guide]").forEach(d=>d.onclick=e=>{e.stopPropagation();d.classList.toggle("open")});
+  C.querySelectorAll("[data-dsend]").forEach(a=>a.addEventListener("click",()=>{const[xid,fid]=a.dataset.dsend.split(":"),x=findDeal(+xid),f=x?.feed.find(y=>String(y.id)===fid);if(f){f.sent=true;touchContact(x);x.updated=today();persist();setTimeout(render,60)}}));
+  C.querySelectorAll("a[data-open]").forEach(a=>a.onclick=e=>{e.preventDefault();openDeal(+a.dataset.open)});
+  if($("botG")){C.querySelector('[data-act="botsave"]').onclick=()=>{botSave();toast("Бот сохранён")};
+    C.querySelector('[data-act="faqadd"]').onclick=()=>{botSave();const b=botCfg();b.faq.push(["",""]);settings.bot=b;render()};
+    C.querySelectorAll("[data-faqrm]").forEach(x=>x.onclick=()=>{botSave();const b=botCfg();b.faq.splice(+x.dataset.faqrm,1);settings.bot=b;persist();render()})}}
 /* ===== Функции студии (по лучшим CRM для танцевальных студий) =====
    Журнал группы, заморозка абонемента, семья, концерты и костюмы, дни рождения, накладки в расписании. */
 /* Небольшая форма в модальном окне: fields — HTML полей; возвращает объект значений или null */
@@ -2600,6 +2690,8 @@ after["ИИ-помощник"]=wireAI;
 after["Экономика"]=wireEcon;
 after["Таблица УО"]=wireSheets;
 after["Концерты"]=wireEvents;
+{const _pv=views["Заявки и воронка"];views["Заявки и воронка"]=()=>deskTop()+(deskTab==="wa"?waTab():deskTab==="bot"?botTab():deskTiles()+_pv());
+ const _pw=after["Заявки и воронка"];after["Заявки и воронка"]=()=>{wireDesk();if(deskTab==="deals")_pw()}}
 views["Рассылки"]=mailView;after["Рассылки"]=wireMail;
 views["Магазин"]=shopView;after["Магазин"]=wireShop;
 views["Расписание"]=schedView;after["Расписание"]=wireSched;
