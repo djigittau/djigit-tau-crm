@@ -1753,7 +1753,7 @@ function tAttView(){const gs=myGroups(),gn=new Set(gs.map(g=>g.name));
   return journalCard(gs)+`<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px"><h3 style="margin:0;flex:1">Посещения моих групп</h3><select class="field" id="tAttG" style="max-width:280px"><option value="">Все мои группы</option>${gs.map(g=>`<option ${g.name===tAttGroup?"selected":""}>${esc(g.name)}</option>`).join("")}</select><label class="sub">с</label><input class="field" type="date" id="tAttF" value="${tAttFrom}" style="max-width:160px"></div>
   <div class="tablewrap"><table class="table"><thead><tr><th>Ученик</th><th>Абонемент</th><th>Отметка</th><th>Дата</th><th>Филиал</th></tr></thead><tbody>
   ${rows.map(a=>{const s=db.students.find(x=>x.id===a.student);return `<tr><td><b>${esc(s?.name||"—")}</b><div class="sub">${esc(a.group||"")}</div></td><td class="sub">${mOf(a)}</td><td>${status(a.status)}</td><td class="num">${esc(a.date)}</td><td>${esc(branchName(a.branch))}</td></tr>`}).join("")||'<tr><td colspan="5" class="empty">Отметок за период нет</td></tr>'}</tbody></table></div></div>`}
-function wireTAtt(){wireJournal();$("tAttG").onchange=e=>{tAttGroup=e.target.value;render()};$("tAttF").onchange=e=>{tAttFrom=e.target.value||addDays(today(),-30);render()}}
+function wireTAtt(){if(!$("tAttG"))return;wireJournal();$("tAttG").onchange=e=>{tAttGroup=e.target.value;render()};$("tAttF").onchange=e=>{tAttFrom=e.target.value||addDays(today(),-30);render()}}
 /* ===== Меню: Смена, Оплаты и сверка, Награды, Костюмы и пошив, Качество консультаций ===== */
 /* --- Смена администратора: открыть с наличными, итоги дня, закрыть со сверкой кассы --- */
 const isCashAcc=a=>/нал|касса|cash/i.test(a||"");
