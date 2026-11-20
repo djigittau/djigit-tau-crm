@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F1DFA8">
+<meta name="theme-color" content="#EDF0F5">
 <title>DJIGIT TAU CRM · демо</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Forum&display=swap" rel="stylesheet">
-<script>try{const t=localStorage.getItem("djigit_crm_theme")||"light";document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{const t=localStorage.getItem("djigit_crm_theme")||"light";document.documentElement.dataset.theme=t;document.documentElement.dataset.skin=localStorage.getItem("djigit_crm_skin")||"air"}catch(e){}</script>
 <style>
 :root{
   color-scheme:light;
@@ -493,6 +493,51 @@ html[data-theme="dark"] svg [stroke="#EFEBE3"],html[data-theme="dark"] svg [stro
 #cmdk .it.on{background:var(--hover)}
 #cmdk .foot{border-top:1px solid var(--line);padding:8px 14px;font-size:12px;color:var(--faint)}
 .kbd{font-size:11px;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--faint);margin-left:6px;white-space:nowrap}
+
+/* ===== Оформление «Воздушное»: светлый холодный фон, белое меню-карточка, пастельные акценты ===== */
+html[data-skin="air"]:not([data-theme="dark"]){--bg:#EDF0F5;--panel:#FFFFFF;--panel2:#FFFFFF;--pale:#F1F4F8;--line:#E2E6ED;--line2:#EEF1F5;--text:#1D2230;--muted:#687083;--faint:#9AA1AF;
+  --gold:#2A3142;--gold-deep:#2A3142;--ink:#1D2230;--inkbg:#1F2430;--hover:#F3F5F9;--hl:#EEF3FB;--s1:#fff;--s2:#fff;--s3:#fff;--s4:#fff;
+  --shadow:0 1px 2px rgba(25,35,60,.04),0 6px 20px rgba(25,35,60,.06);--r:16px;--r-sm:10px}
+html[data-skin="air"]:not([data-theme="dark"]) body{background:var(--bg)}
+html[data-skin="air"]:not([data-theme="dark"]) .side{background:#fff;color:var(--text);border:0;top:12px;left:12px;bottom:12px;height:auto;border-radius:20px;box-shadow:0 2px 6px rgba(25,35,60,.05),0 12px 32px rgba(25,35,60,.08);padding-top:14px}
+html[data-skin="air"]:not([data-theme="dark"]) .main{margin-left:260px;width:calc(100% - 260px)}
+html[data-skin="air"]:not([data-theme="dark"]) .brand{border-bottom:0;padding-bottom:8px}
+html[data-skin="air"]:not([data-theme="dark"]) .navh{color:#A0A7B5;font-size:10.5px;padding:12px 24px 4px}
+html[data-skin="air"]:not([data-theme="dark"]) .nav button{color:#3A4256;margin:1px 10px;width:calc(100% - 20px);padding:8px 12px;border-radius:10px;font-size:13.5px}
+html[data-skin="air"]:not([data-theme="dark"]) .nav button svg.i{color:#7C8496}
+html[data-skin="air"]:not([data-theme="dark"]) .nav button:hover{background:#F3F5F9;color:var(--text)}
+html[data-skin="air"]:not([data-theme="dark"]) .nav button.active{background:#E6EBF3;color:#1D2230;font-weight:600;box-shadow:none}
+html[data-skin="air"]:not([data-theme="dark"]) .nav button.active svg.i{color:#1D2230}
+html[data-skin="air"]:not([data-theme="dark"]) .nav .cnt{background:#FCE3E7;color:#D23B54;border:0;border-radius:10px}
+html[data-skin="air"]:not([data-theme="dark"]) .sidefoot{color:#9AA1AF}
+html[data-skin="air"]:not([data-theme="dark"]) .top{background:rgba(237,240,245,.85);border-bottom:0;backdrop-filter:saturate(1.3) blur(8px)}
+html[data-skin="air"]:not([data-theme="dark"]) .gsearch input{background:#fff;border-color:transparent;border-radius:12px;box-shadow:0 1px 2px rgba(25,35,60,.05)}
+html[data-skin="air"]:not([data-theme="dark"]) .btn{background:#1F2430;border-color:#1F2430;color:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(25,35,60,.18)}
+html[data-skin="air"]:not([data-theme="dark"]) .btn:hover{filter:none;background:#2C3344}
+html[data-skin="air"]:not([data-theme="dark"]) .btn.secondary,html[data-skin="air"]:not([data-theme="dark"]) .mini{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}
+html[data-skin="air"]:not([data-theme="dark"]) .mini{border-radius:8px}
+html[data-skin="air"]:not([data-theme="dark"]) .card,html[data-skin="air"]:not([data-theme="dark"]) .kpi,html[data-skin="air"]:not([data-theme="dark"]) .stat{border:0;border-radius:16px;box-shadow:var(--shadow)}
+html[data-skin="air"]:not([data-theme="dark"]) .field{border-color:#DCE1E9;border-radius:10px}
+html[data-skin="air"]:not([data-theme="dark"]) .field:focus{border-color:#9AA6BC}
+html[data-skin="air"]:not([data-theme="dark"]) .ptabs button,html[data-skin="air"]:not([data-theme="dark"]) .seg button{border:0;background:#E3E8F0;color:#4A5266;border-radius:20px}
+html[data-skin="air"]:not([data-theme="dark"]) .seg{border:0;background:#E3E8F0;border-radius:20px;padding:3px;gap:2px}
+html[data-skin="air"]:not([data-theme="dark"]) .seg button{background:transparent}
+html[data-skin="air"]:not([data-theme="dark"]) .ptabs button.on,html[data-skin="air"]:not([data-theme="dark"]) .seg button.on,html[data-skin="air"]:not([data-theme="dark"]) .pfbar .seg button.on{background:#fff;color:#1D2230;box-shadow:0 1px 4px rgba(25,35,60,.12);font-weight:600}
+html[data-skin="air"]:not([data-theme="dark"]) .colhead{background:#fff!important;border-radius:14px 14px 0 0;border-bottom:1px solid var(--line);border-top:3px solid #E9A3B0;color:var(--text)}
+html[data-skin="air"]:not([data-theme="dark"]) .columns .col:nth-child(2) .colhead{border-top-color:#9DBBE3}html[data-skin="air"]:not([data-theme="dark"]) .columns .col:nth-child(3) .colhead{border-top-color:#EDBB92}html[data-skin="air"]:not([data-theme="dark"]) .columns .col:nth-child(4) .colhead{border-top-color:#9FCB8B}
+html[data-skin="air"]:not([data-theme="dark"]) .colhead .m,html[data-skin="air"]:not([data-theme="dark"]) .colhead .f{color:var(--muted)}
+html[data-skin="air"]:not([data-theme="dark"]) .colbody{background:#F4F6FA;border-radius:0 0 14px 14px}
+html[data-skin="air"]:not([data-theme="dark"]) .cguide{background:#fff}
+html[data-skin="air"]:not([data-theme="dark"]) .lead{border:1px solid #E6EAF0;border-radius:12px;box-shadow:0 1px 3px rgba(25,35,60,.06)}
+html[data-skin="air"]:not([data-theme="dark"]) .lead:hover{border-color:#B9C3D4}
+html[data-skin="air"]:not([data-theme="dark"]) .lead .t b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#3DB06B;margin-right:6px;vertical-align:1px}
+html[data-skin="air"]:not([data-theme="dark"]) .lead .tags span{background:#F1F4F8}
+html[data-skin="air"]:not([data-theme="dark"]) .lead .ltv{background:#EEF3FB;border-color:#D5E0F1;color:#30466B}
+html[data-skin="air"]:not([data-theme="dark"]) .table th{background:#F4F6FA;color:var(--muted)}
+html[data-skin="air"]:not([data-theme="dark"]) .notice{background:#EEF3FB;border-color:#D5E0F1;color:#30466B}
+html[data-skin="air"]:not([data-theme="dark"]) .tag.blue{background:#E6EEF9}
+html[data-skin="air"]:not([data-theme="dark"]) .mg.hi{background:#E3F2E7}
+@media(max-width:760px){html[data-skin="air"]:not([data-theme="dark"]) .side{top:0;left:0;bottom:0;border-radius:0 20px 20px 0}html[data-skin="air"]:not([data-theme="dark"]) .main{margin-left:0;width:100%}}
 </style>
 </head>
 <body>
@@ -735,6 +780,7 @@ const views={
   ${isBoss()?`<div class="card" style="margin-top:16px"><h3>Счета</h3><div class="hint">Названия счетов и остаток на дату начала учёта. Баланс на панели владельца считается от этого остатка.</div>
   ${settings.accounts.map((a,i)=>`<div class="formgrid"><div class="formfield"><label for="an${i}">Счёт ${i+1}</label><input class="field" id="an${i}" data-accname value="${esc(a.name)}"></div><div class="formfield"><label for="as${i}">Начальный остаток, ₸</label><input class="field num" id="as${i}" data-accstart inputmode="numeric" value="${a.start||0}"></div></div>`).join("")}
   <div class="actions"><button class="btn" data-act="saveacc">Сохранить счета</button></div></div>
+  <div class="card" style="margin-top:16px"><h3>Оформление</h3><div class="seg">${[["air","Воздушное — светлое, пастельное"],["gold","Золотое"]].map(([k,l])=>`<button data-skin="${k}" class="${(document.documentElement.dataset.skin||"air")===k?"on":""}">${l}</button>`).join("")}</div></div>
   <div class="card" style="margin-top:16px"><h3>Правила студии</h3><div class="formgrid"><div class="formfield"><label for="stFreeze">Лимит заморозки на абонемент, дней</label><input class="field" id="stFreeze" type="number" min="0" value="${freezeMax()}"></div><div class="formfield"><label for="stFam">Семейная скидка второму и следующим детям, %</label><input class="field" id="stFam" type="number" min="0" max="100" value="${famDisc()}"></div></div></div>
   <div class="card" style="margin-top:16px"><h3>Данные из таблицы студии</h3><div class="hint">Из Excel-таблицы перенесены ученики (лист «ПРОЕКТЫ», выбывшие — из листа «ст»), группы, тренеры, оплаченные месяцы как абонементы и операции из листа «ОПЕРАЦИИ». Повторная загрузка заменит только эти записи; ваши заявки, задачи и операции, добавленные вручную, останутся.</div>${xlsStats()}<div class="actions"><button class="btn" data-act="encload">Загрузить из репозитория (нужен пароль)</button><label class="btn secondary" for="xlsFile" style="cursor:pointer">Загрузить файл данных студии</label><input type="file" id="xlsFile" accept=".json,application/json" hidden></div><div class="sub" style="margin-top:8px">Таблица лежит в репозитории только в зашифрованном виде (studio-data.enc.json). Открытый файл данных на GitHub не выкладывайте. Данные сохраняются только в этом браузере.</div></div>
   <div class="card" style="margin-top:16px"><h3>Загрузить операции из таблицы</h3><div class="hint">Сохраните лист Excel или Google Таблицы как CSV. Нужны столбцы «Дата» и «Сумма»; ещё понимаются «Тип» (доход или расход), «Описание», «Статья», «Филиал» и «Счёт». Строки без типа считаются расходом.</div>
@@ -1838,7 +1884,7 @@ function birthdaysCard(){const t=new Date();t.setHours(0,0,0,0);const list=db.st
   if(!list.length)return"";const txt=x=>fillTpl(tpl("birthday").text,{name:x.s.name,branch:x.s.branch});
   return `<div class="card" style="margin-bottom:16px"><h3>Дни рождения на неделе · ${list.length}</h3>${list.map(x=>`<div class="row"><b>${esc(x.s.name)} · ${x.age} ${plural(x.age,"год","года","лет").replace(/^\d+\s/,"")}</b><span>${x.d===0?"<b>сегодня</b>":x.d===1?"завтра":"через "+x.d+" дн."} ${x.s.phone?`<a class="wa" href="${waURL(x.s.phone,txt(x))}" target="_blank" rel="noopener">Поздравить</a>`:""}</span></div>`).join("")}</div>`}
 
-function wireStudioSettings(){$("stFreeze")&&($("stFreeze").onchange=e=>{settings.freezeMax=Number(e.target.value)||0;persist();toast("Сохранено")});$("stFam")&&($("stFam").onchange=e=>{settings.famDisc=Number(e.target.value)||0;persist();toast("Сохранено")})}
+function wireStudioSettings(){document.querySelectorAll("[data-skin]").forEach(b=>b.onclick=()=>{document.documentElement.dataset.skin=b.dataset.skin;try{localStorage.setItem("djigit_crm_skin",b.dataset.skin)}catch(e){}render()});$("stFreeze")&&($("stFreeze").onchange=e=>{settings.freezeMax=Number(e.target.value)||0;persist();toast("Сохранено")});$("stFam")&&($("stFam").onchange=e=>{settings.famDisc=Number(e.target.value)||0;persist();toast("Сохранено")})}
 /* --- 6. Накладки в расписании: тот же тренер или тот же зал в то же время --- */
 function lessonClash(o,selfId){if(!o.date||!o.time)return null;return db.lessons.find(l=>l.id!==selfId&&l.date===o.date&&l.time===o.time&&((o.teacher&&l.teacher===o.teacher)||(o.room&&l.room&&l.room===o.room&&String(l.branch)===String(o.branch))))}
 /* ===== Ещё из лучших CRM студий: рассылки, сетка расписания, лист ожидания, магазин, билеты ===== */
