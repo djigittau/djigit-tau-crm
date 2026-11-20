@@ -495,6 +495,7 @@ html[data-theme="dark"] svg [stroke="#EFEBE3"],html[data-theme="dark"] svg [stro
 .kbd{font-size:11px;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--faint);margin-left:6px;white-space:nowrap}
 
 .brandwho{font-size:12px;color:var(--muted);padding:0 22px 6px;text-align:center}
+@media(max-width:760px){.jtable thead{display:none}.jtable,.jtable tbody,.jtable tr,.jtable td{display:block;width:100%}.jtable tr{padding:10px 0;border-bottom:1px solid var(--line)}.jtable td{border:0!important;padding:2px 0!important}.jtable{min-width:0!important}.jtable .seg{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;margin-top:6px}.jtable .seg button{padding:9px 2px;font-size:12.5px;white-space:nowrap;min-width:0}}
 /* ===== Оформление «Воздушное»: светлый холодный фон, белое меню-карточка, пастельные акценты ===== */
 html[data-skin="air"]:not([data-theme="dark"]){--bg:#EDF0F5;--panel:#FFFFFF;--panel2:#FFFFFF;--pale:#F1F4F8;--line:#E2E6ED;--line2:#EEF1F5;--text:#1D2230;--muted:#687083;--faint:#9AA1AF;
   --gold:#2A3142;--gold-deep:#2A3142;--ink:#1D2230;--inkbg:#1F2430;--hover:#F3F5F9;--hl:#EEF3FB;--s1:#fff;--s2:#fff;--s3:#fff;--s4:#fff;
@@ -1742,18 +1743,13 @@ function tSchedView(){const days=weekDays(schedWeek),ls=myLessons().filter(l=>l.
   <div class="hint">Расписание заполняют администраторы. Если что-то не так — сообщите администратору.</div>
   ${days.map((d,i)=>{const dl=ls.filter(l=>l.date===d).sort((a,b)=>(a.time||"").localeCompare(b.time||""));return `<div class="row" style="${d===today()?"background:var(--pale);border-radius:8px;padding-left:8px":""}"><b style="min-width:110px">${DOW[i]}, ${fmt(d)}</b><span style="flex:1;text-align:right">${dl.map(l=>`<span class="tag blue" style="margin:2px">${esc(l.time||"")} · ${esc(l.group)}${l.room?" · "+esc(l.room):""} · ${esc(branchName(l.branch))}</span>`).join(" ")||'<span class="sub">выходной</span>'}</span></div>`}).join("")}</div>`}
 function wireTSched(){document.querySelectorAll("[data-week]").forEach(b=>b.onclick=()=>{schedWeek=b.dataset.week==="0"?0:schedWeek+Number(b.dataset.week);render()})}
-/* --- 5. Посещения: журнал своих групп + таблица ученик · абонемент · отметка · дата · филиал --- */
-let tAttFrom="",tAttGroup="";
-function tAttView(){const gs=myGroups(),gn=new Set(gs.map(g=>g.name));
+/* --- 5. Посещения: только журнал своих групп (ученик · абонемент · отметка · филиал, дата выбирается сверху) --- */
+function tAttView(){const gs=myGroups();
   // Только группы этого педагога: если вход не связан с карточкой педагога — никаких чужих групп
-  if(!gs.length)return `<div class="card"><h3>Посещения</h3><div class="empty">За вами (${esc(myTeacher()||"—")}) пока не закреплены группы. Здесь появятся только ваши группы — руководитель назначает их в карточке группы (поле «Тренер») или связывает ваш вход с карточкой педагога в «Команде».</div></div>`;if(!tAttFrom)tAttFrom=addDays(today(),-30);
+  if(!gs.length)return `<div class="card"><h3>Посещения</h3><div class="empty">За вами (${esc(myTeacher()||"—")}) пока не закреплены группы. Здесь появятся только ваши группы — руководитель назначает их в карточке группы (поле «Тренер») или связывает ваш вход с карточкой педагога в «Команде».</div></div>`;
   if(gs.length&&!gs.some(g=>g.name===jGroup))jGroup=gs[0].name;
-  const rows=db.attendance.filter(a=>gn.has(a.group)&&(!tAttGroup||a.group===tAttGroup)&&(a.date||"")>=tAttFrom).sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,400);
-  const mOf=a=>{const m=a.membership?db.memberships.find(x=>x.id===a.membership):db.memberships.filter(x=>x.student===a.student&&(!x.expires||x.expires>=a.date)).sort((x,y)=>(x.expires||"9").localeCompare(y.expires||"9"))[0];return m?`${esc(m.title)} · ${m.used}/${m.total}${m.expires?" · до "+esc(m.expires):""}`:'<span style="color:var(--red)">нет</span>'};
-  return journalCard(gs)+`<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px"><h3 style="margin:0;flex:1">Посещения моих групп</h3><select class="field" id="tAttG" style="max-width:280px"><option value="">Все мои группы</option>${gs.map(g=>`<option ${g.name===tAttGroup?"selected":""}>${esc(g.name)}</option>`).join("")}</select><label class="sub">с</label><input class="field" type="date" id="tAttF" value="${tAttFrom}" style="max-width:160px"></div>
-  <div class="tablewrap"><table class="table"><thead><tr><th>Ученик</th><th>Абонемент</th><th>Отметка</th><th>Дата</th><th>Филиал</th></tr></thead><tbody>
-  ${rows.map(a=>{const s=db.students.find(x=>x.id===a.student);return `<tr><td><b>${esc(s?.name||"—")}</b><div class="sub">${esc(a.group||"")}</div></td><td class="sub">${mOf(a)}</td><td>${status(a.status)}</td><td class="num">${esc(a.date)}</td><td>${esc(branchName(a.branch))}</td></tr>`}).join("")||'<tr><td colspan="5" class="empty">Отметок за период нет</td></tr>'}</tbody></table></div></div>`}
-function wireTAtt(){if(!$("tAttG"))return;wireJournal();$("tAttG").onchange=e=>{tAttGroup=e.target.value;render()};$("tAttF").onchange=e=>{tAttFrom=e.target.value||addDays(today(),-30);render()}}
+  return journalCard(gs)}
+function wireTAtt(){if($("jGroup"))wireJournal()}
 /* ===== Меню: Смена, Оплаты и сверка, Награды, Костюмы и пошив, Качество консультаций ===== */
 /* --- Смена администратора: открыть с наличными, итоги дня, закрыть со сверкой кассы --- */
 const isCashAcc=a=>/нал|касса|cash/i.test(a||"");
@@ -1870,9 +1866,9 @@ function journalCard(list){const gs=list||db.groups.filter(inBranch);if(!gs.leng
   return `<div class="card" style="margin-bottom:16px"><h3>Журнал группы</h3><div class="hint">Выберите группу и дату, отметьте всех и сохраните. Занятие в «Расписании» создастся само — по нему считается зарплата тренера, а с абонементов спишутся занятия.</div>
   <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px"><select class="field" id="jGroup" style="max-width:340px">${gs.map(x=>`<option ${x.name===jGroup?"selected":""}>${esc(x.name)}</option>`).join("")}</select><input class="field" type="date" id="jDate" value="${jDate}" style="max-width:170px">
    <button class="btn secondary mini" data-jall="Присутствовал">Все были</button></div>
-  ${st.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Ученик</th><th>Абонемент</th><th>Отметка</th></tr></thead><tbody>${st.map(s=>{const c=cur(s.id),m=db.memberships.filter(x=>x.student===s.id&&(!x.expires||x.expires>=jDate)&&x.total-x.used>0).sort((a,b)=>(a.expires||"9").localeCompare(b.expires||"9"))[0];
+  ${st.length?`<div class="tablewrap"><table class="table jtable"><thead><tr><th>Ученик</th><th>Абонемент</th><th>Отметка</th><th>Филиал</th></tr></thead><tbody>${st.map(s=>{const c=cur(s.id),m=db.memberships.filter(x=>x.student===s.id&&(!x.expires||x.expires>=jDate)&&x.total-x.used>0).sort((a,b)=>(a.expires||"9").localeCompare(b.expires||"9"))[0];
     return `<tr><td><b>${esc(s.name)}</b>${s.status!=="Активен"?" "+status(s.status):""}</td><td class="sub">${m?(m.total-m.used)+" из "+m.total+(m.expires?" · до "+esc(m.expires):""):'<span style="color:var(--red)">нет действующего</span>'}</td>
-    <td><div class="seg" data-jst="${s.id}">${J_ST.map(([v,l])=>`<button type="button" data-v="${v}" class="${c===v?"on":""}">${l}</button>`).join("")}</div></td></tr>`}).join("")}</tbody></table></div>
+    <td><div class="seg" data-jst="${s.id}">${J_ST.map(([v,l])=>`<button type="button" data-v="${v}" class="${c===v?"on":""}">${l}</button>`).join("")}</div></td><td class="sub">${esc(branchName(g?.branch||s.branch))}</td></tr>`}).join("")}</tbody></table></div>
   <div class="actions" style="margin-top:10px"><button class="btn" data-act="jsave">Сохранить отметки</button><span class="sub">Тренер: ${esc(g?.teacher||"—")}</span></div>`:'<div class="empty">В группе нет учеников</div>'}</div>`}
 function wireJournal(){if(!$("jGroup"))return;$("jGroup").onchange=e=>{jGroup=e.target.value;render()};$("jDate").onchange=e=>{jDate=e.target.value||today();render()};
   document.querySelectorAll("[data-jst] button").forEach(b=>b.onclick=()=>{b.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b&&!x.classList.contains("on")))});
