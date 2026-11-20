@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#EDF0F5">
+<meta name="theme-color" content="#F1DFA8">
 <title>DJIGIT TAU CRM · демо</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Forum&display=swap" rel="stylesheet">
-<script>try{const t=localStorage.getItem("djigit_crm_theme")||"light";document.documentElement.dataset.theme=t;document.documentElement.dataset.skin=localStorage.getItem("djigit_crm_skin")||"air"}catch(e){}</script>
+<script>try{const t=localStorage.getItem("djigit_crm_theme")||"light";document.documentElement.dataset.theme=t;document.documentElement.dataset.skin=localStorage.getItem("djigit_crm_skin")||"gold"}catch(e){}</script>
 <style>
 :root{
   color-scheme:light;
@@ -789,7 +789,7 @@ const views={
   ${isBoss()?`<div class="card" style="margin-top:16px"><h3>Счета</h3><div class="hint">Названия счетов и остаток на дату начала учёта. Баланс на панели владельца считается от этого остатка.</div>
   ${settings.accounts.map((a,i)=>`<div class="formgrid"><div class="formfield"><label for="an${i}">Счёт ${i+1}</label><input class="field" id="an${i}" data-accname value="${esc(a.name)}"></div><div class="formfield"><label for="as${i}">Начальный остаток, ₸</label><input class="field num" id="as${i}" data-accstart inputmode="numeric" value="${a.start||0}"></div></div>`).join("")}
   <div class="actions"><button class="btn" data-act="saveacc">Сохранить счета</button></div></div>
-  <div class="card" style="margin-top:16px"><h3>Оформление</h3><div class="seg">${[["air","Воздушное — светлое, пастельное"],["gold","Золотое"]].map(([k,l])=>`<button data-skin="${k}" class="${(document.documentElement.dataset.skin||"air")===k?"on":""}">${l}</button>`).join("")}</div></div>
+  <div class="card" style="margin-top:16px"><h3>Оформление</h3><div class="seg">${[["gold","Золотое (основное)"],["air","Воздушное — светлое, пастельное"]].map(([k,l])=>`<button data-skin="${k}" class="${(document.documentElement.dataset.skin||"gold")===k?"on":""}">${l}</button>`).join("")}</div></div>
   <div class="card" style="margin-top:16px"><h3>Правила студии</h3><div class="formgrid"><div class="formfield"><label for="stFreeze">Лимит заморозки на абонемент, дней</label><input class="field" id="stFreeze" type="number" min="0" value="${freezeMax()}"></div><div class="formfield"><label for="stFam">Семейная скидка второму и следующим детям, %</label><input class="field" id="stFam" type="number" min="0" max="100" value="${famDisc()}"></div><div class="formfield"><label for="stArr">Педагог приходит до начала занятия, минут</label><input class="field" id="stArr" type="number" min="0" value="${arriveMin()}"></div></div></div>
   <div class="card" style="margin-top:16px"><h3>Данные из таблицы студии</h3><div class="hint">Из Excel-таблицы перенесены ученики (лист «ПРОЕКТЫ», выбывшие — из листа «ст»), группы, тренеры, оплаченные месяцы как абонементы и операции из листа «ОПЕРАЦИИ». Повторная загрузка заменит только эти записи; ваши заявки, задачи и операции, добавленные вручную, останутся.</div>${xlsStats()}<div class="actions"><button class="btn" data-act="encload">Загрузить из репозитория (нужен пароль)</button><label class="btn secondary" for="xlsFile" style="cursor:pointer">Загрузить файл данных студии</label><input type="file" id="xlsFile" accept=".json,application/json" hidden></div><div class="sub" style="margin-top:8px">Таблица лежит в репозитории только в зашифрованном виде (studio-data.enc.json). Открытый файл данных на GitHub не выкладывайте. Данные сохраняются только в этом браузере.</div></div>
   <div class="card" style="margin-top:16px"><h3>Загрузить операции из таблицы</h3><div class="hint">Сохраните лист Excel или Google Таблицы как CSV. Нужны столбцы «Дата» и «Сумма»; ещё понимаются «Тип» (доход или расход), «Описание», «Статья», «Филиал» и «Счёт». Строки без типа считаются расходом.</div>
