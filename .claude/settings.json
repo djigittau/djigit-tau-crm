@@ -1,4 +1,31 @@
 {
+  "enabledPlugins": {
+    "superpowers@superpowers-dev": true,
+    "mattpocock-skills@mattpocock": true,
+    "ecc@ecc": true,
+    "andrej-karpathy-skills@karpathy-skills": true,
+    "ponytail@ponytail": true,
+    "agent-skills@addy-agent-skills": true,
+    "understand-anything@understand-anything": true,
+    "last30days@last30days-skill": true,
+    "career-ops@career-ops": true,
+    "rea@rea": true,
+    "caveman@caveman": true,
+    "claude-mem@thedotmack": true,
+    "headroom@headroom-marketplace": true,
+    "headroom-skill@headroom-marketplace": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "taste-skill@taste-skill": true,
+    "impeccable@impeccable": true,
+    "ppt-master@ppt-master": true,
+    "diagram-design@diagram-design": true,
+    "document-skills@anthropic-agent-skills": true,
+    "example-skills@anthropic-agent-skills": true,
+    "hyperframes@hyperframes": true,
+    "humanizer@humanizer": true,
+    "i-have-adhd@i-have-adhd": true,
+    "marketing-skills@marketingskills": true
+  },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
       "source": {
@@ -138,32 +165,5 @@
         "repo": "coreyhaines31/marketingskills"
       }
     }
-  },
-  "enabledPlugins": {
-    "superpowers@superpowers-dev": true,
-    "mattpocock-skills@mattpocock": true,
-    "ecc@ecc": true,
-    "andrej-karpathy-skills@karpathy-skills": true,
-    "ponytail@ponytail": true,
-    "agent-skills@addy-agent-skills": true,
-    "understand-anything@understand-anything": true,
-    "last30days@last30days-skill": true,
-    "career-ops@career-ops": true,
-    "rea@rea": true,
-    "caveman@caveman": true,
-    "claude-mem@thedotmack": true,
-    "headroom@headroom-marketplace": true,
-    "headroom-skill@headroom-marketplace": true,
-    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
-    "taste-skill@taste-skill": true,
-    "impeccable@impeccable": true,
-    "ppt-master@ppt-master": true,
-    "diagram-design@diagram-design": true,
-    "document-skills@anthropic-agent-skills": true,
-    "example-skills@anthropic-agent-skills": true,
-    "hyperframes@hyperframes": true,
-    "humanizer@humanizer": true,
-    "i-have-adhd@i-have-adhd": true,
-    "marketing-skills@marketingskills": true
   }
 }
