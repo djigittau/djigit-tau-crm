@@ -715,7 +715,7 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Профиль":"Личный кабинет педагога: статистика, зарплата, приход на занятия","Рассылки":"Сообщения в WhatsApp по сегментам: должники, группа, дни рождения, ушедшие, заявки","Товары и награды":"Форма, чешки, атрибутика и награды учеников","Смена":"Открытие и закрытие смены, касса и дела на сегодня","Продления":"Абонементы, которые заканчиваются: напомнить, получить оплату, продлить","Качество консультаций":"Чек-лист разговора с клиентом, оценка ИИ и итоги по менеджерам","Костюмы и пошив":"Заказы костюмов: мерки, мастер, сроки, примерки и оплата","Оплаты и сверка":"Сверка оплат с выпиской банка и кассой, должники","Концерты":"Отчётные концерты: участники, взносы, костюмы и размеры","Таблица УО":"Все 17 листов таблицы «Камран_УО» — как в Google Таблице, с поиском и выгрузкой в Excel","Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей (GitHub, OpenRouter, Groq, Gemini) и резерв Claude: вопросы по данным студии"};
+const subs={"Профиль":"Личный кабинет педагога: статистика, зарплата, приход на занятия","Рассылки":"Сообщения в WhatsApp по сегментам: должники, группа, дни рождения, ушедшие, заявки","Товары и награды":"Форма, чешки, атрибутика и награды учеников","Смена":"Открытие и закрытие смены, касса и дела на сегодня","Продления":"Абонементы, которые заканчиваются: напомнить, получить оплату, продлить","Качество консультаций":"Чек-лист разговора с клиентом, оценка ИИ и итоги по менеджерам","Костюмы и пошив":"Заказы костюмов: мерки, мастер, сроки, примерки и оплата","Оплаты и сверка":"Сверка оплат с выпиской банка и кассой, должники","Концерты":"Отчётные концерты: участники, взносы, костюмы и размеры","Таблица УО":"Все 17 листов таблицы «Камран_УО» — как в Google Таблице, с поиском и выгрузкой в Excel","Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей (GitHub, OpenRouter, Groq, Gemini) и платный резерв OpenAI и Claude: вопросы по данным студии"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
@@ -2706,6 +2706,15 @@ const ANT_URL="https://api.anthropic.com/v1/messages",ANT_KEY="djigit_crm_anthro
 /* Базовый список моделей GitHub: [id, название, тир]. Тир задаёт бесплатный лимит (см. AI_TIERS).
    Кнопка «Загрузить все модели» дополняет список из каталога GitHub — у каждой модели свой дневной лимит. */
 const GH_BASE=[["openai/gpt-4.1-mini","GPT-4.1 mini","low"],["openai/gpt-4o-mini","GPT-4o mini","low"],["meta/Llama-4-Scout-17B-16E-Instruct","Llama 4 Scout","low"],["mistral-ai/mistral-small-2503","Mistral Small","low"],["openai/gpt-4.1","GPT-4.1","high"],["deepseek/DeepSeek-V3-0324","DeepSeek V3","high"]];
+/* OpenAI (ChatGPT) — прямой платный ключ, как у Claude: без дневных лимитов, оплата за токены.
+   «Загрузить модели OpenAI» добавляет весь список моделей, доступных ключу. */
+const OA_URL="https://api.openai.com/v1/chat/completions",OA_LIST="https://api.openai.com/v1/models",OA_KEY="djigit_crm_openai_key",OA_CAT="djigit_crm_cat_oa";
+const OA_BASE=[["gpt-5-nano","GPT-5 nano — самая дешёвая"],["gpt-5-mini","GPT-5 mini — дешёвая"],["gpt-5","GPT-5 — самая умная"]];
+const oaRank=id=>/nano/.test(id)?1:/mini/.test(id)?2:/^o\d/.test(id)?7:6;
+/* Платные провайдеры и порядок резерва от дешёвых к дорогим (общий для OpenAI и Claude) */
+const PAID_PROV=["oa","ant"],isPaid=p=>PAID_PROV.includes(p);
+const PAID_RANK={"claude-haiku-5-5":3,"claude-sonnet-5-5":5,"claude-opus-5-5":8};
+const aiCost=id=>PAID_RANK[id]??(id.startsWith("oa:")?oaRank(id.slice(3)):9);
 const ANT_MODELS=[["claude-haiku-5-5","Claude Haiku 5.5 — дешёвая","ant",0,0],["claude-sonnet-5-5","Claude Sonnet 5.5 — баланс","ant",0,0],["claude-opus-5-5","Claude Opus 5.5 — самая умная","ant",0,0]];
 /* Примерные бесплатные лимиты GitHub Models по тарифу Copilot: [в день, в минуту] для тиров low / high / custom */
 const AI_PLANS={free:["Copilot Free или без Copilot",1],pro:["Copilot Pro / Pro+",1],business:["Copilot Business",2],enterprise:["Copilot Enterprise",3]};
@@ -2727,12 +2736,12 @@ const FREE_PROV={
   gm:{name:"Google Gemini",host:"generativelanguage.googleapis.com",url:"https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",list:"https://generativelanguage.googleapis.com/v1beta/openai/models",key:"djigit_crm_gemini_key",ph:"AIza…",in:20000,
     help:"aistudio.google.com → Get API key → Create API key. Бесплатный уровень без карты; лимиты зависят от модели и меняются Google — CRM сама переключится, если лимит кончится. В бесплатном уровне Google может использовать запросы для улучшения моделей — не пишите в чат лишних личных данных.",
     base:[["gemini-2.5-flash-lite","Gemini 2.5 Flash-Lite","low",500,15],["gemini-2.5-flash","Gemini 2.5 Flash","high",20,5]]}};
-const FREE_CODES=Object.keys(FREE_PROV),fpCat=p=>"djigit_crm_cat_"+p,fpRaw=id=>String(id).replace(/^(or|gq|gm):/,"");
+const FREE_CODES=Object.keys(FREE_PROV),fpCat=p=>"djigit_crm_cat_"+p,fpRaw=id=>String(id).replace(/^(or|gq|gm|oa):/,"");
 const fpCap=p=>{const P=FREE_PROV[p];return P.cap?(aiGet(P.capKey)==="1"?P.capPaid:P.cap):0};
 /* Есть ли ключ у провайдера модели */
-const aiHasKey=p=>!!aiGet(p==="gh"?AI_TKEY:p==="ant"?ANT_KEY:FREE_PROV[p]?.key);
-const aiAnyKey=()=>["gh","ant",...FREE_CODES].some(aiHasKey);
-const aiProvName=p=>p==="gh"?"GitHub":p==="ant"?"Anthropic":FREE_PROV[p]?.name||p;
+const aiHasKey=p=>!!aiGet(p==="gh"?AI_TKEY:p==="ant"?ANT_KEY:p==="oa"?OA_KEY:FREE_PROV[p]?.key);
+const aiAnyKey=()=>["gh",...FREE_CODES,...PAID_PROV].some(aiHasKey);
+const aiProvName=p=>p==="gh"?"GitHub":p==="ant"?"Anthropic":p==="oa"?"OpenAI":FREE_PROV[p]?.name||p;
 const AI_MODELS=[];
 function aiBuildModels(){
   const k=AI_PLANS[aiGet(AI_PLANKEY)]?.[1]||1,paid=aiGet(AI_GHPAYKEY)==="1";let cat=[];try{cat=JSON.parse(aiGet(AI_CATKEY)||"[]")}catch(e){}
@@ -2740,7 +2749,9 @@ function aiBuildModels(){
   const rows=gh.map(([id,name,tier])=>{const[d,r]=AI_TIERS[tier]||AI_TIERS.low;return [id,name,"gh",paid?0:d*k,paid?0:(tier==="custom"?r:Math.round(r*(1+(k-1)/3))),tier]});
   const free=FREE_CODES.flatMap(p=>{let c=[];try{c=JSON.parse(aiGet(fpCat(p))||"[]")}catch(e){}const s=new Set();
     return [...FREE_PROV[p].base,...c].filter(m=>!s.has(m[0])&&s.add(m[0])).map(([id,name,tier,d,r])=>[p+":"+id,name,p,d,r,tier])});
-  AI_MODELS.splice(0,AI_MODELS.length,...rows,...free,...ANT_MODELS)}
+  let oc=[];try{oc=JSON.parse(aiGet(OA_CAT)||"[]")}catch(e){}const os=new Set();
+  const oa=[...OA_BASE,...oc].filter(m=>!os.has(m[0])&&os.add(m[0])).map(([id,name])=>["oa:"+id,name,"oa",0,0]);
+  AI_MODELS.splice(0,AI_MODELS.length,...rows,...free,...oa,...ANT_MODELS)}
 const AI_CKEY="djigit_crm_ai_cache",AI_CACHE_TTL=12*3600e3,AI_CACHE_MAX=60,AI_TIMEOUT=30e3,GH_IN_TOKENS=7600;
 const aiGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}};
 const aiSet=(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}};
@@ -2795,8 +2806,9 @@ function aiPlan(tier="light"){
   const ok=m=>{const[n,lim]=aiLoad(m,u);return aiHasKey(m[2])&&!aiPausedTill(m[0],u)&&!(lim&&n>=lim)};
   const share=m=>{const[n,lim]=aiLoad(m,u);return n/(lim||1e9)};
   const strong=m=>m[5]?m[5]!=="low":m[3]<=50,want=m=>tier==="heavy"?strong(m):!strong(m);
-  const free=AI_MODELS.filter(m=>m[2]!=="ant"&&ok(m)).sort((a,b)=>(aiRpmFull(a[0],u)-aiRpmFull(b[0],u))||(want(b)-want(a))||(share(a)-share(b)));
-  const paid=aiPaidOn()||aiInfo(pref)[2]==="ant"?AI_MODELS.filter(m=>m[2]==="ant"&&ok(m)):[];
+  const free=AI_MODELS.filter(m=>!isPaid(m[2])&&ok(m)).sort((a,b)=>(aiRpmFull(a[0],u)-aiRpmFull(b[0],u))||(want(b)-want(a))||(share(a)-share(b)));
+  // Платный резерв: OpenAI и Claude вместе, от самой дешёвой модели к самой дорогой
+  const paid=aiPaidOn()||isPaid(aiInfo(pref)[2])?AI_MODELS.filter(m=>isPaid(m[2])&&ok(m)).sort((a,b)=>aiCost(a[0])-aiCost(b[0])):[];
   const list=[...free,...paid].map(m=>m[0]);
   if(pref!=="auto"&&list.includes(pref))list.splice(list.indexOf(pref),1),list.unshift(pref);
   return list}
@@ -2863,6 +2875,27 @@ async function antCall(model,messages){
   const out=(j?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").trim();
   if(!out)throw new AiErr(aiInfo(model)[1]+": пустой ответ",{});
   return out+(j?.stop_reason==="max_tokens"?"\n\n(ответ обрезан по длине)":"")}
+/* OpenAI Chat Completions напрямую из браузера. Модели GPT-5 и o-серии — рассуждающие: им нужен
+   max_completion_tokens с запасом, temperature не поддерживается, «размышления» делаем короткими (reasoning_effort low). */
+async function oaCall(model,messages,max){
+  const id=fpRaw(model),who=aiInfo(model)[1],reason=/^(gpt-5|o\d)/.test(id);
+  const body={model:id,messages,max_completion_tokens:reason?Math.max(max*4,4000):Math.max(max,1500)};
+  if(reason)body.reasoning_effort="low";else body.temperature=.4;
+  const {r,j,t}=await aiFetch(OA_URL,{method:"POST",headers:{"Authorization":"Bearer "+aiGet(OA_KEY),"Content-Type":"application/json"},body:JSON.stringify(body)},"api.openai.com",90e3);
+  if(!r.ok){try{aiFail(r,j,t,who)}catch(e){
+    // insufficient_quota — закончились деньги на балансе OpenAI: выключаем провайдера на час
+    if(/insufficient_quota|quota/i.test(t)){e.message=who+": закончились деньги на балансе OpenAI";e.provider=3600;delete e.pause}
+    throw e}}
+  const out=String(j?.choices?.[0]?.message?.content||"").trim();
+  if(!out)throw new AiErr(who+": пустой ответ",{pause:60});
+  return out+(j?.choices?.[0]?.finish_reason==="length"?"\n\n(ответ обрезан по длине)":"")}
+async function oaLoadCatalog(){
+  const {r,j}=await aiFetch(OA_LIST,{headers:{"Authorization":"Bearer "+aiGet(OA_KEY)}},"api.openai.com");
+  if(!r.ok||!Array.isArray(j?.data))throw new Error("OpenAI не отдал список моделей ("+r.status+")");
+  const list=j.data.map(x=>x.id).filter(id=>/^(gpt-[45]|o\d|chatgpt)/.test(id)&&!/audio|realtime|transcribe|tts|image|search|codex|instruct|embed|moderation|deep-research|\d{4}-\d{2}-\d{2}|-pro$/.test(id))
+    .sort((a,b)=>oaRank(a)-oaRank(b)||a.localeCompare(b)).map(id=>[id,id.replace(/^gpt/,"GPT").replace(/-/g," ")]);
+  if(!list.length)throw new Error("у ключа нет подходящих моделей");
+  aiSet(OA_CAT,JSON.stringify(list));aiBuildModels();return list}
 /* Кэш ответов: тот же запрос с теми же данными в течение 12 часов не тратит лимит */
 function aiHash(str){let h=5381;for(let i=0;i<str.length;i++)h=(h*33^str.charCodeAt(i))>>>0;return h.toString(36)+"_"+str.length}
 function aiCacheGet(k){try{const c=JSON.parse(aiGet(AI_CKEY)||"{}"),x=c[k];return x&&Date.now()-x.t<AI_CACHE_TTL?x:null}catch(e){return null}}
@@ -2883,12 +2916,12 @@ async function aiRun(messages,max,plan,onTry,ck){
   for(const model of plan){const prov=aiInfo(model)[2];if(deadProv.has(prov))continue;
     onTry&&onTry(model);
     {const u=aiUsage();(u.t[model]=u.t[model]||[]).push(Date.now());aiSaveUsage(u)}
-    try{const text=prov==="ant"?await antCall(model,messages):FREE_PROV[prov]?await fpCall(model,messages,max):await ghCall(model,messages,max);
+    try{const text=prov==="ant"?await antCall(model,messages):prov==="oa"?await oaCall(model,messages,max):FREE_PROV[prov]?await fpCall(model,messages,max):await ghCall(model,messages,max);
       const u=aiUsage();u.n[model]=(u.n[model]||0)+1;delete u.block[model];delete u.why[model];aiSaveUsage(u);if(ck)aiCachePut(ck,{text,model});return {text,model}}
     catch(e){errs.push(e.message);
       if(e.provider){deadProv.add(prov);AI_MODELS.filter(m=>m[2]===prov).forEach(m=>aiPause(m[0],e.provider,e.message))}
       else if(e.pause){aiPause(model,e.pause,e.message);if(e.day){const u=aiUsage();u.n[model]=Math.max(u.n[model]||0,aiInfo(model)[3]);aiSaveUsage(u)}}}}
-  throw new Error(plan.length?"Все доступные модели не ответили:\n• "+errs.join("\n• "):"Сейчас нет доступных моделей: бесплатные лимиты на паузе"+(FREE_CODES.some(aiHasKey)?"":" (добавьте ключи OpenRouter, Groq или Gemini — это ещё бесплатные запросы)")+(aiGet(ANT_KEY)?(aiPaidOn()?"":", а платный Claude выключен"):" и ключ Anthropic не задан")+". Посмотрите таблицу «Лимиты на сегодня».")}
+  throw new Error(plan.length?"Все доступные модели не ответили:\n• "+errs.join("\n• "):"Сейчас нет доступных моделей: бесплатные лимиты на паузе"+(FREE_CODES.some(aiHasKey)?"":" (добавьте ключи OpenRouter, Groq или Gemini — это ещё бесплатные запросы)")+(PAID_PROV.some(aiHasKey)?(aiPaidOn()?"":", а платный резерв выключен"):" и платного ключа (OpenAI или Anthropic) нет — добавьте его, чтобы ответы были всегда")+". Посмотрите таблицу «Лимиты на сегодня».")}
 let aiChat=[],aiBusy=false;
 function aiContext(){
   const L=db.leads.filter(inBranch),S=db.students.filter(inBranch),Pm=db.payments.filter(inBranch),ym=new Date().toISOString().slice(0,7);
@@ -2910,12 +2943,12 @@ function aiContext(){
 function aiMsgs(){return aiChat.map(m=>`<div class="aimsg ${m.role==="user"?"u":"a"}${m.err?" err":""}">${esc(m.content)}${m.model?`<div class="aimeta">${esc(aiInfo(m.model)[1])}${m.cached?" · из кэша":""}</div>`:""}</div>`).join("")||`<div class="hint">Спросите, например: «Какой источник заявок самый эффективный?», «Почему растут отказы?», «Напиши сообщение ученикам с долгом по оплате».</div>`}
 function aiLimits(){const u=aiUsage(),hm=t=>{const d=new Date(t);return (d.toDateString()===new Date().toDateString()?"":d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"})+" ")+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})};
   return `<div class="tablewrap"><table class="table"><thead><tr><th>Модель</th><th>Класс</th><th>Сегодня</th><th>За минуту</th><th>Состояние</th></tr></thead><tbody>${AI_MODELS.map(([id,name,p,lim,rpm])=>{const till=aiPausedTill(id,u),mi=(u.t[id]||[]).length,cap=FREE_PROV[p]?fpCap(p):0,n=u.n[id]||0;
-    const st=!aiHasKey(p)?`<span style="color:var(--muted)">нет ${p==="gh"?"токена GitHub":"ключа "+aiProvName(p)}</span>`:cap&&aiProvUsed(p,u)>=cap?"общий лимит исчерпан":till?`<span title="${esc(u.why[id]||"")}">пауза до ${hm(till)}</span>`:lim&&n>=lim?"лимит исчерпан":p==="ant"&&!aiPaidOn()&&aiPref()!==id?`<span style="color:var(--muted)">резерв выключен</span>`:"доступна";
-    return `<tr><td>${esc(name)}</td><td class="sub">${p==="ant"?"резерв":{low:"лёгкая",high:"сильная",custom:"особая"}[aiInfo(id)[5]]||"лёгкая"}</td><td>${lim?n+" / ~"+lim:cap?n+" (общий ~"+cap+")":n+(p==="gh"?" (оплата GitHub)":" (платно)")}</td><td>${rpm?mi+" / "+rpm:"—"}</td><td>${st}</td></tr>`}).join("")}</tbody></table></div>
+    const st=!aiHasKey(p)?`<span style="color:var(--muted)">нет ${p==="gh"?"токена GitHub":"ключа "+aiProvName(p)}</span>`:cap&&aiProvUsed(p,u)>=cap?"общий лимит исчерпан":till?`<span title="${esc(u.why[id]||"")}">пауза до ${hm(till)}</span>`:lim&&n>=lim?"лимит исчерпан":isPaid(p)&&!aiPaidOn()&&aiPref()!==id?`<span style="color:var(--muted)">резерв выключен</span>`:"доступна";
+    return `<tr><td>${esc(name)}</td><td class="sub">${isPaid(p)?"резерв (платно)":{low:"лёгкая",high:"сильная",custom:"особая"}[aiInfo(id)[5]]||"лёгкая"}</td><td>${lim?n+" / ~"+lim:cap?n+" (общий ~"+cap+")":n+(p==="gh"?" (оплата GitHub)":" (платно)")}</td><td>${rpm?mi+" / "+rpm:"—"}</td><td>${st}</td></tr>`}).join("")}</tbody></table></div>
   ${FREE_CODES.filter(p=>FREE_PROV[p].cap&&aiHasKey(p)).map(p=>`<p class="sub" style="margin-top:8px">${esc(FREE_PROV[p].name)}: сегодня <b>${aiProvUsed(p,u)} / ~${fpCap(p)}</b> — общий бесплатный лимит на все модели «:free».</p>`).join("")}
   <p class="sub" style="margin-top:8px">Ответов из кэша сегодня: <b>${u.hits}</b> — столько запросов сэкономлено. Повторный тот же вопрос с теми же данными в течение 12 часов отвечается мгновенно и не тратит лимит.</p>`}
 /* Сколько бесплатных вопросов в день в запасе по всем подключённым провайдерам */
-function aiFreeDaily(){return AI_MODELS.filter(m=>m[2]!=="ant"&&(m[2]==="gh"||aiHasKey(m[2]))).reduce((s,m)=>s+m[3],0)+FREE_CODES.filter(p=>aiHasKey(p)).reduce((s,p)=>s+fpCap(p),0)}
+function aiFreeDaily(){return AI_MODELS.filter(m=>!isPaid(m[2])&&(m[2]==="gh"||aiHasKey(m[2]))).reduce((s,m)=>s+m[3],0)+FREE_CODES.filter(p=>aiHasKey(p)).reduce((s,p)=>s+fpCap(p),0)}
 function fpCards(){return FREE_CODES.map(p=>{const P=FREE_PROV[p],c=aiGet(fpCat(p));return `
   <div class="formfield"><label for="fpKey_${p}">Ключ ${esc(P.name)} (бесплатно)</label><input class="field" id="fpKey_${p}" type="password" autocomplete="off" placeholder="${esc(P.ph)}" value="${esc(aiGet(P.key))}"></div>
   <div class="hint">${P.help}</div>
@@ -2924,8 +2957,8 @@ function fpCards(){return FREE_CODES.map(p=>{const P=FREE_PROV[p],c=aiGet(fpCat(
 views["ИИ-помощник"]=()=>{const pref=aiPref(),gt=aiGet(AI_TKEY),ak=aiGet(ANT_KEY);
   const opts=(p,lbl)=>`<optgroup label="${lbl}">${AI_MODELS.filter(x=>x[2]===p).map(([v,t])=>`<option value="${v}" ${v===pref?"selected":""}>Сначала ${t}, затем остальные</option>`).join("")}</optgroup>`;return `
   <div class="card" style="margin-bottom:16px"><h3>Подключение</h3>
-  <div class="hint">В режиме «Авто» CRM экономит бесплатные лимиты GitHub: простые вопросы в чате идут лёгким моделям (по ~150 в день у каждой), разборы месяца, недельная сводка и аналитические вопросы — сильным (по ~50 в день). Нагрузка распределяется по доле израсходованного лимита, модель с исчерпанным лимитом в минуту пропускается, зависшая (30 с) — заменяется. Повторные вопросы отвечаются из кэша. ${aiGet(AI_GHPAYKEY)==="1"?"Включена оплата GitHub Models — дневных лимитов нет, GitHub списывает деньги за токены сверх бесплатного;":"Сейчас в запасе примерно <b>"+aiFreeDaily()+"</b> бесплатных вопросов в день ("+AI_MODELS.filter(m=>m[2]==="gh").length+" моделей GitHub"+FREE_CODES.filter(aiHasKey).map(p=>", "+AI_MODELS.filter(m=>m[2]===p).length+" — "+FREE_PROV[p].name).join("")+");"} платный Claude подключается только когда бесплатные закончились — сначала дешёвый Haiku.</div>
-  <div class="formfield"><label for="aiModel">Режим</label><select class="field" id="aiModel"><option value="auto" ${pref==="auto"?"selected":""}>Авто — балансировка между всеми моделями (рекомендуется)</option>${opts("gh","GitHub Models — бесплатно")}${FREE_CODES.map(p=>opts(p,FREE_PROV[p].name+" — бесплатно")).join("")}${opts("ant","Anthropic Claude — платно")}</select></div>
+  <div class="hint">В режиме «Авто» CRM экономит бесплатные лимиты GitHub: простые вопросы в чате идут лёгким моделям (по ~150 в день у каждой), разборы месяца, недельная сводка и аналитические вопросы — сильным (по ~50 в день). Нагрузка распределяется по доле израсходованного лимита, модель с исчерпанным лимитом в минуту пропускается, зависшая (30 с) — заменяется. Повторные вопросы отвечаются из кэша. ${aiGet(AI_GHPAYKEY)==="1"?"Включена оплата GitHub Models — дневных лимитов нет, GitHub списывает деньги за токены сверх бесплатного;":"Сейчас в запасе примерно <b>"+aiFreeDaily()+"</b> бесплатных вопросов в день ("+AI_MODELS.filter(m=>m[2]==="gh").length+" моделей GitHub"+FREE_CODES.filter(aiHasKey).map(p=>", "+AI_MODELS.filter(m=>m[2]===p).length+" — "+FREE_PROV[p].name).join("")+");"} платный резерв (OpenAI и Claude) подключается только когда бесплатные закончились — сначала самые дешёвые модели.</div>
+  <div class="formfield"><label for="aiModel">Режим</label><select class="field" id="aiModel"><option value="auto" ${pref==="auto"?"selected":""}>Авто — балансировка между всеми моделями (рекомендуется)</option>${opts("gh","GitHub Models — бесплатно")}${FREE_CODES.map(p=>opts(p,FREE_PROV[p].name+" — бесплатно")).join("")}${opts("oa","OpenAI ChatGPT — платно")}${opts("ant","Anthropic Claude — платно")}</select></div>
   <div class="formfield"><label for="aiTok">Токен GitHub (бесплатно)</label><input class="field" id="aiTok" type="password" autocomplete="off" placeholder="github_pat_…" value="${esc(gt)}"></div>
   <div class="hint">GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token с правом <b>Models: Read-only</b> (github.com/settings/personal-access-tokens/new). Лимиты считаются на аккаунт GitHub — если у сотрудников свои токены, у каждого свой запас.</div>
   <div class="formfield"><label for="aiPlan">Ваш тариф GitHub Copilot</label><select class="field" id="aiPlan">${Object.entries(AI_PLANS).map(([k,[t,m]])=>`<option value="${k}" ${(aiGet(AI_PLANKEY)||"free")===k?"selected":""}>${t}${m>1?" — лимиты примерно в "+m+" раза больше":""}</option>`).join("")}</select></div>
@@ -2935,11 +2968,15 @@ views["ИИ-помощник"]=()=>{const pref=aiPref(),gt=aiGet(AI_TKEY),ak=aiG
   <h3 style="margin-top:18px">Другие бесплатные LLM API</h3>
   <div class="hint">Необязательно, но чем больше ключей, тем больше бесплатных вопросов в день: CRM распределяет запросы между всеми подключёнными сервисами и при лимите или сбое сразу переходит к следующему. Ключи хранятся только в этом браузере.</div>
   ${fpCards()}
-  <h3 style="margin-top:18px">Платный резерв</h3>
+  <h3 style="margin-top:18px">Платный резерв — без дневных лимитов</h3>
+  <div class="hint">Платные ключи снимают проблему лимитов: когда бесплатные модели на сегодня закончились, CRM отвечает через OpenAI или Claude — от самой дешёвой модели к дорогой (GPT-5 nano → GPT-5 mini → Claude Haiku → …). Короткий вопрос в чате на дешёвых моделях стоит доли цента. Можно подключить один ключ или оба — тогда при сбое одного ответит другой.</div>
+  <div class="formfield"><label for="aiOa">API-ключ OpenAI / ChatGPT (платно, необязательно)</label><input class="field" id="aiOa" type="password" autocomplete="off" placeholder="sk-proj-…" value="${esc(aiGet(OA_KEY))}"></div>
+  <div class="hint">platform.openai.com → API keys → Create new secret key; баланс пополняется в Billing (подписка ChatGPT Plus сюда не подходит — это отдельный счёт). Поставьте месячный лимит расходов в Limits.</div>
+  <div class="actions" style="margin-bottom:12px"><button class="btn secondary" data-act="oacat">Загрузить все модели OpenAI</button>${aiGet(OA_CAT)?`<span class="sub" style="align-self:center">Каталог загружен: ${AI_MODELS.filter(m=>m[2]==="oa").length} моделей</span>`:""}</div>
   <div class="formfield"><label for="aiAnt">API-ключ Anthropic (платно, необязательно)</label><input class="field" id="aiAnt" type="password" autocomplete="off" placeholder="sk-ant-…" value="${esc(ak)}"></div>
   <div class="hint">console.anthropic.com → Settings → API Keys, баланс пополняется в Billing. Ключ виден любому, у кого есть доступ к этому браузеру, — поставьте лимит расходов в консоли Anthropic.</div>
-  <label class="chk" style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="aiPaid" ${aiPaidOn()?"checked":""}> Подключать платный Claude, когда бесплатные лимиты закончились</label>
-  <div class="actions"><button class="btn" data-act="aisave">Сохранить</button><button class="btn secondary" data-act="aitest">Проверить связь</button>${gt||ak||FREE_CODES.some(aiHasKey)?`<button class="btn secondary" data-act="aidel">Удалить ключи</button>`:""}</div></div>
+  <label class="chk" style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="aiPaid" ${aiPaidOn()?"checked":""}> Подключать платный резерв (OpenAI и Claude), когда бесплатные лимиты закончились</label>
+  <div class="actions"><button class="btn" data-act="aisave">Сохранить</button><button class="btn secondary" data-act="aitest">Проверить связь</button>${gt||ak||aiAnyKey()?`<button class="btn secondary" data-act="aidel">Удалить ключи</button>`:""}</div></div>
   <div class="card" style="margin-bottom:16px"><h3>Лимиты на сегодня</h3><div class="hint">Счётчики ведутся в этом браузере; если тем же токеном пользуются другие, реальный остаток меньше — тогда сработает автопереключение.</div>
   <div id="aiLim">${aiLimits()}</div><div class="actions" style="margin-top:8px"><button class="btn secondary" data-act="aireset">Снять паузы</button><button class="btn secondary" data-act="aicache">Очистить кэш ответов</button></div></div>
   <div class="card"><h3>Чат</h3><div class="hint">К вопросу прикладывается сводка CRM: количества, этапы, источники, финансы по месяцам и имена (без телефонов). Чтобы экономить лимиты, в запрос уходят только последние реплики чата.</div>
@@ -2953,9 +2990,11 @@ function aiHistory(){const out=[];let len=0;
   return out}
 function wireAI(){
   const log=$("aiLog"),q=$("aiQ"),draw=()=>{log.innerHTML=aiMsgs();log.scrollTop=log.scrollHeight},lim=()=>{if($("aiLim"))$("aiLim").innerHTML=aiLimits()};draw();
-  const save=()=>{aiSet(AI_TKEY,$("aiTok").value.trim());aiSet(ANT_KEY,$("aiAnt").value.trim());aiSet(AI_MKEY,$("aiModel").value==="auto"?"":$("aiModel").value);aiSet(AI_PAIDKEY,$("aiPaid").checked?"":"0");aiSet(AI_PLANKEY,$("aiPlan").value==="free"?"":$("aiPlan").value);aiSet(AI_GHPAYKEY,$("aiGhPaid").checked?"1":"");
+  const save=()=>{aiSet(AI_TKEY,$("aiTok").value.trim());aiSet(ANT_KEY,$("aiAnt").value.trim());aiSet(OA_KEY,$("aiOa").value.trim());aiSet(AI_MKEY,$("aiModel").value==="auto"?"":$("aiModel").value);aiSet(AI_PAIDKEY,$("aiPaid").checked?"":"0");aiSet(AI_PLANKEY,$("aiPlan").value==="free"?"":$("aiPlan").value);aiSet(AI_GHPAYKEY,$("aiGhPaid").checked?"1":"");
     FREE_CODES.forEach(p=>{const P=FREE_PROV[p];aiSet(P.key,$("fpKey_"+p).value.trim());if(P.cap)aiSet(P.capKey,$("fpCap_"+p).checked?"1":"")});aiBuildModels()};
   FREE_CODES.forEach(p=>{const c=$("fpCap_"+p);if(c)c.onchange=()=>{save();lim()}});
+  document.querySelector('[data-act="oacat"]').onclick=async e=>{save();if(!aiHasKey("oa")){toast("Сначала вставьте ключ OpenAI");$("aiOa").focus();return}e.target.disabled=true;e.target.textContent="Загружаю…";
+    try{await oaLoadCatalog();toast("Подключено моделей OpenAI: "+AI_MODELS.filter(m=>m[2]==="oa").length);render()}catch(err){toast("Список не загрузился: "+err.message+". Работает встроенный список.");e.target.disabled=false;e.target.textContent="Загрузить все модели OpenAI"}};
   document.querySelectorAll("[data-fpcat]").forEach(b=>b.onclick=async()=>{const p=b.dataset.fpcat,P=FREE_PROV[p];save();
     if(p!=="or"&&!aiHasKey(p)){toast("Сначала вставьте ключ "+P.name);$("fpKey_"+p).focus();return}b.disabled=true;b.textContent="Загружаю…";
     try{await fpLoadCatalog(p);toast("Подключено моделей "+P.name+": "+AI_MODELS.filter(m=>m[2]===p).length);render()}
@@ -2964,13 +3003,13 @@ function wireAI(){
   $("aiModel").onchange=()=>{save();lim()};$("aiPlan").onchange=$("aiGhPaid").onchange=()=>{save();render()};
   document.querySelector('[data-act="aicat"]').onclick=async e=>{save();if(!aiGet(AI_TKEY)){toast("Сначала вставьте токен GitHub");$("aiTok").focus();return}e.target.disabled=true;e.target.textContent="Загружаю…";
     try{const l=await aiLoadCatalog();toast("Подключено моделей GitHub: "+AI_MODELS.filter(m=>m[2]==="gh").length);render()}catch(err){toast("Каталог не загрузился: "+err.message+". Работает встроенный список.");e.target.disabled=false;e.target.textContent="Загрузить все модели GitHub"}};$("aiPaid").onchange=()=>{save();lim()};
-  document.querySelector('[data-act="aidel"]')?.addEventListener("click",()=>{aiSet(AI_TKEY,"");aiSet(ANT_KEY,"");FREE_CODES.forEach(p=>aiSet(FREE_PROV[p].key,""));toast("Ключи удалены");render()});
+  document.querySelector('[data-act="aidel"]')?.addEventListener("click",()=>{aiSet(AI_TKEY,"");aiSet(ANT_KEY,"");aiSet(OA_KEY,"");FREE_CODES.forEach(p=>aiSet(FREE_PROV[p].key,""));toast("Ключи удалены");render()});
   document.querySelector('[data-act="aicache"]').onclick=()=>{aiSet(AI_CKEY,"");lim();toast("Кэш ответов очищен")};
   document.querySelector('[data-act="aireset"]').onclick=()=>{const u=aiUsage();u.block={};u.why={};aiSaveUsage(u);lim();toast("Паузы сняты")};
   document.querySelector('[data-act="aiclear"]').onclick=()=>{aiChat=[];draw()};
   // Проверка: по одному запросу к самой «лёгкой» доступной модели каждого провайдера
   document.querySelector('[data-act="aitest"]').onclick=async e=>{save();e.target.disabled=true;const res=[];
-    for(const p of ["gh",...FREE_CODES,"ant"]){if(!aiHasKey(p))continue;const plan=AI_MODELS.filter(m=>m[2]===p&&!aiPausedTill(m[0])).map(m=>m[0]);
+    for(const p of ["gh",...FREE_CODES,...PAID_PROV]){if(!aiHasKey(p))continue;const plan=AI_MODELS.filter(m=>m[2]===p&&!aiPausedTill(m[0])).map(m=>m[0]);
       try{const r=await aiCall([{role:"user",content:"Ответь одним словом: ок"}],{max:5,plan});res.push(aiProvName(p)+": работает ("+aiInfo(r.model)[1]+")")}
       catch(err){res.push(aiProvName(p)+": "+err.message.replace(/^Все доступные модели не ответили:\n• /,"").split("\n")[0])}}
     toast(res.join(" · ")||"Сначала вставьте ключ");lim();e.target.disabled=false};
