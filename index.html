@@ -2300,12 +2300,34 @@ const AI_URL="https://models.github.ai/inference/chat/completions",AI_TKEY="djig
 const ANT_URL="https://api.anthropic.com/v1/messages",ANT_KEY="djigit_crm_anthropic_key",AI_PAIDKEY="djigit_crm_ai_paid",AI_UKEY="djigit_crm_ai_usage";
 // [id, название, провайдер, примерный бесплатный лимит в день (0 — платно), лимит запросов в минуту]
 // Лёгкие (150/день, 15/мин) — для чата и коротких задач; сильные (50/день, 10/мин) — для разборов и сводок.
-const AI_MODELS=[["openai/gpt-4.1-mini","GPT-4.1 mini","gh",150,15],["openai/gpt-4o-mini","GPT-4o mini","gh",150,15],["meta/Llama-4-Scout-17B-16E-Instruct","Llama 4 Scout","gh",150,15],["mistral-ai/mistral-small-2503","Mistral Small","gh",150,15],["openai/gpt-4.1","GPT-4.1","gh",50,10],["deepseek/DeepSeek-V3-0324","DeepSeek V3","gh",50,10],
-  ["claude-haiku-5-5","Claude Haiku 5.5 — дешёвая","ant",0,0],["claude-sonnet-5-5","Claude Sonnet 5.5 — баланс","ant",0,0],["claude-opus-5-5","Claude Opus 5.5 — самая умная","ant",0,0]];
+/* Базовый список моделей GitHub: [id, название, тир]. Тир задаёт бесплатный лимит (см. AI_TIERS).
+   Кнопка «Загрузить все модели» дополняет список из каталога GitHub — у каждой модели свой дневной лимит. */
+const GH_BASE=[["openai/gpt-4.1-mini","GPT-4.1 mini","low"],["openai/gpt-4o-mini","GPT-4o mini","low"],["meta/Llama-4-Scout-17B-16E-Instruct","Llama 4 Scout","low"],["mistral-ai/mistral-small-2503","Mistral Small","low"],["openai/gpt-4.1","GPT-4.1","high"],["deepseek/DeepSeek-V3-0324","DeepSeek V3","high"]];
+const ANT_MODELS=[["claude-haiku-5-5","Claude Haiku 5.5 — дешёвая","ant",0,0],["claude-sonnet-5-5","Claude Sonnet 5.5 — баланс","ant",0,0],["claude-opus-5-5","Claude Opus 5.5 — самая умная","ant",0,0]];
+/* Примерные бесплатные лимиты GitHub Models по тарифу Copilot: [в день, в минуту] для тиров low / high / custom */
+const AI_PLANS={free:["Copilot Free или без Copilot",1],pro:["Copilot Pro / Pro+",1],business:["Copilot Business",2],enterprise:["Copilot Enterprise",3]};
+const AI_TIERS={low:[150,15],high:[50,10],custom:[8,1]};
+const AI_PLANKEY="djigit_crm_gh_plan",AI_GHPAYKEY="djigit_crm_gh_paid",AI_CATKEY="djigit_crm_gh_catalog",GH_CATALOG="https://models.github.ai/catalog/models";
+const AI_MODELS=[];
+function aiBuildModels(){
+  const k=AI_PLANS[aiGet(AI_PLANKEY)]?.[1]||1,paid=aiGet(AI_GHPAYKEY)==="1";let cat=[];try{cat=JSON.parse(aiGet(AI_CATKEY)||"[]")}catch(e){}
+  const seen=new Set(),gh=[...GH_BASE,...cat].filter(m=>!seen.has(m[0])&&seen.add(m[0]));
+  const rows=gh.map(([id,name,tier])=>{const[d,r]=AI_TIERS[tier]||AI_TIERS.low;return [id,name,"gh",paid?0:d*k,paid?0:(tier==="custom"?r:Math.round(r*(1+(k-1)/3))),tier]});
+  AI_MODELS.splice(0,AI_MODELS.length,...rows,...ANT_MODELS)}
 const AI_CKEY="djigit_crm_ai_cache",AI_CACHE_TTL=12*3600e3,AI_CACHE_MAX=60,AI_TIMEOUT=30e3,GH_IN_TOKENS=7600;
 const aiGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}};
 const aiSet=(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}};
 const aiInfo=id=>AI_MODELS.find(x=>x[0]===id)||[id,id,"gh",0];
+aiBuildModels();
+/* Каталог GitHub Models: все чат-модели с их тиром лимита. Ответ хранится в браузере. */
+async function aiLoadCatalog(){
+  const {r,j}=await aiFetch(GH_CATALOG,{headers:{"Authorization":"Bearer "+aiGet(AI_TKEY),"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}},"models.github.ai");
+  if(!r.ok||!Array.isArray(j))throw new Error("GitHub не отдал каталог ("+r.status+")");
+  const list=j.filter(x=>x&&x.id&&!/embed/i.test(x.id+" "+(x.rate_limit_tier||""))&&(!Array.isArray(x.supported_output_modalities)||x.supported_output_modalities.includes("text")))
+    .map(x=>{const t=String(x.rate_limit_tier||"").toLowerCase();return [x.id,x.name||x.id,t==="low"||t==="high"?t:"custom"]})
+    .sort((a,b)=>["low","high","custom"].indexOf(a[2])-["low","high","custom"].indexOf(b[2]));
+  if(!list.length)throw new Error("в каталоге нет подходящих моделей");
+  aiSet(AI_CATKEY,JSON.stringify(list));aiBuildModels();return list}
 const aiPref=()=>{const m=aiGet(AI_MKEY);return AI_MODELS.some(x=>x[0]===m)?m:"auto"};
 const aiPaidOn=()=>aiGet(AI_PAIDKEY)!=="0";
 const aiDay=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
@@ -2324,8 +2346,8 @@ const aiPausedTill=(id,u=aiUsage())=>(u.block[id]||0)>Date.now()?u.block[id]:0;
 function aiPlan(tier="light"){
   const u=aiUsage(),gh=!!aiGet(AI_TKEY),ant=!!aiGet(ANT_KEY),pref=aiPref();
   const ok=([id,,p,lim])=>(p==="gh"?gh:ant)&&!aiPausedTill(id,u)&&!(lim&&(u.n[id]||0)>=lim);
-  const strong=m=>m[3]<=50,want=m=>tier==="heavy"?strong(m):!strong(m);
-  const free=AI_MODELS.filter(m=>m[2]==="gh"&&ok(m)).sort((a,b)=>(aiRpmFull(a[0],u)-aiRpmFull(b[0],u))||(want(b)-want(a))||((u.n[a[0]]||0)/a[3]-(u.n[b[0]]||0)/b[3]));
+  const strong=m=>m[5]?m[5]!=="low":m[3]<=50,want=m=>tier==="heavy"?strong(m):!strong(m);
+  const free=AI_MODELS.filter(m=>m[2]==="gh"&&ok(m)).sort((a,b)=>(aiRpmFull(a[0],u)-aiRpmFull(b[0],u))||(want(b)-want(a))||((u.n[a[0]]||0)/(a[3]||1e9)-(u.n[b[0]]||0)/(b[3]||1e9)));
   const paid=aiPaidOn()||aiInfo(pref)[2]==="ant"?AI_MODELS.filter(m=>m[2]==="ant"&&ok(m)):[];
   const list=[...free,...paid].map(m=>m[0]);
   if(pref!=="auto"&&list.includes(pref))list.splice(list.indexOf(pref),1),list.unshift(pref);
@@ -2424,15 +2446,19 @@ function aiMsgs(){return aiChat.map(m=>`<div class="aimsg ${m.role==="user"?"u":
 function aiLimits(){const u=aiUsage(),gh=!!aiGet(AI_TKEY),ant=!!aiGet(ANT_KEY),hm=t=>{const d=new Date(t);return (d.toDateString()===new Date().toDateString()?"":d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"})+" ")+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})};
   return `<div class="tablewrap"><table class="table"><thead><tr><th>Модель</th><th>Класс</th><th>Сегодня</th><th>За минуту</th><th>Состояние</th></tr></thead><tbody>${AI_MODELS.map(([id,name,p,lim,rpm])=>{const n=u.n[id]||0,till=aiPausedTill(id,u),mi=(u.t[id]||[]).length;
     const st=!(p==="gh"?gh:ant)?`<span style="color:var(--muted)">нет ${p==="gh"?"токена GitHub":"ключа Anthropic"}</span>`:till?`<span title="${esc(u.why[id]||"")}">пауза до ${hm(till)}</span>`:lim&&n>=lim?"лимит исчерпан":p==="ant"&&!aiPaidOn()&&aiPref()!==id?`<span style="color:var(--muted)">резерв выключен</span>`:"доступна";
-    return `<tr><td>${esc(name)}</td><td class="sub">${p==="ant"?"резерв":lim<=50?"сильная":"лёгкая"}</td><td>${lim?n+" / ~"+lim:n+" (платно)"}</td><td>${rpm?mi+" / "+rpm:"—"}</td><td>${st}</td></tr>`}).join("")}</tbody></table></div>
+    return `<tr><td>${esc(name)}</td><td class="sub">${p==="ant"?"резерв":{low:"лёгкая",high:"сильная",custom:"особая"}[aiInfo(id)[5]]||"лёгкая"}</td><td>${lim?n+" / ~"+lim:n+(p==="gh"?" (оплата GitHub)":" (платно)")}</td><td>${rpm?mi+" / "+rpm:"—"}</td><td>${st}</td></tr>`}).join("")}</tbody></table></div>
   <p class="sub" style="margin-top:8px">Ответов из кэша сегодня: <b>${u.hits}</b> — столько запросов сэкономлено. Повторный тот же вопрос с теми же данными в течение 12 часов отвечается мгновенно и не тратит лимит.</p>`}
 views["ИИ-помощник"]=()=>{const pref=aiPref(),gt=aiGet(AI_TKEY),ak=aiGet(ANT_KEY);
   const opts=(p,lbl)=>`<optgroup label="${lbl}">${AI_MODELS.filter(x=>x[2]===p).map(([v,t])=>`<option value="${v}" ${v===pref?"selected":""}>Сначала ${t}, затем остальные</option>`).join("")}</optgroup>`;return `
   <div class="card" style="margin-bottom:16px"><h3>Подключение</h3>
-  <div class="hint">В режиме «Авто» CRM экономит бесплатные лимиты GitHub: простые вопросы в чате идут лёгким моделям (по ~150 в день у каждой), разборы месяца, недельная сводка и аналитические вопросы — сильным (по ~50 в день). Нагрузка распределяется по доле израсходованного лимита, модель с исчерпанным лимитом в минуту пропускается, зависшая (30 с) — заменяется. Повторные вопросы отвечаются из кэша. Вместе выходит примерно ${AI_MODELS.reduce((s,m)=>s+m[3],0)} вопросов в день; платный Claude подключается только когда бесплатные закончились — сначала дешёвый Haiku.</div>
+  <div class="hint">В режиме «Авто» CRM экономит бесплатные лимиты GitHub: простые вопросы в чате идут лёгким моделям (по ~150 в день у каждой), разборы месяца, недельная сводка и аналитические вопросы — сильным (по ~50 в день). Нагрузка распределяется по доле израсходованного лимита, модель с исчерпанным лимитом в минуту пропускается, зависшая (30 с) — заменяется. Повторные вопросы отвечаются из кэша. ${aiGet(AI_GHPAYKEY)==="1"?"Включена оплата GitHub Models — дневных лимитов нет, GitHub списывает деньги за токены сверх бесплатного;":"Сейчас в запасе примерно <b>"+AI_MODELS.reduce((s,m)=>s+m[3],0)+"</b> вопросов в день ("+AI_MODELS.filter(m=>m[2]==="gh").length+" моделей GitHub);"} платный Claude подключается только когда бесплатные закончились — сначала дешёвый Haiku.</div>
   <div class="formfield"><label for="aiModel">Режим</label><select class="field" id="aiModel"><option value="auto" ${pref==="auto"?"selected":""}>Авто — балансировка между всеми моделями (рекомендуется)</option>${opts("gh","GitHub Models — бесплатно")}${opts("ant","Anthropic Claude — платно")}</select></div>
   <div class="formfield"><label for="aiTok">Токен GitHub (бесплатно)</label><input class="field" id="aiTok" type="password" autocomplete="off" placeholder="github_pat_…" value="${esc(gt)}"></div>
   <div class="hint">GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token с правом <b>Models: Read-only</b> (github.com/settings/personal-access-tokens/new). Лимиты считаются на аккаунт GitHub — если у сотрудников свои токены, у каждого свой запас.</div>
+  <div class="formfield"><label for="aiPlan">Ваш тариф GitHub Copilot</label><select class="field" id="aiPlan">${Object.entries(AI_PLANS).map(([k,[t,m]])=>`<option value="${k}" ${(aiGet(AI_PLANKEY)||"free")===k?"selected":""}>${t}${m>1?" — лимиты примерно в "+m+" раза больше":""}</option>`).join("")}</select></div>
+  <div class="hint"><b>Как получить больше бесплатных запросов через GitHub:</b> 1) нажмите «Загрузить все модели GitHub» — CRM подключит весь каталог, и запросы распределятся между всеми моделями, у каждой свой дневной лимит; 2) на тарифах Copilot Business и Enterprise лимиты выше — выберите свой тариф; 3) у каждого сотрудника может быть свой токен со своего аккаунта и свой запас. Создавать несколько аккаунтов ради лимитов нельзя — это нарушает правила GitHub.</div>
+  <label class="chk" style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="aiGhPaid" ${aiGet(AI_GHPAYKEY)==="1"?"checked":""}> В GitHub включена оплата Models сверх бесплатного лимита (снимает дневные лимиты, платно)</label>
+  <div class="actions" style="margin-bottom:12px"><button class="btn secondary" data-act="aicat">Загрузить все модели GitHub</button>${aiGet(AI_CATKEY)?`<span class="sub" style="align-self:center">Каталог загружен: ${AI_MODELS.filter(m=>m[2]==="gh").length} моделей</span>`:""}</div>
   <div class="formfield"><label for="aiAnt">API-ключ Anthropic (платно, необязательно)</label><input class="field" id="aiAnt" type="password" autocomplete="off" placeholder="sk-ant-…" value="${esc(ak)}"></div>
   <div class="hint">console.anthropic.com → Settings → API Keys, баланс пополняется в Billing. Ключ виден любому, у кого есть доступ к этому браузеру, — поставьте лимит расходов в консоли Anthropic.</div>
   <label class="chk" style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="aiPaid" ${aiPaidOn()?"checked":""}> Подключать платный Claude, когда бесплатные лимиты закончились</label>
@@ -2450,9 +2476,11 @@ function aiHistory(){const out=[];let len=0;
   return out}
 function wireAI(){
   const log=$("aiLog"),q=$("aiQ"),draw=()=>{log.innerHTML=aiMsgs();log.scrollTop=log.scrollHeight},lim=()=>{if($("aiLim"))$("aiLim").innerHTML=aiLimits()};draw();
-  const save=()=>{aiSet(AI_TKEY,$("aiTok").value.trim());aiSet(ANT_KEY,$("aiAnt").value.trim());aiSet(AI_MKEY,$("aiModel").value==="auto"?"":$("aiModel").value);aiSet(AI_PAIDKEY,$("aiPaid").checked?"":"0")};
+  const save=()=>{aiSet(AI_TKEY,$("aiTok").value.trim());aiSet(ANT_KEY,$("aiAnt").value.trim());aiSet(AI_MKEY,$("aiModel").value==="auto"?"":$("aiModel").value);aiSet(AI_PAIDKEY,$("aiPaid").checked?"":"0");aiSet(AI_PLANKEY,$("aiPlan").value==="free"?"":$("aiPlan").value);aiSet(AI_GHPAYKEY,$("aiGhPaid").checked?"1":"");aiBuildModels()};
   document.querySelector('[data-act="aisave"]').onclick=()=>{save();toast("Подключение сохранено");render()};
-  $("aiModel").onchange=()=>{save();lim()};$("aiPaid").onchange=()=>{save();lim()};
+  $("aiModel").onchange=()=>{save();lim()};$("aiPlan").onchange=$("aiGhPaid").onchange=()=>{save();render()};
+  document.querySelector('[data-act="aicat"]').onclick=async e=>{save();if(!aiGet(AI_TKEY)){toast("Сначала вставьте токен GitHub");$("aiTok").focus();return}e.target.disabled=true;e.target.textContent="Загружаю…";
+    try{const l=await aiLoadCatalog();toast("Подключено моделей GitHub: "+AI_MODELS.filter(m=>m[2]==="gh").length);render()}catch(err){toast("Каталог не загрузился: "+err.message+". Работает встроенный список.");e.target.disabled=false;e.target.textContent="Загрузить все модели GitHub"}};$("aiPaid").onchange=()=>{save();lim()};
   document.querySelector('[data-act="aidel"]')?.addEventListener("click",()=>{aiSet(AI_TKEY,"");aiSet(ANT_KEY,"");toast("Ключи удалены");render()});
   document.querySelector('[data-act="aicache"]').onclick=()=>{aiSet(AI_CKEY,"");lim();toast("Кэш ответов очищен")};
   document.querySelector('[data-act="aireset"]').onclick=()=>{const u=aiUsage();u.block={};u.why={};aiSaveUsage(u);lim();toast("Паузы сняты")};
