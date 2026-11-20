@@ -545,7 +545,7 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-const sections=[["Продажи",["Главная","Заявки и воронка","Задачи","ИИ-помощник","Автоматизация"]],["Студия",["Ученики","Группы","Расписание","Посещаемость","Абонементы","Тренеры","Филиалы"]],["Деньги",["Финансы","Экономика","Таблица УО","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
+const sections=[["Продажи",["Главная","Заявки и воронка","Задачи","ИИ-помощник","Автоматизация"]],["Студия",["Ученики","Группы","Расписание","Посещаемость","Абонементы","Концерты","Тренеры","Филиалы"]],["Деньги",["Финансы","Экономика","Таблица УО","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
 const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
@@ -572,20 +572,20 @@ const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="
   xc:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
   robot:'<rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/><circle cx="12" cy="3.5" r="1"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/>'};
-const icons={"Таблица УО":"list","Экономика":"chart","Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
+const icons={"Концерты":"ticket","Таблица УО":"list","Экономика":"chart","Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
 const ico=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[icons[n]]||P.grid}</svg>`;
 const svg=(k,st="")=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${st?`style="${st}"`:""}>${P[k]}</svg>`;
 /* Какие разделы видит каждая роль. null = всё. */
 const ROLES={
   "Руководитель":null,
-  "Администратор":["Задачи","Ученики","Посещаемость","Расписание","Группы","Абонементы","Финансы"],
-  "Тренер":["Посещаемость","Расписание","Группы","Ученики"],
+  "Администратор":["Задачи","Ученики","Посещаемость","Расписание","Группы","Абонементы","Концерты","Финансы"],
+  "Тренер":["Посещаемость","Расписание","Группы","Ученики","Концерты"],
   "Отдел продаж":["Заявки и воронка","Задачи","Ученики","Абонементы"]
 };
 const STAGES=["Новая заявка","Связались","Пробное занятие","Купили абонемент"];
 const LOST="Отказ";
 const STAGE_BG=["var(--s1)","var(--s2)","var(--s3)","var(--s4)"];
-const COLS=["branches","students","leads","renewals","tasks","groups","teachers","memberships","attendance","payments","lessons","planned","payslips","log"];
+const COLS=["branches","students","leads","renewals","tasks","groups","teachers","memberships","attendance","payments","lessons","planned","payslips","events","log"];
 const ACC_COLORS=["#D2A744","#3D6680","#4E7B36","#8E2A35","#7A6A4A"];
 const EXP_CATS=["Зарплата тренеров","Аренда","Реклама","Налоги","ЗП персонала и бонусы","Комиссия банка","Костюмы и инвентарь","Прочее"];
 const PAY_TYPES=["Не задано","За занятие","За ученика (каждое посещение)","% от выручки групп","Только оклад"];
@@ -651,7 +651,7 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Таблица УО":"Все 17 листов таблицы «Камран_УО» — как в Google Таблице, с поиском и выгрузкой в Excel","Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
+const subs={"Концерты":"Отчётные концерты: участники, взносы, костюмы и размеры","Таблица УО":"Все 17 листов таблицы «Камран_УО» — как в Google Таблице, с поиском и выгрузкой в Excel","Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
@@ -699,10 +699,11 @@ const views={
 "Тренеры":()=>tablePage("teachers",["Тренер","Телефон","Филиал","Роль","Оплата"],x=>[`<b>${esc(x.name)}</b>`,esc(x.phone||"—"),esc(branchName(x.branch)),esc(x.role),x.payType&&x.payType!=="Не задано"?payLabel(x):"—"]),
 "Экономика":()=>econView(),
 "Таблица УО":()=>sheetsView(),
-"Абонементы":()=>tablePage("memberships",["Ученик","Абонемент","Занятия","Цена","Филиал","До"],x=>[esc(db.students.find(s=>s.id===x.student)?.name||"—"),`<b>${esc(x.title)}</b>`,`<span class="num">${x.used}/${x.total}</span>`,`<span class="num">${money(x.price)}</span>`,esc(branchName(x.branch)),esc(x.expires||"—")]),
+"Абонементы":()=>tablePage("memberships",["Ученик","Абонемент","Занятия","Цена","Филиал","До","Заморозка"],x=>[esc(db.students.find(s=>s.id===x.student)?.name||"—"),`<b>${esc(x.title)}</b>`,`<span class="num">${x.used}/${x.total}</span>`,`<span class="num">${money(x.price)}</span>`,esc(branchName(x.branch)),esc(x.expires||"—"),freezeCell(x)]),
+"Концерты":()=>eventsView(),
 "Филиалы":()=>tablePage("branches",["Филиал","Адрес","Учеников","Групп"],x=>[`<b>${esc(x.name)}</b>`,esc(x.address||"—"),db.students.filter(s=>s.branch===x.id).length,db.groups.filter(g=>g.branch===x.id).length]),
 "Финансы":()=>finTabs()+(finTab==="dds"?ddsCard()+ddsDayCard():finTab==="bal"?balanceCard():`<div class="stats">${statsCard("Доходы",money(sum("Доход")),"Поступления")}${statsCard("Расходы",money(sum("Расход")),"Расходные операции")}${statsCard("Баланс",money(sum("Доход")-sum("Расход")),"Доход минус расходы")}${statsCard("Операции",db.payments.filter(inBranch).length,sum("Вывод")?"Вывод дивидендов: "+money(sum("Вывод")):"Всего записей")}</div>${tablePage("payments",["Дата","Тип","Категория","Описание","Сумма","Счёт","Филиал","Тренер"],x=>[esc(x.date),status(x.type),esc(x.category||"—"),esc(x.description),`<span class="num">${money(x.amount)}</span>`,esc((x.account||"—")+(x.toAccount?" → "+x.toAccount:"")),esc(branchName(x.branch)),esc(x.teacher||"—")])}`),
-"Посещаемость":()=>`<div class="notice">Отметить присутствие можно кнопкой «Отметить» в разделе «Ученики» или кнопкой «+ Отметка» здесь.<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="deductSw" ${settings.deduct===false?"":"checked"}> Списывать занятие с абонемента при отметке «Присутствовал» или «Опоздал». Когда занятия кончились, ученик получает статус «Нужна оплата».</label></div>${tablePage("attendance",["Дата","Ученик","Группа","Филиал","Статус"],x=>[esc(x.date),esc(db.students.find(s=>s.id===x.student)?.name||"—"),esc(x.group||"—"),esc(branchName(x.branch)),status(x.status)])}`,
+"Посещаемость":()=>journalCard()+`<div class="notice">Отметить присутствие можно кнопкой «Отметить» в разделе «Ученики» или кнопкой «+ Отметка» здесь.<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="deductSw" ${settings.deduct===false?"":"checked"}> Списывать занятие с абонемента при отметке «Присутствовал» или «Опоздал». Когда занятия кончились, ученик получает статус «Нужна оплата».</label></div>${tablePage("attendance",["Дата","Ученик","Группа","Филиал","Статус"],x=>[esc(x.date),esc(db.students.find(s=>s.id===x.student)?.name||"—"),esc(x.group||"—"),esc(branchName(x.branch)),status(x.status)])}`,
 "Расписание":()=>{const ls=db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
   return `<div class="card"><h3>Занятия</h3><div class="hint">Добавляйте занятия кнопкой «+ Занятие»</div>${ls.map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher||"—")} · ${esc(x.room||"—")} <button class="mini" data-edit-any="lessons:${x.id}">Изменить</button>${isBoss()?` <button class="mini del" data-del-any="lessons:${x.id}">Удалить</button>`:""}</span></div>`).join("")||'<div class="empty">Занятий пока нет</div>'}</div>`},
 "Команда":()=>`<div class="notice">Демо: пароли хранятся открыто в этом браузере. В рабочей версии вход должен проверять сервер.</div>
@@ -723,6 +724,7 @@ const views={
   ${isBoss()?`<div class="card" style="margin-top:16px"><h3>Счета</h3><div class="hint">Названия счетов и остаток на дату начала учёта. Баланс на панели владельца считается от этого остатка.</div>
   ${settings.accounts.map((a,i)=>`<div class="formgrid"><div class="formfield"><label for="an${i}">Счёт ${i+1}</label><input class="field" id="an${i}" data-accname value="${esc(a.name)}"></div><div class="formfield"><label for="as${i}">Начальный остаток, ₸</label><input class="field num" id="as${i}" data-accstart inputmode="numeric" value="${a.start||0}"></div></div>`).join("")}
   <div class="actions"><button class="btn" data-act="saveacc">Сохранить счета</button></div></div>
+  <div class="card" style="margin-top:16px"><h3>Правила студии</h3><div class="formgrid"><div class="formfield"><label for="stFreeze">Лимит заморозки на абонемент, дней</label><input class="field" id="stFreeze" type="number" min="0" value="${freezeMax()}"></div><div class="formfield"><label for="stFam">Семейная скидка второму и следующим детям, %</label><input class="field" id="stFam" type="number" min="0" max="100" value="${famDisc()}"></div></div></div>
   <div class="card" style="margin-top:16px"><h3>Данные из таблицы студии</h3><div class="hint">Из Excel-таблицы перенесены ученики (лист «ПРОЕКТЫ», выбывшие — из листа «ст»), группы, тренеры, оплаченные месяцы как абонементы и операции из листа «ОПЕРАЦИИ». Повторная загрузка заменит только эти записи; ваши заявки, задачи и операции, добавленные вручную, останутся.</div>${xlsStats()}<div class="actions"><button class="btn" data-act="encload">Загрузить из репозитория (нужен пароль)</button><label class="btn secondary" for="xlsFile" style="cursor:pointer">Загрузить файл данных студии</label><input type="file" id="xlsFile" accept=".json,application/json" hidden></div><div class="sub" style="margin-top:8px">Таблица лежит в репозитории только в зашифрованном виде (studio-data.enc.json). Открытый файл данных на GitHub не выкладывайте. Данные сохраняются только в этом браузере.</div></div>
   <div class="card" style="margin-top:16px"><h3>Загрузить операции из таблицы</h3><div class="hint">Сохраните лист Excel или Google Таблицы как CSV. Нужны столбцы «Дата» и «Сумма»; ещё понимаются «Тип» (доход или расход), «Описание», «Статья», «Филиал» и «Счёт». Строки без типа считаются расходом.</div>
   <label class="btn secondary" for="csvFile" style="cursor:pointer">Выбрать CSV-файл</label><input type="file" id="csvFile" accept=".csv,text/csv" hidden>${settings.lastImport?`<span class="sub" style="margin-left:10px">Последняя загрузка: ${esc(settings.lastImport)}</span>`:""}</div>`:""}
@@ -776,7 +778,7 @@ function homeView(){
   const firstDay=upcoming[0]?.date;upcoming=upcoming.filter(l=>l.date===firstDay).slice(0,5);
   const stIcon=st=>st===STAGES[3]?svg("okc","color:var(--green)"):st===LOST?svg("xc","color:var(--red)"):svg("clockc","color:var(--gold)");
   const stLabel=st=>st===STAGES[3]?"Оплата (абонемент)":st===STAGES[2]?"Пробное занятие":st===STAGES[1]?"Связались":st===LOST?"Отказ":"Новая заявка";
-  return encBanner()+weeklyCard()+`<div class="kpis">
+  return encBanner()+weeklyCard()+birthdaysCard()+`<div class="kpis">
     <div class="kpi"><span class="ic">${svg("users")}</span><div><label>Активные ученики</label><strong class="num">${stNow}</strong>${delta(stNow,stPrev)} <small>к прошлому месяцу</small></div></div>
     <div class="kpi"><span class="ic">${svg("userplus")}</span><div><label>Новые заявки</label><strong class="num">${lNow}</strong>${delta(lNow,lPrev)}</div></div>
     <div class="kpi"><span class="ic">${svg("coins")}</span><div><label>Выручка (месяц)</label><strong class="num">${money(rNow)}</strong>${delta(rNow,rPrev)}</div></div>
@@ -1186,6 +1188,7 @@ const DEFAULT_TPL={
   renew:{name:"Напоминание о продлении",text:"{имя}, абонемент заканчивается {дата}. Продлим, чтобы не прерывать занятия? Стоимость {сумма}."},
   debt:{name:"Напоминание о долге",text:"{имя}, напоминаем об оплате абонемента на {сумма}: {ссылка_оплаты}. Если уже оплатили — пришлите, пожалуйста, чек, и мы всё отметим."},
   miss:{name:"Мы скучаем",text:"{имя}, мы скучаем! Не видели вас на двух последних занятиях. Всё в порядке? Если стало неудобно время, подберём другую группу."},
+  birthday:{name:"Поздравление с днём рождения",text:"{имя}, с днём рождения! 🎉 Вся команда DJIGIT TAU желает здоровья, радости и ярких выступлений. Ждём на занятиях!"},
   pay:{name:"Ссылка на оплату",text:"{имя}, ссылка для оплаты абонемента на {сумма}: {ссылка_оплаты}. После оплаты пришлите, пожалуйста, чек."}
 };
 const tpl=k=>({...DEFAULT_TPL[k],...(settings.templates[k]||{})});
@@ -1232,7 +1235,7 @@ function runRobots(){
     db.renewals.push(x);m.renewDeal=x.id;feedAdd(x,"sys","Робот создал сделку: абонемент заканчивается "+m.expires);queueMsg(x,"renew");addTask(x,"Позвонить: продление абонемента",at(0,Math.max(new Date().getHours()+1,11)),true);ch=true});
   if(robotOn("r_noshow"))db.leads.forEach(x=>{if(x.stage!==STAGES[2]||!x.trial||x.noshowDone)return;if(Date.now()-new Date(x.trial).getTime()<864e5)return;
     x.noshowDone=true;queueMsg(x,"noshow");addTask(x,"Неявка: предложить перенос пробного",plusMin(30),true);ch=true});
-  if(robotDebt())ch=true;if(robotMiss())ch=true;
+  if(robotDebt())ch=true;if(robotMiss())ch=true;if(robotUnfreeze())ch=true;
   if(ch)persist();
   if(isBoss())setTimeout(()=>makeWeekly(false),0);
 }
@@ -1371,6 +1374,7 @@ async function saveForm(e){
   e.preventDefault();
   const key=T2K[formType],obj={};
   new FormData(e.target).forEach((v,k)=>obj[k]=typeof v==="string"?v.trim():v);
+  if(key==="lessons"){const c=lessonClash(obj,editing?.id);if(c&&!await ask(`Накладка: ${obj.date} в ${obj.time} уже есть занятие «${c.group}» (${c.teacher&&c.teacher===obj.teacher?"тот же тренер: "+c.teacher:"тот же зал: "+c.room}). Всё равно сохранить?`,"Сохранить"))return}
   // Защита от дублей: спрашиваем до создания заявки
   if(key==="leads"&&!editing){const dp=dupOf({id:-1,phone:obj.phone});if(dp.length&&!await ask(`Этот номер уже есть в базе: ${dp.map(d=>d.k.toLowerCase()+" «"+d.n+"» ("+d.st+")").join(", ")}. Всё равно создать новую заявку?`,"Создать"))return}
   NUMS.forEach(k=>{if(obj[k]!==undefined)obj[k]=Number(obj[k])||0});
@@ -1424,7 +1428,7 @@ async function resetDemo(){
   demoSeed();settings.robots=keepRobots||{};settings.templates=keepTpl||{};persist();init();toast("Демо-данные загружены");
 }
 /* Чистая CRM: только филиалы и тренеры */
-const CLEAR_COLS=["students","leads","renewals","tasks","memberships","attendance","payments","lessons","planned","payslips","groups","log"];
+const CLEAR_COLS=["students","leads","renewals","tasks","memberships","attendance","payments","lessons","planned","payslips","events","groups","log"];
 function cleanSeed(){demoSeed();CLEAR_COLS.forEach(k=>db[k]=[]);settings=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));settings.sla=15}
 async function wipeData(){
   if(!isBoss())return;
@@ -1534,6 +1538,118 @@ function linkPayments(){const key=n=>String(n||"").toLowerCase().replace(/ё/g,"
   db.students.forEach(s=>{const k=key(s.name);if(k)(by[k]=by[k]||[]).push(s.id)});let n=0;
   db.payments.forEach(p=>{if(p.student||!p.client)return;const ids=by[key(p.client)];if(ids&&ids.length===1){p.student=ids[0];n++}});
   if(n)persist()}
+/* ===== Функции студии (по лучшим CRM для танцевальных студий) =====
+   Журнал группы, заморозка абонемента, семья, концерты и костюмы, дни рождения, накладки в расписании. */
+/* Небольшая форма в модальном окне: fields — HTML полей; возвращает объект значений или null */
+function askForm(title,fields,okText="Сохранить"){return new Promise(res=>{const d=document.createElement("div");d.className="modalbg";d.style.display="grid";
+  d.innerHTML=`<form class="modal" style="width:min(440px,100%)"><h2>${esc(title)}</h2>${fields}<div class="modalfoot"><button type="button" class="btn secondary" data-no>Отмена</button><button class="btn">${esc(okText)}</button></div></form>`;
+  document.body.append(d);const f=d.querySelector("form"),done=v=>{d.remove();res(v)};f.querySelector("input,select,textarea")?.focus();
+  d.querySelector("[data-no]").onclick=()=>done(null);d.onclick=e=>{if(e.target===d)done(null)};
+  f.onsubmit=e=>{e.preventDefault();const o={};new FormData(f).forEach((v,k)=>o[k]=typeof v==="string"?v.trim():v);done(o)}})}
+const FF=(name,label,input)=>`<div class="formfield"><label for="af_${name}">${label}</label>${input.replace("<input","<input id=\"af_"+name+"\" name=\""+name+"\"").replace("<select","<select id=\"af_"+name+"\" name=\""+name+"\"")}</div>`;
+
+/* --- 1. Журнал группы: тренер отмечает всю группу за раз; занятие для расчёта зарплаты создаётся само --- */
+let jGroup="",jDate="";
+const J_ST=[["Присутствовал","Был"],["Опоздал","Опоздал"],["Отсутствовал","Не был"],["Уважительная причина","Уваж."]];
+function journalCard(){const gs=db.groups.filter(inBranch);if(!gs.length)return"";if(!gs.some(g=>g.name===jGroup))jGroup=gs[0].name;if(!jDate)jDate=today();
+  const g=gs.find(x=>x.name===jGroup),st=db.students.filter(s=>s.group===jGroup&&s.status!=="Архив").sort((a,b)=>a.name.localeCompare(b.name,"ru"));
+  const cur=id=>db.attendance.find(a=>a.student===id&&a.date===jDate&&a.group===jGroup)?.status||"";
+  return `<div class="card" style="margin-bottom:16px"><h3>Журнал группы</h3><div class="hint">Выберите группу и дату, отметьте всех и сохраните. Занятие в «Расписании» создастся само — по нему считается зарплата тренера, а с абонементов спишутся занятия.</div>
+  <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px"><select class="field" id="jGroup" style="max-width:340px">${gs.map(x=>`<option ${x.name===jGroup?"selected":""}>${esc(x.name)}</option>`).join("")}</select><input class="field" type="date" id="jDate" value="${jDate}" style="max-width:170px">
+   <button class="btn secondary mini" data-jall="Присутствовал">Все были</button></div>
+  ${st.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Ученик</th><th>Абонемент</th><th>Отметка</th></tr></thead><tbody>${st.map(s=>{const c=cur(s.id),m=db.memberships.filter(x=>x.student===s.id&&(!x.expires||x.expires>=jDate)&&x.total-x.used>0).sort((a,b)=>(a.expires||"9").localeCompare(b.expires||"9"))[0];
+    return `<tr><td><b>${esc(s.name)}</b>${s.status!=="Активен"?" "+status(s.status):""}</td><td class="sub">${m?(m.total-m.used)+" из "+m.total+(m.expires?" · до "+esc(m.expires):""):'<span style="color:var(--red)">нет действующего</span>'}</td>
+    <td><div class="seg" data-jst="${s.id}">${J_ST.map(([v,l])=>`<button type="button" data-v="${v}" class="${c===v?"on":""}">${l}</button>`).join("")}</div></td></tr>`}).join("")}</tbody></table></div>
+  <div class="actions" style="margin-top:10px"><button class="btn" data-act="jsave">Сохранить отметки</button><span class="sub">Тренер: ${esc(g?.teacher||"—")}</span></div>`:'<div class="empty">В группе нет учеников</div>'}</div>`}
+function wireJournal(){if(!$("jGroup"))return;$("jGroup").onchange=e=>{jGroup=e.target.value;render()};$("jDate").onchange=e=>{jDate=e.target.value||today();render()};
+  document.querySelectorAll("[data-jst] button").forEach(b=>b.onclick=()=>{b.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b&&!x.classList.contains("on")))});
+  document.querySelector("[data-jall]")?.addEventListener("click",()=>document.querySelectorAll("[data-jst]").forEach(sg=>sg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.v==="Присутствовал"))));
+  document.querySelector('[data-act="jsave"]')?.addEventListener("click",()=>{const g=db.groups.find(x=>x.name===jGroup);let n=0;
+    document.querySelectorAll("[data-jst]").forEach(sg=>{const id=+sg.dataset.jst,v=sg.querySelector("button.on")?.dataset.v||"";let a=db.attendance.find(x=>x.student===id&&x.date===jDate&&x.group===jGroup);
+      if(!v){if(a){undoVisit(a);db.attendance=db.attendance.filter(x=>x!==a);n++}return}
+      if(a){if(a.status===v)return;const was=cameIn(a);a.status=v;if(was&&!cameIn(a)){undoVisit(a);delete a.membership}else if(!was&&cameIn(a))deductVisit(a)}
+      else{a={id:nid(),student:id,date:jDate,group:jGroup,branch:g?.branch,status:v};db.attendance.push(a);deductVisit(a)}n++});
+    if(n&&g&&!db.lessons.some(l=>l.group===jGroup&&l.date===jDate))db.lessons.push({id:nid(),date:jDate,time:g.time||"",group:jGroup,teacher:g.teacher||"",branch:g.branch,room:""});
+    logAct("Журнал: "+jGroup+" "+jDate+" ("+n+" отметок)");persist();render();toast(n?"Отметки сохранены: "+n:"Изменений нет")})}
+
+/* --- 2. Заморозка абонемента: срок продлевается на дни заморозки, ученик на паузе, потом возвращается сам --- */
+const freezeMax=()=>settings.freezeMax===undefined?30:Number(settings.freezeMax);
+const frozenDays=m=>(m.freezes||[]).reduce((a,f)=>a+Number(f.days||0),0);
+const addDays=(d,n)=>{const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+async function freezeMs(id){const m=db.memberships.find(x=>x.id===id);if(!m)return;const left=freezeMax()-frozenDays(m);
+  if(left<=0){toast("Лимит заморозки по этому абонементу исчерпан ("+freezeMax()+" дн.)");return}
+  const v=await askForm("Заморозка абонемента",`<p class="hint" style="margin:0 0 8px">Абонемент «${esc(m.title)}». Можно заморозить ещё на ${left} дн. (лимит ${freezeMax()} дн. на абонемент — меняется в «Настройках»).</p>
+    ${FF("from","С какого дня",`<input class="field" type="date" value="${today()}" required>`)}${FF("days","На сколько дней",`<input class="field" type="number" min="1" max="${left}" value="${Math.min(14,left)}" required>`)}
+    ${FF("reason","Причина",`<select class="field">${["Болезнь","Отпуск / отъезд","Учёба / экзамены","Травма","Другое"].map(r=>`<option>${r}</option>`).join("")}</select>`)}`,"Заморозить");
+  if(!v)return;const days=Math.max(1,Math.min(left,Number(v.days)||0));
+  (m.freezes=m.freezes||[]).push({from:v.from||today(),days,reason:v.reason,until:addDays(v.from||today(),days)});if(m.expires)m.expires=addDays(m.expires,days);
+  const s=db.students.find(x=>x.id===m.student);if(s&&(v.from||today())<=today()&&s.status!=="Архив"){s.pausedBy=m.id;s.status="Пауза"}
+  logAct("Заморозка: "+(s?.name||"")+" на "+days+" дн.");persist();render();toast("Абонемент заморожен на "+days+" дн., срок продлён до "+(m.expires||"—"))}
+function robotUnfreeze(){let ch=false;const t=today();db.memberships.forEach(m=>{(m.freezes||[]).forEach(f=>{const s=db.students.find(x=>x.id===m.student);if(!s)return;
+    if(f.from<=t&&f.until>t&&s.status!=="Архив"&&s.status!=="Пауза"){s.status="Пауза";s.pausedBy=m.id;ch=true}
+    if(f.until<=t&&s.status==="Пауза"&&s.pausedBy===m.id){s.status="Активен";delete s.pausedBy;ch=true}})});return ch}
+const freezeCell=m=>{const f=(m.freezes||[]).find(x=>x.from<=today()&&x.until>today());
+  return f?`<span class="tag blue">заморожен до ${esc(f.until)}</span>`:(m.total-m.used>0&&(!m.expires||m.expires>=today())?`<button class="mini" onclick="freezeMs(${m.id})">Заморозить</button>`:"")+(frozenDays(m)?` <span class="sub">${frozenDays(m)} дн.</span>`:"")};
+
+/* --- 3. Семья: родитель с несколькими детьми — по общему телефону --- */
+const famDisc=()=>settings.famDisc===undefined?10:Number(settings.famDisc);
+function familyOf(s){const p=nd(s.phone);return p?db.students.filter(x=>nd(x.phone)===p):[s]}
+function familyCard(s){const fam=familyOf(s);if(fam.length<2)return"";const act=fam.filter(x=>x.status!=="Архив");
+  return `<div class="card" style="margin-top:12px"><h3>Семья · ${fam.length} ${plural(fam.length,"ребёнок","ребёнка","детей").replace(/^\d+\s/,"")}</h3><div class="hint">Ученики с тем же телефоном родителя${s.parent?" ("+esc(s.parent)+")":""}. ${act.length>=2&&famDisc()?`Семейная скидка: ${famDisc()}% на абонемент второго и следующих детей.`:""}</div>
+  ${fam.map(x=>`<div class="row"><b>${x.id===s.id?esc(x.name)+" (этот)":`<a href="#" onclick="event.preventDefault();openProfile(${x.id})">${esc(x.name)}</a>`}</b><span>${status(x.status)} ${canLtv()?`<span class="num">${money(ltv(x.id))}</span>`:""}</span></div>`).join("")}
+  ${canLtv()?`<div class="row"><b>LTV семьи</b><span class="num"><b>${money(fam.reduce((a,x)=>a+ltv(x.id),0))}</b></span></div>`:""}</div>`}
+
+/* --- 4. Концерты и костюмы --- */
+let evOpen=null;
+function eventsView(){const evs=[...db.events].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  if(evOpen&&db.events.some(e=>e.id===evOpen))return eventView(db.events.find(e=>e.id===evOpen));
+  return `<div class="card"><h3>Отчётные концерты и выступления</h3><div class="hint">Участники, взносы, костюмы с размерами и оплатой. Оплаты сразу попадают в «Финансы».</div>
+  <div class="actions" style="margin-bottom:10px"><button class="btn" data-act="evnew">+ Концерт</button></div>
+  ${evs.map(e=>{const P=e.parts||[],paid=P.reduce((a,p)=>a+(p.feePaid?Number(e.fee||0):0)+(p.costPaid?Number(e.costume||0):0),0),exp=P.length*(Number(e.fee||0)+Number(e.costume||0));
+    return `<div class="row" style="cursor:pointer" data-evopen="${e.id}"><b>${esc(e.name)} · ${esc(e.date||"")}</b><span>${esc(e.place||"")} · ${P.length} участн. · собрано <b class="num">${money(paid)}</b> из ${money(exp)}</span></div>`}).join("")||'<div class="empty">Концертов пока нет</div>'}</div>`}
+function eventView(e){const P=e.parts||[],sz=["98–104","110–116","122–128","134–140","146–152","158–164","S","M","L","XL"];
+  const tot=f=>P.reduce((a,p)=>a+f(p),0),fee=Number(e.fee||0),cs=Number(e.costume||0),sizes={};P.forEach(p=>{if(p.size)sizes[p.size]=(sizes[p.size]||0)+1});
+  return `<div class="card"><div class="actions" style="margin-bottom:8px"><button class="mini" data-act="evback">← Все концерты</button><button class="mini" data-act="evedit">Изменить</button>${isBoss()?`<button class="mini del" data-act="evdel">Удалить</button>`:""}</div>
+  <h3>${esc(e.name)}</h3><div class="hint">${esc(e.date||"")} · ${esc(e.place||"")} · взнос ${money(fee)} · костюм ${money(cs)}</div>
+  <div class="stats">${statsCard("Участников",P.length,"")}${statsCard("Взносы",money(tot(p=>p.feePaid?fee:0)),"из "+money(P.length*fee))}${statsCard("Костюмы",money(tot(p=>p.costPaid?cs:0)),"из "+money(P.length*cs))}${statsCard("Размеры",Object.keys(sizes).length,Object.entries(sizes).map(([k,v])=>k+": "+v).join(", ")||"не указаны")}</div>
+  <div class="row" style="gap:8px;flex-wrap:wrap;margin:10px 0"><select class="field" id="evGroup" style="max-width:320px"><option value="">+ Добавить группу целиком…</option>${db.groups.filter(inBranch).map(g=>`<option>${esc(g.name)}</option>`).join("")}</select>
+   <select class="field" id="evStud" style="max-width:280px"><option value="">+ Добавить ученика…</option>${db.students.filter(inBranch).filter(s=>s.status!=="Архив"&&!P.some(p=>p.student===s.id)).sort((a,b)=>a.name.localeCompare(b.name,"ru")).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Участник</th><th>Группа</th><th>Размер костюма</th><th>Взнос</th><th>Костюм</th><th></th></tr></thead><tbody>
+  ${P.map((p,i)=>{const s=db.students.find(x=>x.id===p.student);return `<tr><td><b>${esc(s?.name||"—")}</b></td><td class="sub">${esc(s?.group||"")}</td>
+    <td><select class="field" data-evsize="${i}" style="max-width:120px"><option value="">—</option>${sz.map(z=>`<option ${p.size===z?"selected":""}>${z}</option>`).join("")}</select></td>
+    <td><label><input type="checkbox" data-evpay="${i}:fee" ${p.feePaid?"checked":""}> ${p.feePaid?"оплачен":"нет"}</label></td><td><label><input type="checkbox" data-evpay="${i}:cost" ${p.costPaid?"checked":""}> ${p.costPaid?"оплачен":"нет"}</label></td>
+    <td><button class="mini" data-evrm="${i}">×</button></td></tr>`}).join("")||'<tr><td colspan="6" class="empty">Добавьте участников</td></tr>'}</tbody></table></div></div>`}
+async function editEvent(e){const v=await askForm(e?"Концерт":"Новый концерт",FF("name","Название",`<input class="field" required value="${esc(e?.name||"Отчётный концерт")}">`)+FF("date","Дата",`<input class="field" type="date" value="${e?.date||today()}">`)+
+  FF("place","Место",`<input class="field" value="${esc(e?.place||"")}">`)+FF("fee","Взнос за участие, ₸",`<input class="field" type="number" min="0" value="${e?.fee||0}">`)+FF("costume","Стоимость костюма, ₸",`<input class="field" type="number" min="0" value="${e?.costume||0}">`));
+  if(!v)return;const o={name:v.name,date:v.date,place:v.place,fee:Number(v.fee)||0,costume:Number(v.costume)||0};
+  if(e)Object.assign(e,o);else{const n={id:nid(),parts:[],branch:+$("branchFilter").value||null,...o};db.events.push(n);evOpen=n.id}
+  persist();render()}
+function wireEvents(){const C=$("content"),e=db.events.find(x=>x.id===evOpen);
+  C.querySelector('[data-act="evnew"]')?.addEventListener("click",()=>editEvent(null));
+  C.querySelectorAll("[data-evopen]").forEach(r=>r.onclick=()=>{evOpen=+r.dataset.evopen;render()});
+  C.querySelector('[data-act="evback"]')?.addEventListener("click",()=>{evOpen=null;render()});
+  if(!e)return;C.querySelector('[data-act="evedit"]').onclick=()=>editEvent(e);
+  C.querySelector('[data-act="evdel"]')?.addEventListener("click",async()=>{if(!await ask("Удалить концерт «"+e.name+"»? Оплаты в Финансах останутся."))return;db.events=db.events.filter(x=>x!==e);evOpen=null;persist();render()});
+  const add=ids=>{ids.forEach(id=>{if(!e.parts.some(p=>p.student===id))e.parts.push({student:id,size:"",feePaid:false,costPaid:false})});persist();render()};
+  $("evGroup").onchange=x=>{if(x.target.value)add(db.students.filter(s=>s.group===x.target.value&&s.status!=="Архив").map(s=>s.id))};
+  $("evStud").onchange=x=>{if(x.target.value)add([+x.target.value])};
+  C.querySelectorAll("[data-evsize]").forEach(s=>s.onchange=()=>{e.parts[+s.dataset.evsize].size=s.value;persist()});
+  C.querySelectorAll("[data-evrm]").forEach(b=>b.onclick=()=>{e.parts.splice(+b.dataset.evrm,1);persist();render()});
+  C.querySelectorAll("[data-evpay]").forEach(c=>c.onchange=()=>{const[i,k]=c.dataset.evpay.split(":"),p=e.parts[+i],s=db.students.find(x=>x.id===p.student),amt=k==="fee"?Number(e.fee||0):Number(e.costume||0),key=k==="fee"?"feePaid":"costPaid",pk=k==="fee"?"feePay":"costPay";
+    p[key]=c.checked;
+    if(c.checked&&amt>0){const pay={id:nid(),date:today(),type:"Доход",action:"Продажи",category:"Концерты",description:(k==="fee"?"Взнос за концерт «":"Костюм к концерту «")+e.name+"» — "+(s?.name||""),amount:amt,branch:s?.branch,account:settings.accounts[0]?.name||"",student:p.student,grp:"Продажи",art:k==="fee"?"Концерты (взносы)":"Костюмы"};db.payments.push(pay);p[pk]=pay.id}
+    else if(!c.checked&&p[pk]){db.payments=db.payments.filter(x=>x.id!==p[pk]);delete p[pk]}
+    persist();render();toast(c.checked?"Оплата записана в Финансы":"Оплата отменена")})}
+
+/* --- 5. Дни рождения на неделе --- */
+function birthdaysCard(){const t=new Date();t.setHours(0,0,0,0);const list=db.students.filter(inBranch).filter(s=>s.birth&&s.status!=="Архив").map(s=>{const b=new Date(s.birth+"T00:00:00");if(isNaN(b))return null;
+    let n=new Date(t.getFullYear(),b.getMonth(),b.getDate());if(n<t)n=new Date(t.getFullYear()+1,b.getMonth(),b.getDate());const d=Math.round((n-t)/864e5);return d<=7?{s,d,age:n.getFullYear()-b.getFullYear()}:null}).filter(Boolean).sort((a,b)=>a.d-b.d);
+  if(!list.length)return"";const txt=x=>fillTpl(tpl("birthday").text,{name:x.s.name,branch:x.s.branch});
+  return `<div class="card" style="margin-bottom:16px"><h3>Дни рождения на неделе · ${list.length}</h3>${list.map(x=>`<div class="row"><b>${esc(x.s.name)} · ${x.age} ${plural(x.age,"год","года","лет").replace(/^\d+\s/,"")}</b><span>${x.d===0?"<b>сегодня</b>":x.d===1?"завтра":"через "+x.d+" дн."} ${x.s.phone?`<a class="wa" href="${waURL(x.s.phone,txt(x))}" target="_blank" rel="noopener">Поздравить</a>`:""}</span></div>`).join("")}</div>`}
+
+function wireStudioSettings(){$("stFreeze")&&($("stFreeze").onchange=e=>{settings.freezeMax=Number(e.target.value)||0;persist();toast("Сохранено")});$("stFam")&&($("stFam").onchange=e=>{settings.famDisc=Number(e.target.value)||0;persist();toast("Сохранено")})}
+/* --- 6. Накладки в расписании: тот же тренер или тот же зал в то же время --- */
+function lessonClash(o,selfId){if(!o.date||!o.time)return null;return db.lessons.find(l=>l.id!==selfId&&l.date===o.date&&l.time===o.time&&((o.teacher&&l.teacher===o.teacher)||(o.room&&l.room&&l.room===o.room&&String(l.branch)===String(o.branch))))}
 /* ===== ОПУ, ДДС и Баланс — по правилам таблицы «Камран_УО» =====
    ОПУ (прибыль): по месяцу ОПУ, только статьи из справочника. Продажи → Себестоимость (ЗП тренеров) → Маржа
    → Переменные → Валовая прибыль → Постоянные → Головной → Операционная прибыль → Налоги бизнеса (% от продаж) → Чистая.
@@ -1899,6 +2015,7 @@ function openProfile(id){
   <div class="card" style="margin-top:12px"><h3>Занятия</h3>${R("Занимается с",esc(since||"—"))}${R("Срок занятий",dur(since))}${R("Посещено занятий",pres.length)}${R("Пропусков",miss.length)}${R("Последнее занятие",esc(last||"—"))}${R("Следующее занятие",nl?esc(nl.date+" · "+nl.time):"—")}${s.status==="Архив"?R("Закончил занятия",esc(last||"—")):""}</div>
   <div class="card" style="margin-top:12px"><h3>Абонемент</h3>${act?R("Остаток занятий",(act.total-act.used)+" из "+act.total)+R("Действует до",esc(act.expires||"—")):'<div class="empty">Нет активного абонемента</div>'}${ms.map(m=>R(esc(m.title)+" · "+money(m.price),m.used+"/"+m.total+" · до "+esc(m.expires||"—"))).join("")}</div>
   ${canLtv()?`<div class="card" style="margin-top:12px"><h3>LTV</h3>${R("LTV ученика",money(ltv(id)))}${R("Покупок абонементов",ms.length)}${R("Средний чек",ms.length?money(ltv(id)/ms.length):"—")}${R("В месяц, в среднем",since?money(ltv(id)/Math.max(1,Math.floor(Math.max(0,Date.now()-new Date(since))/864e5/30.4))):"—")}</div>`:""}
+  ${familyCard(s)}
   ${canLtv()?(()=>{const f=studentFin(id);return `<div class="card" style="margin-top:12px"><h3>Финансы ученика</h3><div class="hint">Как «ОТЧЕТ по проекту» в таблице</div>${R("Дата первой оплаты",esc(f.first||"—"))}${R("Оплачено факт",money(f.inc))}${R("Долг по оплате",f.debt?`<b style="color:var(--red)">${money(f.debt)}</b>`:"нет")}${R("Расходы",money(f.exp))}${R("Маржа",money(f.margin))}${R("Рентабельность",f.inc?Math.round(f.margin/f.inc*100)+"%":"—")}
     ${f.ps.length?`<details style="margin-top:8px"><summary class="sub">Операции (${f.ps.length})</summary>${f.ps.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,40).map(p=>R(esc(p.date)+" · "+esc(p.type),money(p.amount))).join("")}</details>`:""}</div>`})():""}
   <div class="card" style="margin-top:12px"><h3>Последние посещения</h3>${att.slice(0,8).map(a=>R(esc(a.date)+" · "+esc(a.group||""),status(a.status))).join("")||'<div class="empty">Отметок пока нет</div>'}</div>
@@ -2361,10 +2478,12 @@ function wireAI(){
 after["ИИ-помощник"]=wireAI;
 after["Экономика"]=wireEcon;
 after["Таблица УО"]=wireSheets;
+after["Концерты"]=wireEvents;
+{const _ns=after["Настройки"];after["Настройки"]=()=>{_ns();wireStudioSettings()}}
 after["Финансы"]=wireFin;
 {const _an=views["Аналитика"];views["Аналитика"]=()=>_an()+bossStudentsCard()}
 after["Автоматизация"]=()=>{wireAuto();wireAgents()};
-after["Посещаемость"]=()=>{$("deductSw").onchange=e=>{settings.deduct=e.target.checked;persist();toast(e.target.checked?"Списание включено":"Списание выключено")}};
+after["Посещаемость"]=()=>{wireJournal();$("deductSw").onchange=e=>{settings.deduct=e.target.checked;persist();toast(e.target.checked?"Списание включено":"Списание выключено")}};
 /* ===== ИИ в карточке сделки ===== */
 let aiDeal={id:null,kind:"",text:"",busy:false,err:false,score:null,step:""};
 const AI_KINDS={reply:"Ответ клиенту",sum:"Резюме сделки",score:"Шанс и следующий шаг"};
