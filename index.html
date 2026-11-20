@@ -1744,7 +1744,9 @@ function tSchedView(){const days=weekDays(schedWeek),ls=myLessons().filter(l=>l.
 function wireTSched(){document.querySelectorAll("[data-week]").forEach(b=>b.onclick=()=>{schedWeek=b.dataset.week==="0"?0:schedWeek+Number(b.dataset.week);render()})}
 /* --- 5. Посещения: журнал своих групп + таблица ученик · абонемент · отметка · дата · филиал --- */
 let tAttFrom="",tAttGroup="";
-function tAttView(){const gs=myGroups(),gn=new Set(gs.map(g=>g.name));if(!tAttFrom)tAttFrom=addDays(today(),-30);
+function tAttView(){const gs=myGroups(),gn=new Set(gs.map(g=>g.name));
+  // Только группы этого педагога: если вход не связан с карточкой педагога — никаких чужих групп
+  if(!gs.length)return `<div class="card"><h3>Посещения</h3><div class="empty">За вами (${esc(myTeacher()||"—")}) пока не закреплены группы. Здесь появятся только ваши группы — руководитель назначает их в карточке группы (поле «Тренер») или связывает ваш вход с карточкой педагога в «Команде».</div></div>`;if(!tAttFrom)tAttFrom=addDays(today(),-30);
   if(gs.length&&!gs.some(g=>g.name===jGroup))jGroup=gs[0].name;
   const rows=db.attendance.filter(a=>gn.has(a.group)&&(!tAttGroup||a.group===tAttGroup)&&(a.date||"")>=tAttFrom).sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,400);
   const mOf=a=>{const m=a.membership?db.memberships.find(x=>x.id===a.membership):db.memberships.filter(x=>x.student===a.student&&(!x.expires||x.expires>=a.date)).sort((x,y)=>(x.expires||"9").localeCompare(y.expires||"9"))[0];return m?`${esc(m.title)} · ${m.used}/${m.total}${m.expires?" · до "+esc(m.expires):""}`:'<span style="color:var(--red)">нет</span>'};
