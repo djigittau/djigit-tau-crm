@@ -603,7 +603,7 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-const sections=[["Продажи",["Главная","Смена","Заявки и воронка","Продления","Задачи","Рассылки","Качество консультаций","ИИ-помощник","Автоматизация"]],["Студия",["Ученики","Группы","Расписание","Посещаемость","Абонементы","Концерты","Костюмы и пошив","Товары и награды","Тренеры","Филиалы"]],["Деньги",["Финансы","Оплаты и сверка","Экономика","Таблица УО","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
+const sections=[["Кабинет",["Профиль"]],["Продажи",["Главная","Смена","Заявки и воронка","Продления","Задачи","Рассылки","Качество консультаций","ИИ-помощник","Автоматизация"]],["Студия",["Ученики","Группы","Расписание","Посещаемость","Абонементы","Концерты","Костюмы и пошив","Товары и награды","Тренеры","Филиалы"]],["Деньги",["Финансы","Оплаты и сверка","Экономика","Таблица УО","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
 const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
@@ -630,22 +630,23 @@ const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="
   xc:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
   robot:'<rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/><circle cx="12" cy="3.5" r="1"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/>'};
-const icons={"Смена":"clockc","Продления":"calcheck","Качество консультаций":"okc","Костюмы и пошив":"dash","Оплаты и сверка":"walletc","Рассылки":"userplus","Товары и награды":"coins","Концерты":"ticket","Таблица УО":"list","Экономика":"chart","Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
+const icons={"Профиль":"user","Смена":"clockc","Продления":"calcheck","Качество консультаций":"okc","Костюмы и пошив":"dash","Оплаты и сверка":"walletc","Рассылки":"userplus","Товары и награды":"coins","Концерты":"ticket","Таблица УО":"list","Экономика":"chart","Главная":"grid","Заявки и воронка":"pipe","Ученики":"user","Посещаемость":"check","Расписание":"cal","Группы":"users","Тренеры":"coach","Абонементы":"ticket","Финансы":"wallet","Филиалы":"pin","Аналитика":"chart","Команда":"shield","Журнал":"list","Настройки":"gear","Панель владельца":"dash","Задачи":"check","Автоматизация":"robot","ИИ-помощник":"robot"};
 const ico=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[icons[n]]||P.grid}</svg>`;
 const svg=(k,st="")=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${st?`style="${st}"`:""}>${P[k]}</svg>`;
 /* Какие разделы видит каждая роль. null = всё. */
 const ROLES={
   "Руководитель":null,
   "Администратор":["Смена","Продления","Задачи","Рассылки","Ученики","Посещаемость","Расписание","Группы","Абонементы","Концерты","Костюмы и пошив","Товары и награды","Финансы","Оплаты и сверка"],
-  "Тренер":["Посещаемость","Расписание","Группы","Ученики","Концерты","Костюмы и пошив"],
+  // Педагог (тренер, преподаватель): личный кабинет — профиль, смена (приход на занятия), свои группы, расписание и посещения
+  "Тренер":["Профиль","Смена","Группы","Расписание","Посещаемость"],
   // Аккаунт преподавателя студии — меню как в рабочем аккаунте на скриншоте: смена, заявки, ученики, продления, оплаты, расписание, товары, костюмы, качество
-  "Преподаватель":["Смена","Задачи","Заявки и воронка","Ученики","Продления","Оплаты и сверка","Расписание","Посещаемость","Группы","Концерты","Товары и награды","Костюмы и пошив","Качество консультаций"],
+  "Преподаватель":["Профиль","Смена","Группы","Расписание","Посещаемость"],
   "Отдел продаж":["Смена","Заявки и воронка","Продления","Задачи","Рассылки","Ученики","Абонементы"]
 };
 const STAGES=["Новая заявка","Связались","Пробное занятие","Купили абонемент"];
 const LOST="Отказ";
 const STAGE_BG=["var(--s1)","var(--s2)","var(--s3)","var(--s4)"];
-const COLS=["branches","students","leads","renewals","tasks","groups","teachers","memberships","attendance","payments","lessons","planned","payslips","events","products","shifts","costumes","log"];
+const COLS=["branches","students","leads","renewals","tasks","groups","teachers","memberships","attendance","payments","lessons","planned","payslips","events","products","shifts","costumes","checkins","log"];
 const ACC_COLORS=["#D2A744","#3D6680","#4E7B36","#8E2A35","#7A6A4A"];
 const EXP_CATS=["Зарплата тренеров","Аренда","Реклама","Налоги","ЗП персонала и бонусы","Комиссия банка","Костюмы и инвентарь","Прочее"];
 const PAY_TYPES=["Не задано","За занятие","За ученика (каждое посещение)","% от выручки групп","Только оклад"];
@@ -700,7 +701,7 @@ function ask(text,yes="Удалить"){return new Promise(res=>{$("askText").te
 function init(){
   if($("brandWho"))$("brandWho").textContent=role+" · "+(me.name||"");
   $("meName").textContent=me.name;$("meRole").textContent=role;$("meAv").textContent=(me.name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  $("nav").innerHTML=sections.map(g=>{const items=g[1].filter(allowed);if(!items.length)return"";
+  $("nav").innerHTML=(isTeacher()?[["Мой кабинет",["Профиль","Смена","Группы","Расписание","Посещаемость"]]]:sections).map(g=>{const items=g[1].filter(allowed);if(!items.length)return"";
     return (g[0]?`<div class="navh">${g[0]}</div>`:"")+items.map(n=>`<button data-page="${n}">${ico(n)}<span>${lbl(n)}</span>${n==="Заявки и воронка"?`<span class="cnt" id="leadCnt"></span>`:n==="Задачи"?`<span class="cnt" id="taskCnt" style="background:#E5675E;color:#fff"></span>`:""}</button>`).join("")}).join("");
   $("nav").querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
   const cur=$("branchFilter").value||"all";
@@ -713,11 +714,11 @@ function init(){
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
 function openSide(){$("side").classList.add("open");$("scrim").classList.add("on")}
 function closeSide(){$("side").classList.remove("open");$("scrim").classList.remove("on")}
-const subs={"Рассылки":"Сообщения в WhatsApp по сегментам: должники, группа, дни рождения, ушедшие, заявки","Товары и награды":"Форма, чешки, атрибутика и награды учеников","Смена":"Открытие и закрытие смены, касса и дела на сегодня","Продления":"Абонементы, которые заканчиваются: напомнить, получить оплату, продлить","Качество консультаций":"Чек-лист разговора с клиентом, оценка ИИ и итоги по менеджерам","Костюмы и пошив":"Заказы костюмов: мерки, мастер, сроки, примерки и оплата","Оплаты и сверка":"Сверка оплат с выпиской банка и кассой, должники","Концерты":"Отчётные концерты: участники, взносы, костюмы и размеры","Таблица УО":"Все 17 листов таблицы «Камран_УО» — как в Google Таблице, с поиском и выгрузкой в Excel","Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
+const subs={"Профиль":"Личный кабинет педагога: статистика, зарплата, приход на занятия","Рассылки":"Сообщения в WhatsApp по сегментам: должники, группа, дни рождения, ушедшие, заявки","Товары и награды":"Форма, чешки, атрибутика и награды учеников","Смена":"Открытие и закрытие смены, касса и дела на сегодня","Продления":"Абонементы, которые заканчиваются: напомнить, получить оплату, продлить","Качество консультаций":"Чек-лист разговора с клиентом, оценка ИИ и итоги по менеджерам","Костюмы и пошив":"Заказы костюмов: мерки, мастер, сроки, примерки и оплата","Оплаты и сверка":"Сверка оплат с выпиской банка и кассой, должники","Концерты":"Отчётные концерты: участники, взносы, костюмы и размеры","Таблица УО":"Все 17 листов таблицы «Камран_УО» — как в Google Таблице, с поиском и выгрузкой в Excel","Экономика":"Прибыль по филиалам, зарплаты тренеров, окупаемость рекламы и отток","Главная":"","Заявки и воронка":"От первого обращения до покупки абонемента","Ученики":"Единая база учеников всех филиалов","Посещаемость":"Отметка присутствия и контроль занятий","Расписание":"Календарь занятий по филиалам","Группы":"Составы, уровни и расписание групп","Тренеры":"Сотрудники и распределение по филиалам","Абонементы":"Продажи, остатки занятий и сроки","Финансы":"Доходы, расходы и кассовые операции","Филиалы":"Управление площадками сети","Аналитика":"Воронка продаж, посещаемость и LTV","Журнал":"Кто и что менял в системе","Задачи":"Звонки и сообщения по сделкам с контролем сроков","Автоматизация":"Цифровая воронка: роботы на этапах и шаблоны сообщений","Панель владельца":"Деньги, план и маржа филиалов на одном экране","Команда":"Сотрудники, роли и доступ","Настройки":"Резервная копия и демо-данные","ИИ-помощник":"Авто-балансировка бесплатных моделей GitHub и резерв Claude: вопросы по данным студии"};
 const FORM_OF={"Ученики":"student","Заявки и воронка":"lead","Группы":"group","Тренеры":"teacher","Филиалы":"branch","Абонементы":"membership","Финансы":"payment","Посещаемость":"attendance","Расписание":"lesson","Панель владельца":"planned"};
 function render(){
   $("title").textContent=current==="Главная"?"Студия кавказских танцев «DJIGIT TAU»":lbl(current);
-  $("xlsBtn").style.display=SECTION_SHEET[current]?"":"none";
+  $("xlsBtn").style.display=SECTION_SHEET[current]&&!isTeacher()?"":"none";
   $("monthWrap").style.display=["Главная","Панель владельца","Экономика"].includes(current)?"":"none";
   $("monthSel").innerHTML=[...new Set([...[...Array(12)].map((_,i)=>shiftMonth(new Date().toISOString().slice(0,7),-i)),...db.payments.map(p=>(p.date||"").slice(0,7)).filter(x=>/^\d{4}-\d{2}$/.test(x)),panelMonth])].sort().reverse().map(ym=>{const[a,b]=ym.split("-").map(Number);return `<option value="${ym}" ${ym===panelMonth?"selected":""}>${MONTHS_FULL[b-1][0].toUpperCase()+MONTHS_FULL[b-1].slice(1)} ${a}</option>`}).join("");
   const nl=db.leads.filter(inBranch).filter(l=>l.stage===STAGES[0]).length;if($("leadCnt")){$("leadCnt").textContent=nl;$("leadCnt").hidden=!nl}
@@ -726,7 +727,7 @@ function render(){
   $("subtitle").textContent=subs[current]||"";
   document.querySelectorAll("[data-page]").forEach(b=>{b.classList.toggle("active",b.dataset.page===current);b.setAttribute("aria-current",b.dataset.page===current?"page":"false")});
   const ft=FORM_OF[current];
-  $("primary").style.display=ft&&(current!=="Филиалы"||isBoss())?"":"none";
+  $("primary").style.display=ft&&!isTeacher()&&(current!=="Филиалы"||isBoss())?"":"none";
   $("primary").textContent="+ "+({student:"Ученик",lead:"Заявка",group:"Группа",teacher:"Тренер",branch:"Филиал",membership:"Абонемент",payment:"Операция",attendance:"Отметка",lesson:"Занятие",planned:"Платёж"}[ft]||"Добавить");
   const C=$("content");C.innerHTML=views[current]();if(render.last!==current){C.classList.remove("fade");void C.offsetWidth;C.classList.add("fade");render.last=current}
   after[current]?.();
@@ -773,9 +774,10 @@ const views={
   <div class="formfield"><label for="nu_name">Имя</label><input class="field" id="nu_name"></div>
   <div class="formfield"><label for="nu_phone">Номер телефона</label><input class="field" id="nu_phone" inputmode="tel" placeholder="+7 ..."></div>
   <div class="formfield"><label for="nu_pass">Пароль</label><input class="field" id="nu_pass"></div>
-  <div class="formfield"><label for="nu_role">Роль</label><select class="field" id="nu_role">${Object.keys(ROLES).filter(r=>r!=="Руководитель").map(r=>`<option>${r}</option>`).join("")}</select></div></div>
+  <div class="formfield"><label for="nu_role">Роль</label><select class="field" id="nu_role">${Object.keys(ROLES).filter(r=>r!=="Руководитель").map(r=>`<option>${r}</option>`).join("")}</select></div>
+  <div class="formfield"><label for="nu_teacher">Карточка педагога (для тренера / преподавателя)</label><select class="field" id="nu_teacher"><option value="">—</option>${db.teachers.map(t=>`<option>${esc(t.name)}</option>`).join("")}</select></div></div>
   <div class="modalfoot"><button class="btn" data-act="adduser">Добавить сотрудника</button></div></div>
-  <div class="card" style="margin-top:16px"><h3>Сотрудники</h3><div class="hint">${plural(users.length,"человек","человека","человек")}</div>${users.map(u=>`<div class="row"><b>${esc(u.name)}</b><span>${esc(u.role)} · +${esc(u.phone)}${u.phone!==me.phone&&u.role!=="Руководитель"?` <button class="mini del" data-deluser="${esc(u.phone)}">Убрать</button>`:""}</span></div>`).join("")}</div>`,
+  <div class="card" style="margin-top:16px"><h3>Сотрудники</h3><div class="hint">${plural(users.length,"человек","человека","человек")}</div>${users.map(u=>`<div class="row"><b>${esc(u.name)}</b><span>${u.role==="Тренер"||u.role==="Преподаватель"?`<select class="field" data-uteach="${esc(u.phone)}" style="width:auto;display:inline-block;padding:3px 6px;font-size:12.5px" title="Карточка педагога"><option value="">педагог: по имени</option>${db.teachers.map(t=>`<option ${u.teacher===t.name?"selected":""}>${esc(t.name)}</option>`).join("")}</select> `:""}${esc(u.role)} · +${esc(u.phone)}${u.phone!==me.phone&&u.role!=="Руководитель"?` <button class="mini del" data-deluser="${esc(u.phone)}">Убрать</button>`:""}</span></div>`).join("")}</div>`,
 "Журнал":()=>`<div class="card"><h3>Действия сотрудников</h3><div class="hint">Последние 300 записей. Видит только руководитель.</div>${db.log.map(x=>`<div class="row"><b>${esc(x.t)}</b><span>${esc(x.who?x.who+" · ":"")}${esc(x.role)} · ${esc(x.at)}</span></div>`).join("")||'<div class="empty">Пока ничего не менялось</div>'}</div>`,
 "Настройки":()=>`<div class="card" style="margin-bottom:16px"><h3>Выгрузка в Excel</h3><div class="hint">Один файл .xlsx: каждый раздел на своём листе (ученики, заявки, продления, задачи, абонементы, финансы, посещения, расписание и другие). Учитывается выбранный филиал. Таблицу одного раздела можно скачать кнопкой «Excel» в самом разделе.</div>
   <button class="btn" data-act="xlsall">Выгрузить всё в Excel</button></div>
@@ -787,7 +789,7 @@ const views={
   ${settings.accounts.map((a,i)=>`<div class="formgrid"><div class="formfield"><label for="an${i}">Счёт ${i+1}</label><input class="field" id="an${i}" data-accname value="${esc(a.name)}"></div><div class="formfield"><label for="as${i}">Начальный остаток, ₸</label><input class="field num" id="as${i}" data-accstart inputmode="numeric" value="${a.start||0}"></div></div>`).join("")}
   <div class="actions"><button class="btn" data-act="saveacc">Сохранить счета</button></div></div>
   <div class="card" style="margin-top:16px"><h3>Оформление</h3><div class="seg">${[["air","Воздушное — светлое, пастельное"],["gold","Золотое"]].map(([k,l])=>`<button data-skin="${k}" class="${(document.documentElement.dataset.skin||"air")===k?"on":""}">${l}</button>`).join("")}</div></div>
-  <div class="card" style="margin-top:16px"><h3>Правила студии</h3><div class="formgrid"><div class="formfield"><label for="stFreeze">Лимит заморозки на абонемент, дней</label><input class="field" id="stFreeze" type="number" min="0" value="${freezeMax()}"></div><div class="formfield"><label for="stFam">Семейная скидка второму и следующим детям, %</label><input class="field" id="stFam" type="number" min="0" max="100" value="${famDisc()}"></div></div></div>
+  <div class="card" style="margin-top:16px"><h3>Правила студии</h3><div class="formgrid"><div class="formfield"><label for="stFreeze">Лимит заморозки на абонемент, дней</label><input class="field" id="stFreeze" type="number" min="0" value="${freezeMax()}"></div><div class="formfield"><label for="stFam">Семейная скидка второму и следующим детям, %</label><input class="field" id="stFam" type="number" min="0" max="100" value="${famDisc()}"></div><div class="formfield"><label for="stArr">Педагог приходит до начала занятия, минут</label><input class="field" id="stArr" type="number" min="0" value="${arriveMin()}"></div></div></div>
   <div class="card" style="margin-top:16px"><h3>Данные из таблицы студии</h3><div class="hint">Из Excel-таблицы перенесены ученики (лист «ПРОЕКТЫ», выбывшие — из листа «ст»), группы, тренеры, оплаченные месяцы как абонементы и операции из листа «ОПЕРАЦИИ». Повторная загрузка заменит только эти записи; ваши заявки, задачи и операции, добавленные вручную, останутся.</div>${xlsStats()}<div class="actions"><button class="btn" data-act="encload">Загрузить из репозитория (нужен пароль)</button><label class="btn secondary" for="xlsFile" style="cursor:pointer">Загрузить файл данных студии</label><input type="file" id="xlsFile" accept=".json,application/json" hidden></div><div class="sub" style="margin-top:8px">Таблица лежит в репозитории только в зашифрованном виде (studio-data.enc.json). Открытый файл данных на GitHub не выкладывайте. Данные сохраняются только в этом браузере.</div></div>
   <div class="card" style="margin-top:16px"><h3>Загрузить операции из таблицы</h3><div class="hint">Сохраните лист Excel или Google Таблицы как CSV. Нужны столбцы «Дата» и «Сумма»; ещё понимаются «Тип» (доход или расход), «Описание», «Статья», «Филиал» и «Счёт». Строки без типа считаются расходом.</div>
   <label class="btn secondary" for="csvFile" style="cursor:pointer">Выбрать CSV-файл</label><input type="file" id="csvFile" accept=".csv,text/csv" hidden>${settings.lastImport?`<span class="sub" style="margin-left:10px">Последняя загрузка: ${esc(settings.lastImport)}</span>`:""}</div>`:""}
@@ -1048,7 +1050,7 @@ const after={
   "Главная":wireHome,
   "Панель владельца":wirePanel,
   "Заявки и воронка":wirePipeline,
-  "Команда":()=>{document.querySelector('[data-act="adduser"]').onclick=addUser;document.querySelectorAll("[data-deluser]").forEach(b=>b.onclick=()=>removeUser(b.dataset.deluser))},
+  "Команда":()=>{document.querySelectorAll("[data-uteach]").forEach(x=>x.onchange=()=>{const u=users.find(y=>y.phone===x.dataset.uteach);if(u){if(x.value)u.teacher=x.value;else delete u.teacher;persist();toast("Вход связан с карточкой педагога")}});document.querySelector('[data-act="adduser"]').onclick=addUser;document.querySelectorAll("[data-deluser]").forEach(b=>b.onclick=()=>removeUser(b.dataset.deluser))},
   "Настройки":()=>{document.querySelector('[data-act="encload"]')?.addEventListener("click",()=>{encLater=false;showEncPrompt()});document.querySelector('[data-act="xlsall"]').onclick=exportExcelAll;document.querySelector('[data-act="export"]').onclick=exportData;document.querySelector('[data-act="copy"]').onclick=copyData;$("impFile").onchange=importData;document.querySelector('[data-act="reset"]')?.addEventListener("click",resetDemo);document.querySelector('[data-act="wipe"]')?.addEventListener("click",wipeData);if($("xlsFile"))$("xlsFile").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;f.text().then(async t=>{let d;try{d=JSON.parse(t);if(!d.students||!d.payments)throw 0}catch(_){toast("Это не файл данных студии");return}
   if(db.students.some(x=>x.src==="xls")&&!await ask("Заменить ранее загруженные данные студии? Записи, добавленные вручную, останутся.","Заменить"))return;
   XLS=d;importXls();persist();init();toast("Данные студии загружены")})};if($("csvFile")){$("csvFile").onchange=importCSV;document.querySelector('[data-act="saveacc"]').onclick=saveAccounts}},
@@ -1502,7 +1504,7 @@ async function resetDemo(){
   demoSeed();settings.robots=keepRobots||{};settings.templates=keepTpl||{};persist();init();toast("Демо-данные загружены");
 }
 /* Чистая CRM: только филиалы и тренеры */
-const CLEAR_COLS=["students","leads","renewals","tasks","memberships","attendance","payments","lessons","planned","payslips","events","products","shifts","costumes","groups","log"];
+const CLEAR_COLS=["students","leads","renewals","tasks","memberships","attendance","payments","lessons","planned","payslips","events","products","shifts","costumes","checkins","groups","log"];
 function cleanSeed(){demoSeed();CLEAR_COLS.forEach(k=>db[k]=[]);settings=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));settings.sla=15}
 async function wipeData(){
   if(!isBoss())return;
@@ -1681,6 +1683,75 @@ function wireDesk(){const C=$("content");
   if($("botG")){C.querySelector('[data-act="botsave"]').onclick=()=>{botSave();toast("Бот сохранён")};
     C.querySelector('[data-act="faqadd"]').onclick=()=>{botSave();const b=botCfg();b.faq.push(["",""]);settings.bot=b;render()};
     C.querySelectorAll("[data-faqrm]").forEach(x=>x.onclick=()=>{botSave();const b=botCfg();b.faq.splice(+x.dataset.faqrm,1);settings.bot=b;persist();render()})}}
+/* ===== Кабинет педагога: Профиль, Смена (приход на занятия), Мои группы, Моё расписание, Посещения =====
+   Вход сотрудника связывается с карточкой педагога (Команда → «Карточка педагога»); если не связан —
+   ищем педагога по имени (первое слово). Расписание заполняют администраторы, педагог только смотрит. */
+const isTeacher=()=>role==="Тренер"||role==="Преподаватель";
+const tKey=n=>String(n||"").trim().split(/\s+/)[0].toLowerCase().replace(/ё/g,"е");
+let profTeacher="";
+function myTeacher(){if(!isTeacher())return profTeacher||db.teachers[0]?.name||"";const n=me?.teacher||"";if(n)return n;
+  const t=db.teachers.find(x=>x.name===me?.name)||db.teachers.find(x=>tKey(x.name)===tKey(me?.name));return t?t.name:(me?.name||"")}
+const isMine=(name,who=myTeacher())=>!!name&&!!who&&(name===who||tKey(name)===tKey(who));
+const myGroups=(who=myTeacher())=>db.groups.filter(g=>isMine(g.teacher,who));
+const myLessons=(who=myTeacher())=>db.lessons.filter(l=>isMine(l.teacher,who));
+const arriveMin=()=>settings.arriveMin===undefined?10:Number(settings.arriveMin);
+/* Статус прихода: «заранее» — за arriveMin минут и раньше, «вовремя» — до начала, «опоздал» — после начала */
+function checkStatus(ch,l){if(!ch)return null;const st=new Date(l.date+"T"+(l.time||"00:00")+":00"),at=new Date(ch.at),mins=Math.round((st-at)/60000);
+  return {mins,code:mins>=arriveMin()?"early":mins>=0?"ontime":"late",label:mins>=arriveMin()?`за ${mins} мин`:mins>=0?`вовремя (за ${mins} мин)`:`опоздал на ${-mins} мин`}}
+const checkOf=l=>db.checkins.find(c=>c.lesson===l.id);
+/* --- 1. Профиль и статистика --- */
+function teacherStats(who,ym){const ls=myLessons(who).filter(l=>(l.date||"").startsWith(ym)&&l.date<=today()),gs=myGroups(who),gn=new Set(gs.map(g=>g.name));
+  const st=db.students.filter(s=>gn.has(s.group)&&s.status!=="Архив"),att=db.attendance.filter(a=>gn.has(a.group)&&(a.date||"").startsWith(ym)),came=att.filter(cameIn).length;
+  const ch=ls.map(l=>checkStatus(checkOf(l),l)).filter(Boolean),left=db.students.filter(s=>gn.has(s.group)&&s.left&&s.left.startsWith(ym)).length;
+  const t=db.teachers.find(x=>x.name===who)||db.teachers.find(x=>tKey(x.name)===tKey(who));const pr=t?payroll(t,ym):null;
+  return {t,ls,gs,st,att:att.length,came,rate:att.length?came/att.length:0,ch,early:ch.filter(c=>c.code!=="late").length,late:ch.filter(c=>c.code==="late").length,noCheck:ls.length-ch.length,left,pr}}
+function profileView(){const who=myTeacher(),ym=today().slice(0,7),S=teacherStats(who,ym),slips=db.payslips.filter(p=>isMine(p.who,who)).sort((a,b)=>b.ym.localeCompare(a.ym)).slice(0,6);
+  const hist=[...Array(6)].map((_,i)=>shiftMonth(ym,-5+i)).map(m=>[m,myLessons(who).filter(l=>(l.date||"").startsWith(m)&&l.date<=today()).length]);
+  const pickT=!isTeacher()?`<div class="row" style="gap:8px;margin-bottom:12px"><label class="sub" for="profT">Педагог</label><select class="field" id="profT" style="max-width:320px">${db.teachers.map(t=>`<option ${t.name===who?"selected":""}>${esc(t.name)}</option>`).join("")}</select></div>`:"";
+  return `${pickT}<div class="card" style="margin-bottom:16px"><div style="display:flex;gap:16px;align-items:center"><div class="avatar" style="width:64px;height:64px;font-size:22px">${esc(initials(who))}</div>
+    <div><h2 style="margin:0 0 4px">${esc(who||"—")}</h2><div class="sub">${esc(S.t?branchName(S.t.branch):"")}${S.t?.phone?" · "+esc(S.t.phone):""}${S.t?.payType&&S.t.payType!=="Не задано"?" · "+payLabel(S.t):""}</div>
+    ${!S.t?`<div class="hint" style="color:var(--red)">Карточка педагога не найдена. Руководитель: «Команда» → свяжите вход с карточкой педагога.</div>`:""}</div></div></div>
+  <div class="stats">${statsCard("Групп",S.gs.length,plural(S.st.length,"ученик","ученика","учеников"))}${statsCard("Занятий в этом месяце",S.ls.length,"проведено")}${statsCard("Посещаемость",Math.round(S.rate*100)+"%",S.came+" из "+S.att+" отметок")}${statsCard("Приход вовремя",S.ch.length?Math.round(S.early/S.ch.length*100)+"%":"—",S.late?`опозданий: ${S.late}`:S.noCheck?`без отметки: ${S.noCheck}`:"без опозданий")}</div>
+  <div class="grid2" style="margin-top:16px"><div class="card"><h3>Зарплата за месяц</h3>${S.pr&&S.pr.set?`<div class="row"><b>Начислено по ставке</b><span class="num">${money(S.pr.acc)}</span></div><div class="row"><b>Занятий / посещений</b><span class="num">${S.pr.lessons} / ${S.pr.visits}</span></div><div class="row"><b>Выплачено</b><span class="num">${money(S.pr.paid)}</span></div>`:'<div class="hint">Ставка ещё не задана — её указывает руководитель в карточке педагога.</div>'}
+    ${slips.length?`<h3 style="margin-top:12px">Расчётные листы</h3>${slips.map(p=>`<div class="row"><b>${esc(p.ym)}</b><span>${money(slipTotal(p))} ${status(p.status)}</span></div>`).join("")}`:""}</div>
+   <div class="card"><h3>Занятия по месяцам</h3>${bars(hist.map(([m,n])=>[opuLabel(m,"month"),n]),Math.max(1,...hist.map(h=>h[1])))}<div class="row" style="margin-top:8px"><b>Ушли из групп в этом месяце</b><span class="num">${S.left}</span></div></div></div>
+  <div class="card" style="margin-top:16px"><h3>Мои группы</h3>${S.gs.map(g=>{const f=groupFill(g,ym);return `<div class="row"><b>${esc(g.name)}</b><span>${esc(branchName(g.branch))} · ${esc(g.days||"")} ${esc(g.time||"")} · ${f.listed}${f.cap?" / "+f.cap:""} уч.</span></div>`}).join("")||'<div class="empty">Групп пока нет — их назначает администратор</div>'}</div>`}
+/* --- 2. Смена педагога: отметка прихода на занятие --- */
+function tShiftView(){const who=myTeacher(),t=today(),ls=myLessons(who).filter(l=>l.date===t).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+  const ym=t.slice(0,7),hist=myLessons(who).filter(l=>(l.date||"").startsWith(ym)&&l.date<=t).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const tag=c=>c?`<span class="tag ${c.code==="late"?"red":c.code==="ontime"?"blue":""}">${c.label}</span>`:'<span class="sub">не отмечен</span>';
+  return `<div class="card" style="margin-bottom:16px"><h3>Сегодня · ${new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"})}</h3><div class="hint">Придя в зал, нажмите «Я на месте». Правило студии: приходить за ${arriveMin()} минут до начала занятия. Время отметки видит администратор.</div>
+  ${ls.map(l=>{const c=checkStatus(checkOf(l),l);return `<div class="row"><b>${esc(l.time||"")} · ${esc(l.group)}</b><span>${esc(branchName(l.branch))}${l.room?" · "+esc(l.room):""} ${c?tag(c)+(checkOf(l).out?` · ушёл ${esc(new Date(checkOf(l).out).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}))}`:` <button class="mini" data-tout="${l.id}">Занятие закончено</button>`):`<button class="btn" data-tin="${l.id}">Я на месте</button>`}</span></div>`}).join("")||'<div class="empty">Сегодня занятий нет</div>'}</div>
+  <div class="card"><h3>Приход на занятия в этом месяце</h3><div class="tablewrap"><table class="table"><thead><tr><th>Дата</th><th>Группа</th><th>Начало</th><th>Пришёл</th><th>Статус</th></tr></thead><tbody>
+  ${hist.map(l=>{const ch=checkOf(l),c=checkStatus(ch,l);return `<tr><td>${esc(l.date)}</td><td>${esc(l.group)}</td><td class="num">${esc(l.time||"")}</td><td class="num">${ch?esc(new Date(ch.at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})):"—"}</td><td>${tag(c)}</td></tr>`}).join("")||'<tr><td colspan="5" class="empty">Занятий пока не было</td></tr>'}</tbody></table></div></div>`}
+function wireTShift(){document.querySelectorAll("[data-tin]").forEach(b=>b.onclick=()=>{const l=db.lessons.find(x=>x.id===+b.dataset.tin);if(!l||checkOf(l))return;
+    db.checkins.push({id:nid(),lesson:l.id,teacher:myTeacher(),date:l.date,at:nowISO()});const c=checkStatus(checkOf(l),l);logAct("Педагог на месте: "+l.group+" · "+c.label);persist();render();toast(c.code==="late"?"Отмечено: "+c.label:"Отмечено, вы на месте "+c.label)});
+  document.querySelectorAll("[data-tout]").forEach(b=>b.onclick=()=>{const ch=db.checkins.find(c=>c.lesson===+b.dataset.tout);if(ch){ch.out=nowISO();persist();render();toast("Занятие отмечено завершённым")}})}
+/* Для администратора: кто из педагогов пришёл сегодня */
+function teachersTodayCard(){const t=today(),ls=db.lessons.filter(inBranch).filter(l=>l.date===t&&l.teacher).sort((a,b)=>(a.time||"").localeCompare(b.time||""));if(!ls.length)return"";
+  return `<div class="card" style="margin-top:16px"><h3>Педагоги сегодня</h3><div class="hint">Отметка «Я на месте» из кабинета педагога. Правило: за ${arriveMin()} мин до начала.</div>${ls.map(l=>{const c=checkStatus(checkOf(l),l);return `<div class="row"><b>${esc(l.time||"")} · ${esc(l.teacher)}</b><span>${esc(l.group)} · ${c?`<span class="tag ${c.code==="late"?"red":c.code==="ontime"?"blue":""}">${c.label}</span>`:'<span class="sub">ещё не отметился</span>'}</span></div>`}).join("")}</div>`}
+/* --- 3. Мои группы --- */
+function tGroupsView(){const ym=today().slice(0,7),gs=myGroups();
+  return gs.map(g=>{const f=groupFill(g,ym),st=db.students.filter(s=>s.group===g.name&&s.status!=="Архив").sort((a,b)=>a.name.localeCompare(b.name,"ru"));
+    return `<div class="card" style="margin-bottom:16px"><h3>${esc(g.name)}</h3><div class="hint">${esc(branchName(g.branch))} · ${esc(g.days||"")} ${esc(g.time||"")} · ${esc(g.age||"")} · ${f.listed}${f.cap?" из "+f.cap:""} учеников${f.fill!=null?" · заполняемость "+Math.round(f.fill*100)+"%":""}</div>
+    ${st.map(s=>{const m=db.memberships.filter(x=>x.student===s.id&&(!x.expires||x.expires>=today())&&x.total-x.used>0).sort((a,b)=>(a.expires||"9").localeCompare(b.expires||"9"))[0];
+      return `<div class="row"><b><a href="#" onclick="event.preventDefault();openProfile(${s.id})">${esc(s.name)}</a> ${s.status!=="Активен"?status(s.status):""}</b><span class="sub">${m?`осталось ${m.total-m.used} из ${m.total}${m.expires?" · до "+esc(m.expires):""}`:'<span style="color:var(--red)">нет абонемента</span>'}</span></div>`}).join("")||'<div class="empty">В группе пока нет учеников</div>'}</div>`}).join("")||'<div class="card"><div class="empty">За вами пока не закреплены группы — их назначает администратор в карточке группы</div></div>'}
+/* --- 4. Моё расписание (только просмотр) --- */
+function tSchedView(){const days=weekDays(schedWeek),ls=myLessons().filter(l=>l.date>=days[0]&&l.date<=days[6]),fmt=d=>new Date(d+"T12:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+  return `<div class="card"><div class="row" style="gap:8px;align-items:center;margin-bottom:8px"><h3 style="margin:0;flex:1">Моё расписание · ${fmt(days[0])} — ${fmt(days[6])}</h3><button class="mini" data-week="-1">← Неделя</button><button class="mini" data-week="0">Сегодня</button><button class="mini" data-week="1">Неделя →</button></div>
+  <div class="hint">Расписание заполняют администраторы. Если что-то не так — сообщите администратору.</div>
+  ${days.map((d,i)=>{const dl=ls.filter(l=>l.date===d).sort((a,b)=>(a.time||"").localeCompare(b.time||""));return `<div class="row" style="${d===today()?"background:var(--pale);border-radius:8px;padding-left:8px":""}"><b style="min-width:110px">${DOW[i]}, ${fmt(d)}</b><span style="flex:1;text-align:right">${dl.map(l=>`<span class="tag blue" style="margin:2px">${esc(l.time||"")} · ${esc(l.group)}${l.room?" · "+esc(l.room):""} · ${esc(branchName(l.branch))}</span>`).join(" ")||'<span class="sub">выходной</span>'}</span></div>`}).join("")}</div>`}
+function wireTSched(){document.querySelectorAll("[data-week]").forEach(b=>b.onclick=()=>{schedWeek=b.dataset.week==="0"?0:schedWeek+Number(b.dataset.week);render()})}
+/* --- 5. Посещения: журнал своих групп + таблица ученик · абонемент · отметка · дата · филиал --- */
+let tAttFrom="",tAttGroup="";
+function tAttView(){const gs=myGroups(),gn=new Set(gs.map(g=>g.name));if(!tAttFrom)tAttFrom=addDays(today(),-30);
+  if(gs.length&&!gs.some(g=>g.name===jGroup))jGroup=gs[0].name;
+  const rows=db.attendance.filter(a=>gn.has(a.group)&&(!tAttGroup||a.group===tAttGroup)&&(a.date||"")>=tAttFrom).sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,400);
+  const mOf=a=>{const m=a.membership?db.memberships.find(x=>x.id===a.membership):db.memberships.filter(x=>x.student===a.student&&(!x.expires||x.expires>=a.date)).sort((x,y)=>(x.expires||"9").localeCompare(y.expires||"9"))[0];return m?`${esc(m.title)} · ${m.used}/${m.total}${m.expires?" · до "+esc(m.expires):""}`:'<span style="color:var(--red)">нет</span>'};
+  return journalCard(gs)+`<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px"><h3 style="margin:0;flex:1">Посещения моих групп</h3><select class="field" id="tAttG" style="max-width:280px"><option value="">Все мои группы</option>${gs.map(g=>`<option ${g.name===tAttGroup?"selected":""}>${esc(g.name)}</option>`).join("")}</select><label class="sub">с</label><input class="field" type="date" id="tAttF" value="${tAttFrom}" style="max-width:160px"></div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Ученик</th><th>Абонемент</th><th>Отметка</th><th>Дата</th><th>Филиал</th></tr></thead><tbody>
+  ${rows.map(a=>{const s=db.students.find(x=>x.id===a.student);return `<tr><td><b>${esc(s?.name||"—")}</b><div class="sub">${esc(a.group||"")}</div></td><td class="sub">${mOf(a)}</td><td>${status(a.status)}</td><td class="num">${esc(a.date)}</td><td>${esc(branchName(a.branch))}</td></tr>`}).join("")||'<tr><td colspan="5" class="empty">Отметок за период нет</td></tr>'}</tbody></table></div></div>`}
+function wireTAtt(){wireJournal();$("tAttG").onchange=e=>{tAttGroup=e.target.value;render()};$("tAttF").onchange=e=>{tAttFrom=e.target.value||addDays(today(),-30);render()}}
 /* ===== Меню: Смена, Оплаты и сверка, Награды, Костюмы и пошив, Качество консультаций ===== */
 /* --- Смена администратора: открыть с наличными, итоги дня, закрыть со сверкой кассы --- */
 const isCashAcc=a=>/нал|касса|cash/i.test(a||"");
@@ -1791,7 +1862,7 @@ const FF=(name,label,input)=>`<div class="formfield"><label for="af_${name}">${l
 /* --- 1. Журнал группы: тренер отмечает всю группу за раз; занятие для расчёта зарплаты создаётся само --- */
 let jGroup="",jDate="";
 const J_ST=[["Присутствовал","Был"],["Опоздал","Опоздал"],["Отсутствовал","Не был"],["Уважительная причина","Уваж."]];
-function journalCard(){const gs=db.groups.filter(inBranch);if(!gs.length)return"";if(!gs.some(g=>g.name===jGroup))jGroup=gs[0].name;if(!jDate)jDate=today();
+function journalCard(list){const gs=list||db.groups.filter(inBranch);if(!gs.length)return"";if(!gs.some(g=>g.name===jGroup))jGroup=gs[0].name;if(!jDate)jDate=today();
   const g=gs.find(x=>x.name===jGroup),st=db.students.filter(s=>s.group===jGroup&&s.status!=="Архив").sort((a,b)=>a.name.localeCompare(b.name,"ru"));
   const cur=id=>db.attendance.find(a=>a.student===id&&a.date===jDate&&a.group===jGroup)?.status||"";
   return `<div class="card" style="margin-bottom:16px"><h3>Журнал группы</h3><div class="hint">Выберите группу и дату, отметьте всех и сохраните. Занятие в «Расписании» создастся само — по нему считается зарплата тренера, а с абонементов спишутся занятия.</div>
@@ -1890,7 +1961,7 @@ function birthdaysCard(){const t=new Date();t.setHours(0,0,0,0);const list=db.st
   if(!list.length)return"";const txt=x=>fillTpl(tpl("birthday").text,{name:x.s.name,branch:x.s.branch});
   return `<div class="card" style="margin-bottom:16px"><h3>Дни рождения на неделе · ${list.length}</h3>${list.map(x=>`<div class="row"><b>${esc(x.s.name)} · ${x.age} ${plural(x.age,"год","года","лет").replace(/^\d+\s/,"")}</b><span>${x.d===0?"<b>сегодня</b>":x.d===1?"завтра":"через "+x.d+" дн."} ${x.s.phone?`<a class="wa" href="${waURL(x.s.phone,txt(x))}" target="_blank" rel="noopener">Поздравить</a>`:""}</span></div>`).join("")}</div>`}
 
-function wireStudioSettings(){document.querySelectorAll("[data-skin]").forEach(b=>b.onclick=()=>{document.documentElement.dataset.skin=b.dataset.skin;try{localStorage.setItem("djigit_crm_skin",b.dataset.skin)}catch(e){}render()});$("stFreeze")&&($("stFreeze").onchange=e=>{settings.freezeMax=Number(e.target.value)||0;persist();toast("Сохранено")});$("stFam")&&($("stFam").onchange=e=>{settings.famDisc=Number(e.target.value)||0;persist();toast("Сохранено")})}
+function wireStudioSettings(){$("stArr")&&($("stArr").onchange=e=>{settings.arriveMin=Number(e.target.value)||0;persist();toast("Сохранено")});document.querySelectorAll("[data-skin]").forEach(b=>b.onclick=()=>{document.documentElement.dataset.skin=b.dataset.skin;try{localStorage.setItem("djigit_crm_skin",b.dataset.skin)}catch(e){}render()});$("stFreeze")&&($("stFreeze").onchange=e=>{settings.freezeMax=Number(e.target.value)||0;persist();toast("Сохранено")});$("stFam")&&($("stFam").onchange=e=>{settings.famDisc=Number(e.target.value)||0;persist();toast("Сохранено")})}
 /* --- 6. Накладки в расписании: тот же тренер или тот же зал в то же время --- */
 function lessonClash(o,selfId){if(!o.date||!o.time)return null;return db.lessons.find(l=>l.id!==selfId&&l.date===o.date&&l.time===o.time&&((o.teacher&&l.teacher===o.teacher)||(o.room&&l.room&&l.room===o.room&&String(l.branch)===String(o.branch))))}
 /* ===== Ещё из лучших CRM студий: рассылки, сетка расписания, лист ожидания, магазин, билеты ===== */
@@ -2393,7 +2464,7 @@ function addUser(){
   if(!phone||!name||!pass){toast("Заполните имя, номер и пароль");return}
   if(phone.length<11){toast("Введите номер полностью, например +7 701 000 00 00");return}
   if(users.some(x=>x.phone===phone)){toast("Такой номер уже есть");return}
-  users.push({phone,pass,name,role:g("nu_role")});
+  users.push({phone,pass,name,role:g("nu_role"),...(g("nu_teacher")?{teacher:g("nu_teacher")}:{})});
   logAct("Добавлен сотрудник: "+name+" ("+g("nu_role")+")");persist();render();toast("Сотрудник добавлен");
 }
 async function removeUser(phone){
@@ -2932,6 +3003,11 @@ document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLower
 $("themeBtn").onclick=()=>{$("mePop").classList.remove("on");setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark")};
 $("cmdBtn").onclick=()=>{$("mePop").classList.remove("on");openCmd()};
 setTheme(document.documentElement.dataset.theme||"light");
+/* Кабинет педагога подключается последним: поверх всех остальных обёрток разделов */
+views["Профиль"]=profileView;after["Профиль"]=()=>{$("profT")&&($("profT").onchange=e=>{profTeacher=e.target.value;render()})};
+{const pairs=[["Смена",tShiftView,wireTShift],["Группы",tGroupsView,null],["Расписание",tSchedView,wireTSched],["Посещаемость",tAttView,wireTAtt]];
+ pairs.forEach(([k,v,w])=>{const ov=views[k],ow=after[k];views[k]=()=>isTeacher()?v():ov();after[k]=()=>isTeacher()?(w&&w()):(ow&&ow())})}
+{const _sv=views["Смена"];views["Смена"]=()=>_sv()+(isTeacher()?"":teachersTodayCard())}
 (async function boot(){
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
