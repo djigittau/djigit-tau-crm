@@ -9,7 +9,7 @@
   .mid{font-size:52px;font-weight:600;line-height:1.25;text-shadow:0 4px 30px rgba(0,0,0,.7)}
   .gold{color:#E2C27A}
   .line{width:220px;height:3px;margin:28px auto;background:linear-gradient(90deg,transparent,#D9B568,transparent)}
-  .cta{display:inline-block;margin-top:40px;padding:28px 60px;border:3px solid #D9B568;border-radius:80px;font-size:46px;font-weight:700;color:#11100E;background:linear-gradient(180deg,#F0D592,#C8A55F)}
+  .cta{display:inline-block;margin-top:26px;padding:26px 60px;border:3px solid #D9B568;border-radius:80px;font-size:46px;font-weight:700;color:#11100E;background:linear-gradient(180deg,#F0D592,#C8A55F)}
   .vign{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(0,0,0,.65) 100%)}
 </style>
 <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
@@ -25,7 +25,11 @@ import {FontLoader} from 'three/addons/loaders/FontLoader.js';
 import {TextGeometry} from 'three/addons/geometries/TextGeometry.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 
-const W=1080,H=1920;
+const Q=new URLSearchParams(location.search);const W=1080,H=+(Q.get('h')||1920);
+const L=H>1500?{o1:300,o2:1260,o3:1230,o4:1200,look:-3}:{o1:130,o2:1000,o3:960,o4:930,look:-3.5};
+document.documentElement.style.height=document.body.style.height=H+'px';
+for(const k of ['o1','o2','o3','o4'])document.getElementById(k).style.top=L[k]+'px';
+if(Q.get('cover')){document.getElementById('o1').innerHTML='<div class="mid">Студия<br><span class="gold">кавказского танца</span></div><div class="line"></div><div class="kick">Лезгинка · дети и взрослые</div>';}
 const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(1);renderer.setSize(W,H);
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
@@ -129,7 +133,7 @@ window.renderAt=function(t){
   const R=THREE.MathUtils.lerp(150,84,p1)-cl(t,6.5,15)*8, y=THREE.MathUtils.lerp(16,24,p1);
   const orbit=(ease(cl(t,6.5,15))-.5)*.5;
   cam.position.set(Math.sin(orbit)*R+Math.sin(t*.4)*.6, y+Math.sin(t*.7)*.3, -60+Math.cos(orbit)*R);
-  cam.lookAt(0,THREE.MathUtils.lerp(12,27,p1),-60);
+  cam.lookAt(0,THREE.MathUtils.lerp(12,27+L.look,p1),-60);
 
   // logo reveal
   const r=ease(cl(t,3.2,6.2));
@@ -153,6 +157,7 @@ window.renderAt=function(t){
   set('o2',fade(t,6.4,7.2,8.8,9.4),30);
   set('o3',fade(t,9.4,10.2,11.8,12.4),30);
   set('o4',cl(t,12.6,13.4),30);
+  if(Q.get('cover')){const e=document.getElementById('o1');e.style.opacity=1;e.style.transform='none';e.style.top=(L.o3-10)+'px';document.getElementById('o2').style.opacity=0;}
   renderer.render(scene,cam);
 };
 </script></body></html>
