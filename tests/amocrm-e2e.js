@@ -189,8 +189,42 @@ await step('Данные сохраняются после перезагруз�
   await p.waitForTimeout(800);await p.reload();await p.waitForTimeout(800);
   ok(await E(()=>db.leads.some(x=>x.name==='Тестова Зарина'&&x.stage==='Купили абонемент'&&x.manager==='Айгерим')),'данные потерялись');
 });
-await step('Роль «Отдел продаж»: воронка работает, удаления нет',async()=>{
-  await E(()=>logout());await login(p,3);await go("Заявки и воронка");
+await step('Вход: на экране только руководитель, старые демо-входы убраны',async()=>{
+  await E(()=>logout());await p.waitForTimeout(300);
+  eq(await p.locator('[data-fill]').count(),1,'кнопок входа');
+  // старые сохранённые данные с 5 демо-входами чистятся при запуске
+  await E(()=>{users.push({phone:"70000000004",pass:"4444",name:"Менеджер",role:"Отдел продаж"},{phone:"77770000000",pass:"9999",name:"Второй",role:"Руководитель"});persistNow()});
+  await p.reload();await p.waitForTimeout(800);
+  const u=await E(()=>users.map(x=>x.phone+':'+x.role));
+  ok(!u.some(x=>x.startsWith('70000000004')),'старый демо-вход остался: '+u);
+  eq(u.filter(x=>x.endsWith('Руководитель')).length,1,'руководителей');
+  await E(()=>{users=users.filter(x=>x.phone!=="77770000000");persistNow()});await p.reload();await p.waitForTimeout(600);
+});
+await step('Руководитель создаёт аккаунт; второго руководителя создать нельзя',async()=>{
+  await login(p,0);await go("Команда");
+  eq(await p.locator('#nu_role option',{hasText:'Руководитель'}).count(),0,'роль «Руководитель» в списке');
+  await p.fill('#nu_name','Бекзат');await p.fill('#nu_phone','+7 705 111 22 33');await p.fill('#nu_pass','12');
+  await p.selectOption('#nu_role','Отдел продаж');await p.click('[data-act="adduser"]');await p.waitForTimeout(200);
+  ok(!(await E(()=>users.some(x=>x.phone==="77051112233"))),'создан с паролем из 2 символов');
+  await p.fill('#nu_pass','bek2026');await p.click('[data-act="adduser"]');await p.waitForTimeout(300);
+  eq(await E(()=>users.find(x=>x.phone==="77051112233")?.role),'Отдел продаж','роль');
+  await p.click('[data-eduser="77051112233"]');await p.fill('#af_pass','bek2027');await p.locator('.modalbg form').last().locator('button.btn:not(.secondary)').click();await p.waitForTimeout(300);
+  eq(await E(()=>users.find(x=>x.phone==="77051112233").pass),'bek2027','новый пароль');
+});
+await step('Руководитель меняет свой пароль — подсказка на входе исчезает',async()=>{
+  await p.click('[data-act="mylogin"]');await p.fill('#af_pass','Boss-777');await p.fill('#af_pass2','Boss-777');
+  await p.locator('.modalbg form').last().locator('button.btn:not(.secondary)').click();await p.waitForTimeout(400);
+  eq(await E(()=>me.pass),'Boss-777','пароль');
+  await E(()=>logout());await p.waitForTimeout(300);
+  eq(await p.locator('[data-fill]').count(),0,'пароль руководителя всё ещё виден на входе');
+  await p.fill('#lg_p','+70000000001');await p.fill('#lg_w','1111');await p.click('#lgForm button[type=submit]');await p.waitForTimeout(300);
+  ok(await p.locator('#login').count(),'вошёл со старым паролем');
+});
+await step('Сотрудник «Отдел продаж» входит: воронка есть, «Сотрудники» и удаления нет',async()=>{
+  await p.fill('#lg_p','+7 705 111 22 33');await p.fill('#lg_w','bek2027');await p.click('#lgForm button[type=submit]');await p.waitForTimeout(500);
+  eq(await E(()=>me?.name),'Бекзат','вход');
+  eq(await p.locator('#nav [data-page="Команда"]').count(),0,'раздел «Сотрудники» виден');
+  await go("Заявки и воронка");
   ok(await p.locator('.columns .lead').count()>0,'нет карточек');await p.locator('.columns .lead').first().click();await p.waitForTimeout(300);
   eq(await p.locator('#deal [data-del]').count(),0,'кнопка удаления видна');await p.keyboard.press('Escape');
 });

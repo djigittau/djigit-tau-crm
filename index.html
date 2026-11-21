@@ -656,12 +656,14 @@ const DEFAULT_SETTINGS={robots:{},templates:{},payLink:"",sla:15,plan:0,accounts
 let settings=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 let panelMonth=new Date().toISOString().slice(0,7),panelCompare=[];
 const UKEY="djigit_crm_v2",SKEY="djigit_crm_sess";
-const DEMO_USERS=[
-  {phone:"70000000001",pass:"1111",name:"Камран",role:"Руководитель"},
-  {phone:"70000000002",pass:"2222",name:"Администратор",role:"Администратор"},
-  {phone:"70000000003",pass:"3333",name:"Вугар",role:"Тренер"},
-  {phone:"70000000004",pass:"4444",name:"Менеджер",role:"Отдел продаж"},
-  {phone:"70000000005",pass:"5555",name:"Преподаватель",role:"Преподаватель"}];
+/* В CRM один руководитель. Остальные аккаунты он создаёт сам в разделе «Сотрудники» */
+const DEMO_USERS=[{phone:"70000000001",pass:"1111",name:"Камран",role:"Руководитель"}];
+/* Старые демо-входы, которые раньше создавались сами: убираем их один раз при запуске */
+const OLD_DEMO=["70000000002:2222","70000000003:3333","70000000004:4444","70000000005:5555"];
+const isBossDefault=u=>u.role==="Руководитель"&&u.phone===DEMO_USERS[0].phone&&u.pass===DEMO_USERS[0].pass;
+function oneBoss(){let ch=false;const n=users.length;users=users.filter(u=>!OLD_DEMO.includes(u.phone+":"+u.pass));if(users.length!==n)ch=true;
+  const b=users.filter(u=>u.role==="Руководитель");b.slice(1).forEach(u=>{u.role="Администратор";ch=true});
+  if(!b.length){users.unshift({...DEMO_USERS[0]});ch=true}return ch}
 
 let db={},users=[],role=null,me=null,current="Главная",editing=null,formType="";
 COLS.forEach(k=>db[k]=[]);
@@ -770,7 +772,9 @@ const views={
 "Посещаемость":()=>journalCard()+`<div class="notice">Отметить присутствие можно кнопкой «Отметить» в разделе «Ученики» или кнопкой «+ Отметка» здесь.<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="deductSw" ${settings.deduct===false?"":"checked"}> Списывать занятие с абонемента при отметке «Присутствовал» или «Опоздал». Когда занятия кончились, ученик получает статус «Нужна оплата».</label></div>${tablePage("attendance",["Дата","Ученик","Группа","Филиал","Статус"],x=>[esc(x.date),esc(db.students.find(s=>s.id===x.student)?.name||"—"),esc(x.group||"—"),esc(branchName(x.branch)),status(x.status)])}`,
 "Расписание":()=>{const ls=db.lessons.filter(inBranch).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
   return `<div class="card"><h3>Занятия</h3><div class="hint">Добавляйте занятия кнопкой «+ Занятие»</div>${ls.map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher||"—")} · ${esc(x.room||"—")} <button class="mini" data-edit-any="lessons:${x.id}">Изменить</button>${isBoss()?` <button class="mini del" data-del-any="lessons:${x.id}">Удалить</button>`:""}</span></div>`).join("")||'<div class="empty">Занятий пока нет</div>'}</div>`},
-"Команда":()=>`<div class="notice">Демо: пароли хранятся открыто в этом браузере. В рабочей версии вход должен проверять сервер.</div>
+"Команда":()=>`<div class="notice">Руководитель в CRM один — это вы. Аккаунты сотрудников создаёте только вы: дайте человеку номер и пароль, он войдёт со своими правами. Пароли хранятся в этом браузере; в рабочей версии вход должен проверять сервер.</div>
+  ${users.some(isBossDefault)?`<div class="notice" style="background:var(--red-bg);color:var(--red)">У вас стандартный пароль 1111, и он виден на экране входа. Смените его в блоке «Мой вход».</div>`:""}
+  <div class="card" style="margin-bottom:16px"><h3>Мой вход</h3><div class="hint">Руководитель · ${esc(me.name)} · +${esc(me.phone)}</div><div class="modalfoot" style="justify-content:flex-start"><button class="btn secondary" data-act="mylogin">Изменить имя, номер или пароль</button></div></div>
   <div class="card"><h3>Добавить сотрудника</h3><div class="hint">Сотрудник входит по номеру телефона и паролю</div><div class="formgrid">
   <div class="formfield"><label for="nu_name">Имя</label><input class="field" id="nu_name"></div>
   <div class="formfield"><label for="nu_phone">Номер телефона</label><input class="field" id="nu_phone" inputmode="tel" placeholder="+7 ..."></div>
@@ -778,7 +782,7 @@ const views={
   <div class="formfield"><label for="nu_role">Роль</label><select class="field" id="nu_role">${Object.keys(ROLES).filter(r=>r!=="Руководитель").map(r=>`<option>${r}</option>`).join("")}</select></div>
   <div class="formfield"><label for="nu_teacher">Карточка педагога (для тренера / преподавателя)</label><select class="field" id="nu_teacher"><option value="">—</option>${db.teachers.map(t=>`<option>${esc(t.name)}</option>`).join("")}</select></div></div>
   <div class="modalfoot"><button class="btn" data-act="adduser">Добавить сотрудника</button></div></div>
-  <div class="card" style="margin-top:16px"><h3>Сотрудники</h3><div class="hint">${plural(users.length,"человек","человека","человек")}</div>${users.map(u=>`<div class="row"><b>${esc(u.name)}</b><span>${u.role==="Тренер"||u.role==="Преподаватель"?`<select class="field" data-uteach="${esc(u.phone)}" style="width:auto;display:inline-block;padding:3px 6px;font-size:12.5px" title="Карточка педагога"><option value="">педагог: по имени</option>${db.teachers.map(t=>`<option ${u.teacher===t.name?"selected":""}>${esc(t.name)}</option>`).join("")}</select> `:""}${esc(u.role)} · +${esc(u.phone)}${u.phone!==me.phone&&u.role!=="Руководитель"?` <button class="mini del" data-deluser="${esc(u.phone)}">Убрать</button>`:""}</span></div>`).join("")}</div>`,
+  <div class="card" style="margin-top:16px"><h3>Сотрудники</h3><div class="hint">${plural(users.length,"человек","человека","человек")}</div>${users.map(u=>`<div class="row"><b>${esc(u.name)}</b><span>${u.role==="Тренер"||u.role==="Преподаватель"?`<select class="field" data-uteach="${esc(u.phone)}" style="width:auto;display:inline-block;padding:3px 6px;font-size:12.5px" title="Карточка педагога"><option value="">педагог: по имени</option>${db.teachers.map(t=>`<option ${u.teacher===t.name?"selected":""}>${esc(t.name)}</option>`).join("")}</select> `:""}${esc(u.role)} · +${esc(u.phone)}${u.phone!==me.phone&&u.role!=="Руководитель"?` <button class="mini" data-eduser="${esc(u.phone)}">Изменить</button> <button class="mini del" data-deluser="${esc(u.phone)}">Убрать</button>`:""}</span></div>`).join("")}</div>`,
 "Журнал":()=>`<div class="card"><h3>Действия сотрудников</h3><div class="hint">Последние 300 записей. Видит только руководитель.</div>${db.log.map(x=>`<div class="row"><b>${esc(x.t)}</b><span>${esc(x.who?x.who+" · ":"")}${esc(x.role)} · ${esc(x.at)}</span></div>`).join("")||'<div class="empty">Пока ничего не менялось</div>'}</div>`,
 "Настройки":()=>`<div class="card" style="margin-bottom:16px"><h3>Выгрузка в Excel</h3><div class="hint">Один файл .xlsx: каждый раздел на своём листе (ученики, заявки, продления, задачи, абонементы, финансы, посещения, расписание и другие). Учитывается выбранный филиал. Таблицу одного раздела можно скачать кнопкой «Excel» в самом разделе.</div>
   <button class="btn" data-act="xlsall">Выгрузить всё в Excel</button></div>
@@ -1051,7 +1055,7 @@ const after={
   "Главная":wireHome,
   "Панель владельца":wirePanel,
   "Заявки и воронка":wirePipeline,
-  "Команда":()=>{document.querySelectorAll("[data-uteach]").forEach(x=>x.onchange=()=>{const u=users.find(y=>y.phone===x.dataset.uteach);if(u){if(x.value)u.teacher=x.value;else delete u.teacher;persist();toast("Вход связан с карточкой педагога")}});document.querySelector('[data-act="adduser"]').onclick=addUser;document.querySelectorAll("[data-deluser]").forEach(b=>b.onclick=()=>removeUser(b.dataset.deluser))},
+  "Команда":()=>{document.querySelectorAll("[data-uteach]").forEach(x=>x.onchange=()=>{const u=users.find(y=>y.phone===x.dataset.uteach);if(u){if(x.value)u.teacher=x.value;else delete u.teacher;persist();toast("Вход связан с карточкой педагога")}});document.querySelector('[data-act="adduser"]').onclick=addUser;document.querySelectorAll("[data-deluser]").forEach(b=>b.onclick=()=>removeUser(b.dataset.deluser));document.querySelectorAll("[data-eduser]").forEach(b=>b.onclick=()=>editUser(b.dataset.eduser));document.querySelector('[data-act="mylogin"]').onclick=editMyLogin},
   "Настройки":()=>{document.querySelector('[data-act="encload"]')?.addEventListener("click",()=>{encLater=false;showEncPrompt()});document.querySelector('[data-act="xlsall"]').onclick=exportExcelAll;document.querySelector('[data-act="export"]').onclick=exportData;document.querySelector('[data-act="copy"]').onclick=copyData;$("impFile").onchange=importData;document.querySelector('[data-act="reset"]')?.addEventListener("click",resetDemo);document.querySelector('[data-act="wipe"]')?.addEventListener("click",wipeData);if($("xlsFile"))$("xlsFile").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;f.text().then(async t=>{let d;try{d=JSON.parse(t);if(!d.students||!d.payments)throw 0}catch(_){toast("Это не файл данных студии");return}
   if(db.students.some(x=>x.src==="xls")&&!await ask("Заменить ранее загруженные данные студии? Записи, добавленные вручную, останутся.","Заменить"))return;
   XLS=d;importXls();persist();init();toast("Данные студии загружены")})};if($("csvFile")){$("csvFile").onchange=importCSV;document.querySelector('[data-act="saveacc"]').onclick=saveAccounts}},
@@ -2502,11 +2506,11 @@ function loginScreen(){
   $("login")?.remove();
   const d=document.createElement("div");d.id="login";
   d.innerHTML=`<form class="modal" id="lgForm"><img class="lglogo" src="${document.querySelector(".brand .lg-light").src}" alt="DJIGIT TAU — студия кавказского танца"><h2 style="text-align:center;font-size:18px">Вход в CRM студии</h2>
-  <div class="notice">Демо: пароли не защищают данные. Нажмите на аккаунт ниже, чтобы подставить номер и пароль.</div>
+  ${users.some(isBossDefault)?`<div class="notice">Первый вход руководителя: нажмите на номер ниже. Потом смените пароль в разделе «Сотрудники» — эта подсказка исчезнет.</div>`:""}
   <div class="formfield"><label for="lg_p">Номер телефона</label><input class="field" id="lg_p" inputmode="tel" placeholder="+7 ..." autocomplete="username"></div>
   <div class="formfield"><label for="lg_w">Пароль</label><input class="field" id="lg_w" type="password" autocomplete="current-password"></div>
   <div class="modalfoot"><button class="btn" type="submit">Войти</button></div>
-  <div style="margin-top:12px">${DEMO_USERS.map(u=>`<div class="row"><b>${esc(u.role)}</b><button type="button" class="mini" data-fill="${u.phone}:${u.pass}">+${u.phone} · ${u.pass}</button></div>`).join("")}</div></form>`;
+  ${users.some(isBossDefault)?`<div style="margin-top:12px">${DEMO_USERS.map(u=>`<div class="row"><b>${esc(u.role)}</b><button type="button" class="mini" data-fill="${u.phone}:${u.pass}">+${u.phone} · ${u.pass}</button></div>`).join("")}</div>`:`<div class="hint" style="margin-top:12px;text-align:center">Нет входа? Попросите руководителя создать аккаунт.</div>`}</form>`;
   document.body.append(d);
   $("lgForm").onsubmit=doLogin;
   d.querySelectorAll("[data-fill]").forEach(b=>b.onclick=()=>{const[p,w]=b.dataset.fill.split(":");fillLogin(p,w)});
@@ -2520,16 +2524,35 @@ function enter(u){
   init();setTimeout(checkEncData,300);
 }
 function addUser(){
+  if(!isBoss())return;
   const g=id=>$(id).value.trim();
   const phone=nd(g("nu_phone")),name=g("nu_name"),pass=g("nu_pass");
   if(!phone||!name||!pass){toast("Заполните имя, номер и пароль");return}
   if(phone.length<11){toast("Введите номер полностью, например +7 701 000 00 00");return}
   if(users.some(x=>x.phone===phone)){toast("Такой номер уже есть");return}
+  if(pass.length<4){toast("Пароль — минимум 4 символа");return}
+  if(!ROLES[g("nu_role")]){toast("Руководитель в CRM один");return}
   users.push({phone,pass,name,role:g("nu_role"),...(g("nu_teacher")?{teacher:g("nu_teacher")}:{})});
   logAct("Добавлен сотрудник: "+name+" ("+g("nu_role")+")");persist();render();toast("Сотрудник добавлен");
 }
+const STAFF_ROLES=()=>Object.keys(ROLES).filter(r=>r!=="Руководитель");
+async function editUser(phone){
+  if(!isBoss())return;const u=users.find(x=>x.phone===phone);if(!u||u.role==="Руководитель")return;
+  const v=await askForm("Сотрудник: "+u.name,FF("name","Имя",`<input class="field" value="${esc(u.name)}" required>`)+FF("role","Роль",`<select class="field">${STAFF_ROLES().map(r=>`<option ${r===u.role?"selected":""}>${r}</option>`).join("")}</select>`)+FF("pass","Новый пароль (пусто — оставить прежний)",`<input class="field" autocomplete="new-password">`));
+  if(!v)return;if(!v.name){toast("Введите имя");return}if(v.pass&&v.pass.length<4){toast("Пароль — минимум 4 символа");return}if(!STAFF_ROLES().includes(v.role))return;
+  u.name=v.name;u.role=v.role;if(v.pass)u.pass=v.pass;if(u.role!=="Тренер"&&u.role!=="Преподаватель")delete u.teacher;
+  logAct("Изменён сотрудник: "+u.name+" ("+u.role+")"+(v.pass?", новый пароль":""));persist();render();toast(v.pass?"Сохранено, пароль изменён":"Сохранено")}
+async function editMyLogin(){
+  if(!isBoss())return;
+  const v=await askForm("Мой вход",FF("name","Имя",`<input class="field" value="${esc(me.name)}" required>`)+FF("phone","Номер телефона",`<input class="field" inputmode="tel" value="+${esc(me.phone)}" required>`)+FF("pass","Новый пароль (пусто — оставить прежний)",`<input class="field" type="password" autocomplete="new-password">`)+FF("pass2","Повторите новый пароль",`<input class="field" type="password" autocomplete="new-password">`));
+  if(!v)return;const phone=nd(v.phone);
+  if(!v.name){toast("Введите имя");return}if(phone.length<11){toast("Введите номер полностью");return}
+  if(users.some(x=>x!==me&&x.phone===phone)){toast("Этот номер уже занят другим сотрудником");return}
+  if(v.pass&&v.pass.length<4){toast("Пароль — минимум 4 символа");return}if(v.pass!==v.pass2){toast("Пароли не совпадают");return}
+  me.name=v.name;me.phone=phone;if(v.pass)me.pass=v.pass;try{sessionStorage.setItem(SKEY,phone)}catch(e){}
+  logAct("Руководитель изменил свой вход");persist();init();toast(v.pass?"Сохранено, пароль изменён":"Сохранено")}
 async function removeUser(phone){
-  const u=users.find(x=>x.phone===phone);if(!u)return;
+  if(!isBoss())return;const u=users.find(x=>x.phone===phone);if(!u||u.role==="Руководитель")return;
   if(!await ask(`Убрать сотрудника «${u.name}»? Он больше не сможет войти.`,"Убрать"))return;
   users=users.filter(x=>x.phone!==phone);logAct("Убран сотрудник: "+u.name);persist();render();toast("Сотрудник убран");
 }
@@ -3073,7 +3096,7 @@ views["Профиль"]=profileView;after["Профиль"]=()=>{$("profT")&&($(
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
   else{cleanSeed();users=DEMO_USERS.map(u=>({...u}));persist()}
-  if(!settings.teacherAcc){settings.teacherAcc=1;if(!users.some(u=>u.role==="Преподаватель")&&!users.some(u=>u.phone==="70000000005")){users.push({...DEMO_USERS.find(u=>u.role==="Преподаватель")});persist()}}
+  settings.teacherAcc=1;if(oneBoss())persist();
   db.leads.forEach(l=>{if(l.price===undefined)l.price=0;l.pipeline=l.pipeline||"sales";l.feed=l.feed||[];if(l.stage===LOST&&!l.reason)l.reason="Другое"});
   settings.robots=settings.robots||{};settings.templates=settings.templates||{};if(!settings.sla)settings.sla=15;
   if(XLS&&settings.xlsVersion!==XLS.v){importXls();persist()}
