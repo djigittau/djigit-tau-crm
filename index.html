@@ -401,6 +401,10 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .brand{border-bottom:1px solid #EEDFB8}.brand img{width:170px}
 .brand .lg-dark{display:none}
 .navh{padding:14px 22px 4px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#B39A68}
+summary.navh{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;user-select:none}summary.navh::-webkit-details-marker{display:none}
+summary.navh::before{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+details[open]>summary.navh::before{transform:rotate(45deg)}summary.navh:hover{color:inherit;opacity:.85}
+.navn{margin-left:auto;font-size:10px;opacity:.7;letter-spacing:0}
 .nav button{color:#4E4230;margin:1px 10px;width:calc(100% - 20px);padding:9px 12px;border-radius:10px;font-size:14px}
 .nav button svg.i{color:#B08A3E}
 .nav button:hover{background:rgba(255,255,255,.7);color:#2A2418}
@@ -604,8 +608,9 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-const sections=[["Кабинет",["Профиль"]],["Продажи",["Главная","Смена","Заявки и воронка","Продления","Задачи","Рассылки","Качество консультаций","ИИ-помощник","Автоматизация"]],["Студия",["Ученики","Группы","Расписание","Посещаемость","Абонементы","Концерты","Костюмы и пошив","Товары и награды","Тренеры","Филиалы"]],["Деньги",["Финансы","Оплаты и сверка","Экономика","Таблица УО","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
-const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники"};
+/* Первая группа без заголовка — то, чем пользуются каждый день; остальные сворачиваются */
+const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Расписание"]],["Продажи",["Смена","Продления","Рассылки","Качество консультаций","Автоматизация","ИИ-помощник"]],["Студия",["Группы","Посещаемость","Абонементы","Концерты","Костюмы и пошив","Товары и награды","Тренеры","Профиль","Филиалы"]],["Деньги",["Финансы","Оплаты и сверка","Экономика","Панель владельца","Аналитика","Таблица УО"]],["Система",["Команда","Журнал","Настройки"]]];
+const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники","Качество консультаций":"Качество","Костюмы и пошив":"Костюмы","Товары и награды":"Товары","Оплаты и сверка":"Оплаты","Панель владельца":"Сводка","Профиль":"Кабинет педагога"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   pipe:'<rect x="3" y="4" width="5" height="16" rx="1.3"/><rect x="9.5" y="4" width="5" height="11" rx="1.3"/><rect x="16" y="4" width="5" height="7" rx="1.3"/>',
@@ -677,6 +682,8 @@ function branchName(id){return db.branches.find(b=>b.id==id)?.name||"—"}
 function inBranch(x){const v=$("branchFilter").value||"all";return v==="all"||String(x.branch)===v}
 function toast(s){const t=$("toast");t.textContent=s;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),2600)}
 function allowed(n){return !ROLES[role]||ROLES[role].includes(n)}
+/* Стартовый раздел: первый в списке роли (у руководителя — Главная) */
+const homePage=()=>ROLES[role]?.[0]||"Главная";
 function isBoss(){return role==="Руководитель"}
 function nid(){return Date.now()*1000+Math.floor(Math.random()*1000)}
 function logAct(t){db.log.unshift({id:nid(),t,role,who:me?.name||"",at:new Date().toLocaleString("ru-RU")});db.log=db.log.slice(0,300)}
@@ -704,14 +711,19 @@ function ask(text,yes="Удалить"){return new Promise(res=>{$("askText").te
 function init(){
   if($("brandWho"))$("brandWho").textContent=role+" · "+(me.name||"");
   $("meName").textContent=me.name;$("meRole").textContent=role;$("meAv").textContent=(me.name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  $("nav").innerHTML=(isTeacher()?[["Мой кабинет",["Профиль","Смена","Группы","Расписание","Посещаемость"]]]:sections).map(g=>{const items=g[1].filter(allowed);if(!items.length)return"";
-    return (g[0]?`<div class="navh">${g[0]}</div>`:"")+items.map(n=>`<button data-page="${n}">${ico(n)}<span>${lbl(n)}</span>${n==="Заявки и воронка"?`<span class="cnt" id="leadCnt"></span>`:n==="Задачи"?`<span class="cnt" id="taskCnt" style="background:#E5675E;color:#fff"></span>`:""}</button>`).join("")}).join("");
+  const groups=isTeacher()?[["Мой кабинет",["Профиль","Смена","Группы","Расписание","Посещаемость"]]]:sections;
+  // Короткое меню (до 9 пунктов) показываем целиком; длинное — группы сворачиваются
+  const fold=groups.flatMap(g=>g[1]).filter(allowed).length>9;
+  const btn=n=>`<button data-page="${n}">${ico(n)}<span>${lbl(n)}</span>${n==="Заявки и воронка"?`<span class="cnt" id="leadCnt"></span>`:n==="Задачи"?`<span class="cnt" id="taskCnt" style="background:#E5675E;color:#fff"></span>`:""}</button>`;
+  $("nav").innerHTML=groups.map(g=>{const items=g[1].filter(allowed);if(!items.length)return"";
+    if(fold&&g[0])return `<details class="navg"><summary class="navh">${g[0]}<span class="navn">${items.length}</span></summary>${items.map(btn).join("")}</details>`;
+    return (g[0]?`<div class="navh">${g[0]}</div>`:"")+items.map(btn).join("")}).join("");
   $("nav").querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
   const cur=$("branchFilter").value||"all";
   $("branchFilter").innerHTML='<option value="all">Все филиалы</option>'+db.branches.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("");
   $("branchFilter").value=db.branches.some(b=>String(b.id)===cur)?cur:"all";
   $("expBtn").style.display="";$("toSettings").style.display=allowed("Настройки")?"":"none";
-  if(!allowed(current))current=sections.flatMap(g=>g[1]).find(allowed);
+  if(!allowed(current))current=homePage();
   render();
 }
 function go(n){current=n;closeSide();render();window.scrollTo(0,0)}
@@ -729,6 +741,7 @@ function render(){
   runRobots();updateBell();
   $("subtitle").textContent=subs[current]||"";
   document.querySelectorAll("[data-page]").forEach(b=>{b.classList.toggle("active",b.dataset.page===current);b.setAttribute("aria-current",b.dataset.page===current?"page":"false")});
+  document.querySelector("nav button.active")?.closest("details")?.setAttribute("open","");
   const ft=FORM_OF[current];
   $("primary").style.display=ft&&!isTeacher()&&(current!=="Филиалы"||isBoss())?"":"none";
   $("primary").textContent="+ "+({student:"Ученик",lead:"Заявка",group:"Группа",teacher:"Тренер",branch:"Филиал",membership:"Абонемент",payment:"Операция",attendance:"Отметка",lesson:"Занятие",planned:"Платёж"}[ft]||"Добавить");
@@ -2520,7 +2533,7 @@ function enter(u){
   try{sessionStorage.setItem(SKEY,u.phone)}catch(e){}
   me=u;role=u.role;
   $("login")?.remove();
-  current=sections.flatMap(g=>g[1]).find(allowed);
+  current=homePage();
   init();setTimeout(checkEncData,300);
 }
 function addUser(){
