@@ -1107,7 +1107,7 @@ function pFilter(arr){const q=PF.q.trim().toLowerCase(),dq=q.replace(/\D/g,""),t
     if(PF.source&&(x.source||"")!==PF.source)return false;if(PF.manager&&(x.manager||"")!==PF.manager)return false;if(PF.tag&&!(x.tags||[]).includes(PF.tag))return false;
     if(PF.task){const t=nextTask(x.id);if(PF.task==="late"&&!(t&&isLateT(t)))return false;if(PF.task==="none"&&t)return false;if(PF.task==="today"&&!(t&&t.due.slice(0,10)===t0))return false}
     return true});
-  const by={new:(a,b)=>(b.updated||b.created||"").localeCompare(a.updated||a.created||""),price:(a,b)=>Number(b.price||0)-Number(a.price||0),stale:(a,b)=>daysIn(b)-daysIn(a),name:(a,b)=>String(a.name).localeCompare(String(b.name),"ru"),ai:(a,b)=>(b.aiScore??-1)-(a.aiScore??-1)}[PF.sort]||(()=>0);
+  const by={new:(a,b)=>(b.updated||b.created||"").localeCompare(a.updated||a.created||"")||(b.stageAt||b.createdAt||"").localeCompare(a.stageAt||a.createdAt||"")||(b.id-a.id),price:(a,b)=>Number(b.price||0)-Number(a.price||0),stale:(a,b)=>daysIn(b)-daysIn(a),name:(a,b)=>String(a.name).localeCompare(String(b.name),"ru"),ai:(a,b)=>(b.aiScore??-1)-(a.aiScore??-1)}[PF.sort]||(()=>0);
   return arr.sort(by)}
 const pActive=()=>["q","source","manager","tag","task"].some(k=>PF[k]);
 function pToolbar(coll){const uniq=f=>[...new Set(coll.flatMap(f).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ru"));
@@ -1264,7 +1264,12 @@ const DEFAULT_TPL={
   pay:{name:"Ссылка на оплату",text:"{имя}, ссылка для оплаты абонемента на {сумма}: {ссылка_оплаты}. После оплаты пришлите, пожалуйста, чек."}
 };
 const tpl=k=>({...DEFAULT_TPL[k],...(settings.templates[k]||{})});
-function fillTpl(text,x){const fn=(x.name||"").split(/\s+/).find(w=>w&&w[0]===w[0].toUpperCase()&&!/[а-я]+ов[а]?$|ев[а]?$|ин[а]?$/i.test(w))||(x.name||"").split(" ")[0];
+/* Имя для обращения: «Алиева Сабина» → Сабина, «Тестова Зарина» → Зарина, «Пушкин Иван» → Иван.
+   -ов/-ев/-ский/-ян… — точно фамилия; -ин/-ина/-ын — фамилия, только если рядом есть другое слово (Зарина, Амина, Мадина — имена) */
+function firstName(name){const ws=String(name||"").replace(/\(.*?\)/g," ").split(/\s+/).filter(w=>/^[А-ЯЁA-Z]/.test(w));
+  const strong=w=>/(ов|ова|ев|ева|ёв|ёва|ский|ская|цкий|цкая|енко|ян|янц|швили|дзе|ович|евич|овна|евна|ична|оглы|кызы)$/i.test(w),weak=w=>/(ин|ина|ын|ына)$/i.test(w);
+  const c=ws.filter(w=>!strong(w));return c.find(w=>!weak(w))||c[0]||ws[0]||String(name||"").trim().split(/\s+/)[0]||""}
+function fillTpl(text,x){const fn=firstName(x.name);
   return text.replace(/\{имя\}/g,fn||"").replace(/\{филиал\}/g,branchName(x.branch)).replace(/\{дата\}/g,x.trial?fmtDT(x.trial):x.expires||"").replace(/\{сумма\}/g,money(x.price||0)).replace(/\{ссылка_оплаты\}/g,settings.payLink||"[ссылка Kaspi]")}
 const waURL=(phone,text)=>"https://wa.me/"+nd(phone)+(text?"?text="+encodeURIComponent(text):"");
 function queueMsg(x,key){const t=tpl(key);feedAdd(x,"msg",fillTpl(t.text,x),{tplName:t.name,auto:true,sent:false})}
@@ -2069,7 +2074,7 @@ function waitCard(){const gs=db.groups.filter(inBranch),wl=gs.flatMap(g=>(g.wait
   return `<div class="card" style="margin-top:16px"><h3>Лист ожидания · ${wl.length}</h3><div class="hint">Желающие попасть в заполненные группы. Когда место освободится — «Записать»: ученик появится в группе (или будет создан со статусом «Пробное»).${full.length?` Заполнены: ${full.map(g=>esc(g.name)).join(", ")}.`:""}</div>
   <div class="actions" style="margin-bottom:8px"><button class="btn secondary mini" data-act="wadd">+ В лист ожидания</button></div>
   ${wl.map(({g,w,i})=>{const f=groupFill(g,today().slice(0,7)),free=!f.cap||f.listed<f.cap;return `<div class="row"><b>${esc(w.name)} · ${esc(w.phone||"")}</b><span>${esc(g.name)} · с ${esc(w.added)} ${free?'<span class="tag">есть место</span>':""}
-    <button class="mini" data-wok="${g.id}:${i}">Записать</button>${w.phone?` <a class="wa" href="${waURL(w.phone,`${(w.name||"").split(" ")[0]}, освободилось место в группе «${g.name}» студии DJIGIT TAU. Записать вас?`)}" target="_blank" rel="noopener">Написать</a>`:""} <button class="mini del" data-wrm="${g.id}:${i}">×</button></span></div>`}).join("")||'<div class="empty">Лист ожидания пуст</div>'}</div>`}
+    <button class="mini" data-wok="${g.id}:${i}">Записать</button>${w.phone?` <a class="wa" href="${waURL(w.phone,`${firstName(w.name)}, освободилось место в группе «${g.name}» студии DJIGIT TAU. Записать вас?`)}" target="_blank" rel="noopener">Написать</a>`:""} <button class="mini del" data-wrm="${g.id}:${i}">×</button></span></div>`}).join("")||'<div class="empty">Лист ожидания пуст</div>'}</div>`}
 function wireWait(){document.querySelector('[data-act="wadd"]')?.addEventListener("click",async()=>{const gs=db.groups.filter(inBranch);
     const v=await askForm("В лист ожидания",FF("g","Группа",`<select class="field">${gs.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join("")}</select>`)+FF("name","Имя",`<input class="field" required>`)+FF("phone","Телефон",`<input class="field" type="tel">`));
     if(!v)return;const g=db.groups.find(x=>x.id===+v.g);if(!g)return;(g.wait=g.wait||[]).push({name:v.name,phone:v.phone,added:today()});persist();render();toast("Добавлено в лист ожидания")});
