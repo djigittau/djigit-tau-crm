@@ -1,0 +1,32 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:1080px;height:1920px;background:#000;overflow:hidden;font-family:Inter,sans-serif}
+canvas{position:absolute;inset:0}
+.t{position:absolute;left:0;right:0;text-align:center;opacity:0}
+#logo{top:760px;font-size:150px;font-weight:900;letter-spacing:10px;
+ background:linear-gradient(180deg,#FFF1C4 0%,#E8C26E 45%,#A87A2E 100%);-webkit-background-clip:text;color:transparent;
+ filter:drop-shadow(0 0 30px rgba(232,194,110,.45))}
+#line{top:960px;margin:auto;width:520px;height:3px;background:linear-gradient(90deg,transparent,#E8C26E,transparent)}
+#tag{top:1010px;font-size:40px;font-weight:600;letter-spacing:8px;color:#F3E2B5}
+#sub{top:690px;font-size:30px;letter-spacing:12px;color:#C9A55A;font-weight:600}
+</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div id="sub" class="t">STUDIO OF CAUCASIAN DANCE</div>
+<div id="logo" class="t">DJIGIT TAU</div>
+<div id="line" class="t"></div>
+<div id="tag" class="t">DISCOVER YOUR STRENGTH.<br>FIND YOUR DANCE.</div>
+<script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let s=5;const r=()=>((s=(s*16807)%2147483647)/2147483647);
+const P=[...Array(260)].map(()=>({x:r()*1080,y:r()*1920,v:20+r()*60,z:.5+r()*2.5,p:r()*6}));
+const cl=(x,a,b)=>Math.min(1,Math.max(0,(x-a)/(b-a)));
+window.renderAt=t=>{
+ g.fillStyle='#000';g.fillRect(0,0,1080,1920);
+ const gr=g.createRadialGradient(540,880,0,540,880,700);gr.addColorStop(0,`rgba(120,80,20,${.35*cl(t,.3,1.5)})`);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,1080,1920);
+ for(const q of P){const y=((q.y-t*q.v)%1920+1920)%1920,a=(.4+.6*Math.sin(t*2+q.p))*cl(t,0,1);
+  g.beginPath();g.fillStyle=`rgba(255,214,130,${a*.8})`;g.shadowColor='#ffcf70';g.shadowBlur=12;g.arc(q.x+Math.sin(t+q.p)*8,y,q.z,0,7);g.fill();}
+ g.shadowBlur=0;
+ const set=(id,o,dy)=>{const e=document.getElementById(id);e.style.opacity=o;e.style.transform=`translateY(${(1-o)*dy}px) scale(${.92+.08*o})`;};
+ set('logo',cl(t,.6,1.8),30);set('sub',cl(t,1.2,2),15);set('line',cl(t,1.6,2.3),0);set('tag',cl(t,2.0,2.9),20);
+};
+window.ready=true;
+</script></body></html>
