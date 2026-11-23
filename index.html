@@ -199,6 +199,7 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 /* amoCRM-style deal card, tasks, robots */
 .ptabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .ptabs button{border:1px solid var(--line);background:var(--panel);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--muted)}
+.hubtabs{margin:-6px 0 16px}.hubtabs button{font-size:14px;padding:8px 16px}
 .ptabs button.on{background:var(--inkbg);color:#fff;border-color:var(--ink);font-weight:600}
 .ptabs button b{margin-left:6px;font-weight:600}
 .lead .task{margin-top:7px;padding-top:6px;border-top:1px dashed var(--line);font-size:12px;display:flex;gap:6px;align-items:flex-start;color:var(--text)}
@@ -401,10 +402,6 @@ svg.i{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-
 .brand{border-bottom:1px solid #EEDFB8}.brand img{width:170px}
 .brand .lg-dark{display:none}
 .navh{padding:14px 22px 4px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#B39A68}
-summary.navh{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;user-select:none}summary.navh::-webkit-details-marker{display:none}
-summary.navh::before{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
-details[open]>summary.navh::before{transform:rotate(45deg)}summary.navh:hover{color:inherit;opacity:.85}
-.navn{margin-left:auto;font-size:10px;opacity:.7;letter-spacing:0}
 .nav button{color:#4E4230;margin:1px 10px;width:calc(100% - 20px);padding:9px 12px;border-radius:10px;font-size:14px}
 .nav button svg.i{color:#B08A3E}
 .nav button:hover{background:rgba(255,255,255,.7);color:#2A2418}
@@ -608,9 +605,11 @@ const sections_OLD=[
   ["Студия",["Расписание","Группы","Тренеры","Абонементы"]],
   ["Управление",["Панель владельца","Финансы","Филиалы","Аналитика","Команда","Журнал","Настройки"]]
 ];
-/* Первая группа без заголовка — то, чем пользуются каждый день; остальные сворачиваются */
-const sections=[["",["Главная","Заявки и воронка","Задачи","Ученики","Расписание"]],["Продажи",["Смена","Продления","Рассылки","Качество консультаций","Автоматизация","ИИ-помощник"]],["Студия",["Группы","Посещаемость","Абонементы","Концерты","Костюмы и пошив","Товары и награды","Тренеры","Профиль","Филиалы"]],["Деньги",["Финансы","Оплаты и сверка","Экономика","Панель владельца","Аналитика"]],["Система",["Команда","Журнал","Настройки"]]];
-const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники","Качество консультаций":"Качество","Костюмы и пошив":"Костюмы","Товары и награды":"Товары","Оплаты и сверка":"Оплаты","Панель владельца":"Сводка","Профиль":"Кабинет педагога"};
+/* 8 пунктов меню; страницы внутри пункта открываются вкладками сверху */
+const sections=[["Главная",["Главная"]],["Заявки",["Заявки и воронка","Продления","Задачи","Рассылки","Качество консультаций","Автоматизация"]],["Ученики",["Ученики","Группы","Абонементы","Посещаемость","Товары и награды","Костюмы и пошив"]],["Расписание",["Расписание","Смена","Концерты"]],["Сотрудники",["Тренеры","Профиль","Команда"]],["Филиалы",["Филиалы"]],["Финансы",["Финансы","Экономика","Оплаты и сверка","Панель владельца","Аналитика"]],["Ещё",["ИИ-помощник","Журнал","Настройки"]]];
+const HUB_OF=Object.fromEntries(sections.flatMap(([h,ps])=>ps.map(n=>[n,h])));
+const HUB_ICON={"Заявки":"pipe","Ученики":"user","Сотрудники":"coach","Финансы":"wallet","Ещё":"gear"};
+const LABEL={"Заявки и воронка":"Заявки","Посещаемость":"Посещения","Аналитика":"Отчёты","Команда":"Сотрудники","Качество консультаций":"Качество","Костюмы и пошив":"Костюмы","Товары и награды":"Товары","Оплаты и сверка":"Оплаты","Панель владельца":"Сводка","Профиль":"Кабинет педагога","Тренеры":"Сотрудники","Команда":"Доступы","Экономика":"Зарплаты и прибыль","Финансы":"Операции"};
 const lbl=n=>LABEL[n]||n;
 const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   pipe:'<rect x="3" y="4" width="5" height="16" rx="1.3"/><rect x="9.5" y="4" width="5" height="11" rx="1.3"/><rect x="16" y="4" width="5" height="7" rx="1.3"/>',
@@ -711,13 +710,10 @@ function ask(text,yes="Удалить"){return new Promise(res=>{$("askText").te
 function init(){
   if($("brandWho"))$("brandWho").textContent=role+" · "+(me.name||"");
   $("meName").textContent=me.name;$("meRole").textContent=role;$("meAv").textContent=(me.name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  const groups=isTeacher()?[["Мой кабинет",["Профиль","Смена","Группы","Расписание","Посещаемость"]]]:sections;
-  // Короткое меню (до 9 пунктов) показываем целиком; длинное — группы сворачиваются
-  const fold=groups.flatMap(g=>g[1]).filter(allowed).length>9;
-  const btn=n=>`<button data-page="${n}">${ico(n)}<span>${lbl(n)}</span>${n==="Заявки и воронка"?`<span class="cnt" id="leadCnt"></span>`:n==="Задачи"?`<span class="cnt" id="taskCnt" style="background:#E5675E;color:#fff"></span>`:""}</button>`;
-  $("nav").innerHTML=groups.map(g=>{const items=g[1].filter(allowed);if(!items.length)return"";
-    if(fold&&g[0])return `<details class="navg"><summary class="navh">${g[0]}<span class="navn">${items.length}</span></summary>${items.map(btn).join("")}</details>`;
-    return (g[0]?`<div class="navh">${g[0]}</div>`:"")+items.map(btn).join("")}).join("");
+  const cnt=h=>h==="Заявки"?`<span class="cnt" id="leadCnt"></span><span class="cnt" id="taskCnt" style="background:#E5675E;color:#fff"></span>`:"";
+  $("nav").innerHTML=isTeacher()?`<div class="navh">Мой кабинет</div>`+["Профиль","Смена","Группы","Расписание","Посещаемость"].filter(allowed).map(n=>`<button data-page="${n}">${ico(n)}<span>${lbl(n)}</span></button>`).join("")
+    :sections.map(([h,ps])=>{const first=ps.find(allowed);if(!first)return"";
+      return `<button data-page="${first}" data-hub="${h}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[HUB_ICON[h]||icons[first]]||P.grid}</svg><span>${h}</span>${cnt(h)}</button>`}).join("");
   $("nav").querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
   const cur=$("branchFilter").value||"all";
   $("branchFilter").innerHTML='<option value="all">Все филиалы</option>'+db.branches.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("");
@@ -740,12 +736,13 @@ function render(){
   const tl=myTasks().filter(isLateT).length;if($("taskCnt")){$("taskCnt").textContent=tl;$("taskCnt").hidden=!tl}
   runRobots();updateBell();
   $("subtitle").textContent=subs[current]||"";
-  document.querySelectorAll("[data-page]").forEach(b=>{b.classList.toggle("active",b.dataset.page===current);b.setAttribute("aria-current",b.dataset.page===current?"page":"false")});
-  document.querySelector("nav button.active")?.closest("details")?.setAttribute("open","");
+  document.querySelectorAll("[data-page]").forEach(b=>{const on=b.dataset.hub?b.dataset.hub===HUB_OF[current]:b.dataset.page===current;b.classList.toggle("active",on);b.setAttribute("aria-current",on?"page":"false")});
   const ft=FORM_OF[current];
   $("primary").style.display=ft&&!isTeacher()&&(current!=="Филиалы"||isBoss())?"":"none";
   $("primary").textContent="+ "+({student:"Ученик",lead:"Заявка",group:"Группа",teacher:"Тренер",branch:"Филиал",membership:"Абонемент",payment:"Операция",attendance:"Отметка",lesson:"Занятие",planned:"Платёж"}[ft]||"Добавить");
-  const C=$("content");C.innerHTML=views[current]();if(render.last!==current){C.classList.remove("fade");void C.offsetWidth;C.classList.add("fade");render.last=current}
+  const tabs=isTeacher()?[]:(sections.find(([h])=>h===HUB_OF[current])?.[1]||[]).filter(allowed);
+  const C=$("content");C.innerHTML=(tabs.length>1?`<div class="ptabs hubtabs" role="tablist">${tabs.map(n=>`<button role="tab" data-go="${n}" class="${n===current?"on":""}" aria-selected="${n===current}">${lbl(n)}</button>`).join("")}</div>`:"")+views[current]();
+  C.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));if(render.last!==current){C.classList.remove("fade");void C.offsetWidth;C.classList.add("fade");render.last=current}
   after[current]?.();
 }
 function statsCard(l,v,n){return `<div class="stat"><strong class="num">${v}</strong><label>${l}</label><small>${n}</small></div>`}
