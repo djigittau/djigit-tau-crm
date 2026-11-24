@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DJIGIT TAU CRM</title>
+<style>
+:root{--bg:#F6F4EF;--panel:#fff;--ink:#121110;--muted:#7A7468;--line:#E8E3D8;--gold:#C9A24E;--gold2:#E6C77E;--side:#0F0E0C;--sidetx:#CFC6B4;--red:#C2463D;--green:#3F8A4E}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif}
+button,input,select,textarea{font:inherit}
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+aside{background:var(--side);color:var(--sidetx);padding:22px 0 18px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column}
+aside .logo{display:block;width:170px;margin:0 auto 6px}
+aside .who{text-align:center;font-size:12px;color:#9C927F;margin-bottom:18px;padding:0 16px}
+aside .who b{display:block;color:var(--gold2);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.navh{padding:14px 24px 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6F6656}
+nav button{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:2px 12px;padding:10px 14px;border:0;border-radius:10px;background:none;color:var(--sidetx);text-align:left;cursor:pointer}
+nav button:hover{background:#1E1C18;color:#fff}
+nav button.on{background:linear-gradient(90deg,var(--gold2),var(--gold));color:#17130A;font-weight:650}
+nav svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+aside .foot{margin-top:auto;padding:16px 24px 0;font-size:12px;color:#6F6656}
+main{padding:28px 32px 60px;min-width:0}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.top h1{margin:0;font-size:26px;letter-spacing:-.01em}
+.top .sub{color:var(--muted);font-size:14px;width:100%;margin-top:-10px}
+.burger{display:none;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 10px}
+.btn{border:0;border-radius:10px;padding:10px 18px;font-weight:650;cursor:pointer;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#17130A;white-space:nowrap}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--ink);font-weight:550}
+.ml{margin-left:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.stat b{display:block;font-size:26px;font-weight:750;letter-spacing:-.02em}
+.stat span{color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+.card h3{margin:0 0 12px;font-size:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button{border:1px solid var(--line);background:var(--panel);border-radius:20px;padding:7px 16px;cursor:pointer;color:var(--muted)}
+.tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.field{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff;min-width:0}
+.tools .search{flex:1 1 220px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:12.5px;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px;border-bottom:1px solid var(--line)}
+.empty{text-align:center;color:var(--muted);padding:38px 12px}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:13px;background:#FBFAF6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.prof{display:flex;gap:18px;align-items:center}
+.ava{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold));display:grid;place-items:center;font-weight:800;font-size:26px;color:#17130A}
+.kv{display:grid;grid-template-columns:180px 1fr;gap:8px 16px;font-size:14px}
+.kv span{color:var(--muted)}
+.shiftbox{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;background:#F1ECDF;color:#6B5A2E}
+.preview{background:#17130A;color:var(--gold2);text-align:center;font-size:13px;padding:7px 10px}
+.preview select{background:#2A241A;color:#fff;border:1px solid #5A4A2A;border-radius:8px;padding:3px 8px;margin-left:8px}
+/* вход */
+.login{min-height:100vh;display:grid;place-items:center;background:radial-gradient(900px 600px at 80% -10%,#3A2E16 0,transparent 60%),var(--side);padding:20px}
+.login form{width:100%;max-width:380px;background:#17150F;border:1px solid #2E281C;border-radius:18px;padding:30px 28px;color:#E9E1CF}
+.login img{display:block;width:200px;margin:0 auto 18px}
+.login h2{margin:0 0 18px;text-align:center;font-size:18px;font-weight:600}
+.login label{display:block;font-size:13px;color:#A99E88;margin:12px 0 6px}
+.login input{width:100%;background:#0F0E0C;border:1px solid #34301F;color:#fff;border-radius:10px;padding:11px 12px}
+.login .btn{width:100%;margin-top:20px;padding:12px}
+.login .msg{color:#E58C80;font-size:13px;min-height:18px;margin-top:10px;text-align:center}
+.login .hint{color:#7E7563;font-size:12px;text-align:center;margin-top:14px}
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  aside{position:fixed;inset:0 auto 0 0;width:270px;z-index:20;transform:translateX(-100%);transition:transform .2s}
+  aside.open{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+  .burger{display:inline-block}
+  main{padding:18px 14px 50px}
+  .top h1{font-size:21px}
+  .grid2{grid-template-columns:1fr}
+  .kv{grid-template-columns:130px 1fr}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+'use strict';
+/* ===== Роли и меню по ТЗ v2 ===== */
+const ROLES={owner:"Директор",manager:"Управляющий",admin:"Администратор",sales:"Отдел продаж",teacher:"Тренер"};
+const MENU={
+  teacher:[["","profile","attendance","students","shift"]],
+  sales:[["","profile","shift","trial_new","trials"]],
+  admin:[["","profile","trial_new","rent","payroll","fines"]],
+  manager:[["","profile","trial_new","rent","payroll","fines"],["Контроль","control"]],
+  owner:[["","home"],["Люди","employees","students","trainers","sales_dept"],["Работа","trials","attendance","shifts_all","branches"],
+         ["Расходы","rent","salaries","insurance","extra","fines"],["Деньги и отчёты","finance","analytics"],["Система","settings"]]
+};
+const I={user:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.7-3.7 3.5-5.6 7-5.6s6.3 1.9 7 5.6"/>',
+  check:'<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  users:'<circle cx="9" cy="8" r="3.3"/><path d="M2.5 20c.6-3.4 3.2-5.2 6.5-5.2s5.9 1.8 6.5 5.2"/><path d="M16 4.8a3.3 3.3 0 010 6.4M18.6 14.9c1.6.8 2.6 2.4 2.9 5.1"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  plus:'<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M12 8v8M8 12h8"/>',
+  pipe:'<rect x="3" y="4" width="5" height="16" rx="1.3"/><rect x="9.5" y="4" width="5" height="11" rx="1.3"/><rect x="16" y="4" width="5" height="7" rx="1.3"/>',
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/>',
+  wallet:'<path d="M4 7.5A2.5 2.5 0 016.5 5H18v3"/><rect x="4" y="8" width="16.5" height="11.5" rx="2.5"/><circle cx="16" cy="13.8" r="1.2"/>',
+  shield:'<path d="M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>',
+  receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  warn:'<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.3v.2"/>',
+  pin:'<path d="M12 21s-6.5-6-6.5-11A6.5 6.5 0 0112 3.5 6.5 6.5 0 0118.5 10c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+  chart:'<path d="M4 20V11M10 20V5M16 20v-6M2.5 20.5h19"/>',
+  coach:'<circle cx="12" cy="7" r="3.3"/><path d="M6 21v-3.5A4.5 4.5 0 0110.5 13h3a4.5 4.5 0 014.5 4.5V21"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/>'};
+
+/* ===== Разделы: заголовок, показатели, вкладки, колонки таблицы, фильтры, кнопка ===== */
+const P={
+ profile:{t:"Профиль",i:"user",sub:"Личные и рабочие данные",kind:"profile"},
+ attendance:{t:"Посещаемость",i:"check",sub:"Электронный табель учеников",kind:"attendance",
+   stats:["Всего учеников","Пришли","Отсутствовали","Уважительные","Опоздания","Посещаемость, %"],
+   cols:["Ученик","Статус","Причина","Комментарий"]},
+ students:{t:"Ученики",i:"users",sub:"Ученики и их история посещений",add:"Добавить ученика",
+   filters:["Филиал","Группа"],cols:["ФИО","Возраст","Контакт родителя","Группа","Филиал","Дата зачисления"]},
+ shift:{t:"Смена",i:"clock",sub:"Учёт рабочего времени",kind:"shift",
+   stats:["Часов за месяц","Смен за месяц","Опоздания","Пропущенные смены"],cols:["Дата","Начало","Окончание","Часы","Опоздание","Филиал"]},
+ trial_new:{t:"Заполнение пробников",i:"plus",sub:"Запись на пробное занятие",kind:"trialform"},
+ trials:{t:"Обработка пробников",i:"pipe",sub:"Статусы, звонки, перенос и передача клиента",
+   stats:["Всего пробников","Записались","Пришли","Купили абонемент","Конверсия в продажу, %"],
+   tabs:["Все","Новый пробник","Ожидает подтверждения","Подтверждён","Пришёл на пробное","Не пришёл","Думает","Купил абонемент","Отказался"],
+   filters:["Филиал","Менеджер","Дата"],cols:["Ученик","Родитель","Телефон","Филиал","Дата и время","Группа","Менеджер","Статус"],add:"Добавить пробное занятие"},
+ rent:{t:"Аренда зала и коммунальные услуги",i:"key",sub:"Расходы на содержание филиалов",
+   stats:["Аренда за месяц","Коммунальные за месяц","Не оплачено"],tabs:["Аренда зала","Коммунальные услуги"],
+   filters:["Филиал","Месяц","Статус оплаты"],cols:["Филиал","Адрес","Арендодатель","Сумма","Дата оплаты","Период","Статус","Комментарий"],add:"Добавить расход",add2:"Добавить свою категорию"},
+ payroll:{t:"Зарплаты, страховка и расходы",i:"wallet",sub:"Выплаты сотрудникам и дополнительные расходы",
+   tabs:["Зарплаты","Медицинская страховка","Дополнительные расходы"],filters:["Филиал","Месяц","Статус"],
+   cols:["Сотрудник","Должность","Филиал","Оклад","Доплаты","Удержания","Дата выплаты","Статус"],add:"Добавить запись",add2:"Добавить свою категорию расхода"},
+ fines:{t:"Штрафы",i:"warn",sub:"Учёт штрафов сотрудников",stats:["Назначено","Оспаривается","Удержано","Отменено"],
+   tabs:["Все","Назначен","Оспаривается","Удержан","Отменён"],filters:["Филиал","Сотрудник","Месяц"],
+   cols:["Сотрудник","Должность","Филиал","Причина","Сумма","Дата","Кто назначил","Статус"],add:"Назначить штраф"},
+ control:{t:"Контроль",i:"eye",sub:"Операционная работа филиала",
+   stats:["Сотрудников на смене","Опоздания сегодня","Пробники сегодня","Расходы на согласовании","Задолженности по расходам"],
+   tabs:["Смены сотрудников","Пробные занятия","Расходы на согласовании","Задолженности","Отчёты филиала"],
+   filters:["Филиал","Сотрудник","Дата"],cols:["Сотрудник","Роль","Начало","Окончание","Часы","Опоздание"]},
+ home:{t:"Главная",i:"home",sub:"Сводка по всем филиалам",kind:"home",
+   stats:["Всего учеников","Активные ученики","Новые заявки","Пробники","Конверсия пробников, %","Тренеры","Сотрудники","Выручка","Расходы","Прибыль","Задолженности","Посещаемость, %"]},
+ employees:{t:"Профили сотрудников",i:"shield",sub:"Аккаунты, роли и доступ",filters:["Филиал","Роль","Статус"],
+   cols:["ФИО","Роль","Должность","Филиал","Телефон","Email","Начало работы","Статус"],add:"Добавить сотрудника"},
+ trainers:{t:"Тренеры",i:"coach",sub:"Тренеры, группы и нагрузка",filters:["Филиал","Вид танца"],
+   cols:["ФИО","Филиал","Группы","Учеников","Посещаемость, %","Смен за месяц","Статус"],add:"Добавить тренера"},
+ sales_dept:{t:"Отдел продаж",i:"chart",sub:"Результаты менеджеров",stats:["Пробников","Пришли","Продажи","Конверсия, %"],
+   filters:["Филиал","Менеджер","Месяц"],cols:["Менеджер","Филиал","Пробников","Пришли","Купили","Конверсия, %","Смен","Часов"]},
+ shifts_all:{t:"Смены",i:"clock",sub:"Общая таблица смен сотрудников",stats:["На смене сейчас","Часов за месяц","Опоздания","Пропущенные смены"],
+   tabs:["Все смены","Опоздания","Пропущенные","План смен"],filters:["Филиал","Сотрудник","Месяц"],
+   cols:["Сотрудник","Роль","Филиал","Дата","Начало","Окончание","Часы","Опоздание"],add:"Запланировать смену"},
+ branches:{t:"Филиалы",i:"pin",sub:"Все филиалы студии",filters:["Статус"],
+   cols:["Название","Адрес","Администратор","Управляющий","Тренеров","Учеников","Групп","Статус"],add:"Добавить филиал"},
+ salaries:{t:"Зарплаты",i:"wallet",sub:"Начисления и выплаты",stats:["Начислено за месяц","Выплачено","К выплате"],
+   filters:["Филиал","Месяц","Статус"],cols:["Сотрудник","Должность","Филиал","Оклад","Доплаты","Удержания","К выплате","Дата выплаты","Статус"],add:"Добавить начисление"},
+ insurance:{t:"Медицинская страховка",i:"heart",sub:"Полисы сотрудников",filters:["Филиал","Статус"],
+   cols:["Сотрудник","Страховая компания","Сумма","Период действия","Дата оплаты","Статус"],add:"Добавить полис"},
+ extra:{t:"Дополнительные расходы",i:"receipt",sub:"Прочие расходы филиалов",stats:["Расходы за месяц","На согласовании","Не оплачено"],
+   filters:["Филиал","Категория","Месяц"],cols:["Название","Категория","Сумма","Дата","Филиал","Ответственный","Согласование","Комментарий"],add:"Добавить расход",add2:"Добавить свою категорию"},
+ finance:{t:"Финансы",i:"wallet",sub:"Выручка, расходы и прибыль",stats:["Выручка","Расходы","Прибыль","Задолженности"],
+   tabs:["Обзор","Доходы","Расходы","По филиалам"],filters:["Филиал","Месяц"],cols:["Дата","Тип","Категория","Сумма","Филиал","Комментарий"]},
+ analytics:{t:"Аналитика",i:"chart",sub:"Показатели студии с фильтрами",stats:["Ученики","Пробники","Конверсия, %","Выручка","Расходы","Прибыль"],
+   filters:["Филиал","Месяц","Сотрудник","Категория расходов","Тренер","Менеджер"],cols:["Показатель","Значение","Прошлый месяц","Изменение"]},
+ settings:{t:"Настройки",i:"gear",sub:"Справочники и доступы",kind:"settings"}
+};
+
+/* ===== Состояние ===== */
+const Q=new URLSearchParams(location.search);
+let me=null, page=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${I[k]||I.home}</svg>`;
+const firstPage=r=>MENU[r].flat().find(k=>P[k]);
+/* У директора в меню названия по ТЗ */
+const ALIAS={owner:{trials:"Пробные занятия",rent:"Аренда и коммунальные услуги"}};
+const title=k=>ALIAS[me.role]?.[k]||P[k].t;
+
+/* ===== Вход ===== */
+function loginView(){
+  $("root").innerHTML=`<div class="login"><form id="lf" autocomplete="on">
+   <img src="logo-light.png" alt="DJIGIT TAU">
+   <h2>Вход в CRM</h2>
+   <label for="le">Email или телефон</label><input id="le" name="username" autocomplete="username" required>
+   <label for="lp">Пароль</label><input id="lp" name="password" type="password" autocomplete="current-password" required>
+   <button class="btn" type="submit">Войти</button>
+   <div class="msg" id="lm" role="alert"></div>
+   <div class="hint">Вход заработает на этапе 3 (Supabase Auth). Предпросмотр аккаунтов: <a href="?preview=owner" style="color:#E6C77E">открыть</a></div>
+  </form></div>`;
+  $("lf").onsubmit=e=>{e.preventDefault();$("lm").textContent="Вход подключается на этапе 3. Сейчас доступен только предпросмотр."};
+}
+
+/* ===== Каркас ===== */
+function app(){
+  const r=me.role;
+  const nav=MENU[r].map(([h,...ks])=>(h?`<div class="navh">${h}</div>`:"")+ks.map(k=>`<button data-p="${k}" class="${k===page?"on":""}">${ico(P[k].i)}<span>${title(k)}</span></button>`).join("")).join("");
+  $("root").innerHTML=(me.preview?`<div class="preview">Предпросмотр дизайна, данных нет. Аккаунт:<select id="pv">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${k===r?"selected":""}>${v}</option>`).join("")}</select></div>`:"")+
+  `<div class="shell"><aside id="side"><img class="logo" src="logo-light.png" alt="DJIGIT TAU"><div class="who"><b>${ROLES[r]}</b>${esc(me.name)}</div>
+   <nav>${nav}</nav><div class="foot">DJIGIT TAU CRM</div></aside>
+   <main><div class="top"><button class="burger" id="bg" aria-label="Меню">☰</button><h1>${title(page)}</h1>${headBtns(P[page])}<div class="sub">${P[page].sub||""}</div></div><div id="content">${render(P[page])}</div></main></div>`;
+  document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{page=b.dataset.p;history.replaceState(null,"",url());app()});
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{b.parentNode.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
+  $("bg").onclick=()=>$("side").classList.toggle("open");
+  if($("pv"))$("pv").onchange=e=>{me.role=e.target.value;me.name=ROLES[me.role]+" (тест)";page=firstPage(me.role);history.replaceState(null,"",url());app()};
+}
+const url=()=>`?preview=${me.role}&p=${page}`;
+const headBtns=p=>(p.add2?`<button class="btn ghost ml">${p.add2}</button>`:"")+(p.add?`<button class="btn ${p.add2?"":"ml"}">+ ${p.add}</button>`:"");
+const zero=l=>/%/.test(l)?"0%":/(Выручка|Расходы|Прибыль|Задолж|Аренда|Коммунал|Начислено|Выплачено|К выплате|оплачено|за месяц$)/i.test(l)&&!/Смен|Часов/.test(l)?"0 ₸":"0";
+const stats=p=>p.stats?`<div class="stats">${p.stats.map(l=>`<div class="stat"><b>${zero(l)}</b><span>${l}</span></div>`).join("")}</div>`:"";
+const tabs=p=>p.tabs?`<div class="tabs" role="tablist">${p.tabs.map((t,i)=>`<button role="tab" class="${i?"":"on"}">${t}</button>`).join("")}</div>`:"";
+const tools=p=>`<div class="tools"><input class="field search" placeholder="Поиск" aria-label="Поиск">${(p.filters||[]).map(f=>`<select class="field" aria-label="${f}"><option>${f}: все</option></select>`).join("")}</div>`;
+const table=(cols,msg)=>`<div class="tablewrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody><tr><td colspan="${cols.length}"><div class="empty"><b>Пока нет данных</b>${msg||"Добавьте первую запись — она появится здесь"}</div></td></tr></tbody></table></div>`;
+const FF=(l,inp)=>`<div><label style="display:block;font-size:13px;color:var(--muted);margin-bottom:5px">${l}</label>${inp}</div>`;
+const inp=(t="text")=>`<input class="field" type="${t}" style="width:100%">`;
+const sel=o=>`<select class="field" style="width:100%"><option>${o}</option></select>`;
+
+function render(p){
+  if(p.kind==="profile")return `<div class="grid2"><div class="card"><div class="prof"><div class="ava">${esc((me.name||"?")[0])}</div><div><b style="font-size:18px">${esc(me.name)}</b><div class="badge">${ROLES[me.role]}</div></div></div>
+    <div class="kv" style="margin-top:18px"><span>Телефон</span><b>—</b><span>Email</span><b>—</b><span>Должность</span><b>—</b><span>Филиал</span><b>—</b><span>Дата начала работы</span><b>—</b></div>
+    <button class="btn ghost" style="margin-top:16px">Изменить фото и данные</button> <button class="btn ghost" style="margin-top:16px">Сменить пароль</button></div>
+    <div class="card"><h3>${me.role==="teacher"?"Мои группы":"Мои рабочие данные"}</h3>${table(me.role==="teacher"?["Группа","Филиал","Учеников","Расписание"]:["Показатель","За месяц"],"Данные появятся после начала работы")}</div></div>`;
+  if(p.kind==="attendance")return `<div class="tools"><select class="field" aria-label="Группа"><option>Выберите группу</option></select><input class="field" type="date" aria-label="Дата занятия"><span class="ml"></span><button class="btn ghost">История посещений</button><button class="btn ghost">За месяц</button></div>
+    ${stats(p)}<div class="card"><div class="chips" style="margin-bottom:12px"><span class="chip">Пришёл</span><span class="chip">Отсутствует</span><span class="chip">По уважительной причине</span><span class="chip">Опоздал</span><span class="chip">Отработка</span></div>
+    ${table(p.cols,"Выберите группу и дату — появится список учеников")}<button class="btn" style="margin-top:14px">Сохранить табель</button></div>`;
+  if(p.kind==="shift")return `<div class="card"><div class="shiftbox"><div><div style="color:var(--muted);font-size:13px">Текущая смена</div><b style="font-size:20px">Смена не начата</b></div><span class="ml"></span><button class="btn">Начать смену</button><button class="btn dark" disabled style="opacity:.4">Завершить смену</button></div>
+    <div style="color:var(--muted);font-size:13px;margin-top:10px">Время начала и окончания ставит сервер — изменить их задним числом нельзя.</div></div>${stats(p)}<div class="card"><h3>История смен</h3>${table(p.cols)}</div>`;
+  if(p.kind==="trialform")return `<div class="card"><h3>Новое пробное занятие</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px">
+    ${FF("ФИО ученика",inp())}${FF("Имя родителя",inp())}${FF("Номер телефона",inp("tel"))}${FF("Возраст",inp("number"))}${FF("Филиал",sel("Выберите филиал"))}${FF("Желаемая категория",sel("Выберите категорию"))}
+    ${FF("Вид танца",sel("Выберите вид танца"))}${FF("Дата пробного занятия",inp("date"))}${FF("Время",inp("time"))}${FF("Группа",sel("Выберите группу"))}${["admin","manager","owner"].includes(me.role)?FF("Тренер",sel("Выберите тренера")):""}${FF("Ответственный менеджер",sel("Выберите менеджера"))}</div>
+    <div style="margin-top:14px">${FF("Комментарий",`<textarea class="field" rows="2" style="width:100%"></textarea>`)}</div><button class="btn" style="margin-top:14px">+ Добавить пробное занятие</button></div>
+    <div class="card"><h3>Список пробников</h3>${tools({filters:["Филиал","Статус","Дата"]})}${table(["Ученик","Родитель","Телефон","Филиал","Дата и время","Группа","Статус"])}</div>`;
+  if(p.kind==="home")return `${tools({filters:["Филиал","Месяц"]})}${stats(p)}<div class="grid2"><div class="card"><h3>Выручка и расходы по месяцам</h3><div class="empty"><b>Пока нет данных</b>График появится после первых оплат и расходов</div></div>
+    <div class="card"><h3>Воронка пробников</h3><div class="empty"><b>Пока нет данных</b>Появится после первых пробных занятий</div></div></div>`;
+  if(p.kind==="settings")return `<div class="tabs"><button class="on">Виды танца</button><button>Категории занятий</button><button>Категории расходов</button><button>Роли и доступ</button></div>
+    <div class="card"><div class="tools"><input class="field search" placeholder="Название" aria-label="Название"><button class="btn">+ Добавить</button></div>${table(["Название","Статус","Действия"],"Добавьте свои виды танца")}</div>`;
+  return `${stats(p)}${tabs(p)}<div class="card">${tools(p)}${table(p.cols)}</div>`;
+}
+
+/* ===== Запуск ===== */
+const pv=Q.get("preview");
+if(pv&&ROLES[pv]){me={role:pv,name:ROLES[pv]+" (тест)",preview:true};page=P[Q.get("p")]&&MENU[pv].flat().includes(Q.get("p"))?Q.get("p"):firstPage(pv);app()}
+else loginView();
+</script>
+</body>
+</html>
