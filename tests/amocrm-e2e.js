@@ -1,6 +1,6 @@
 // Сквозной тест воронок «как в amoCRM»: node tests/amocrm-e2e.js "$PWD" /tmp  (нужен playwright с chromium)
 const {chromium,devices}=require('playwright');
-const URL='file://'+process.argv[2]+'/crm-old.html';
+const URL='file://'+process.argv[2]+'/index.html';
 const OUT=process.argv[3];
 const results=[];const errs=[];
 async function step(name,fn){try{await fn();results.push(['OK',name])}catch(e){results.push(['FAIL',name,e.message.split('\n')[0]])}}
