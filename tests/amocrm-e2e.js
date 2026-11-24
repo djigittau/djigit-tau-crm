@@ -6,7 +6,8 @@ const results=[];const errs=[];
 async function step(name,fn){try{await fn();results.push(['OK',name])}catch(e){results.push(['FAIL',name,e.message.split('\n')[0]])}}
 const eq=(a,b,m)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw new Error(`${m}: ожидалось ${JSON.stringify(b)}, получено ${JSON.stringify(a)}`)};
 const ok=(c,m)=>{if(!c)throw new Error(m)};
-async function login(p,i=0){await p.goto(URL);await p.waitForTimeout(500);await p.locator('[data-fill]').nth(i).click();await p.click('#lgForm button[type=submit]');await p.waitForTimeout(500)}
+// Вход директором (временный пароль уже сменён)
+async function login(p){await p.goto(URL);await p.waitForTimeout(500);await p.evaluate(()=>{const u=users.find(x=>x.role==='Руководитель');delete u.mustChange;u.pass='Dir-2026!';persistNow(true)});await p.fill('#lg_p','director@djigittau.kz');await p.fill('#lg_w','Dir-2026!');await p.click('#lgForm button[type=submit]');await p.waitForTimeout(500)}
 (async()=>{const b=await chromium.launch();
 const ctx=await b.newContext({viewport:{width:1440,height:900}});const p=await ctx.newPage();
 p.on('pageerror',e=>errs.push('pageerror: '+e.message));p.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text())});
@@ -189,16 +190,11 @@ await step('Данные сохраняются после перезагруз�
   await p.waitForTimeout(800);await p.reload();await p.waitForTimeout(800);
   ok(await E(()=>db.leads.some(x=>x.name==='Тестова Зарина'&&x.stage==='Купили абонемент'&&x.manager==='Айгерим')),'данные потерялись');
 });
-await step('Вход: на экране только руководитель, старые демо-входы убраны',async()=>{
+await step('Старт по ТЗ: 5 тестовых аккаунтов по email, вход с пустым логином не проходит',async()=>{
   await E(()=>logout());await p.waitForTimeout(300);
-  eq(await p.locator('[data-fill]').count(),1,'кнопок входа');
-  // старые сохранённые данные с 5 демо-входами чистятся при запуске
-  await E(()=>{users.push({phone:"70000000004",pass:"4444",name:"Менеджер",role:"Отдел продаж"},{phone:"77770000000",pass:"9999",name:"Второй",role:"Руководитель"});persistNow()});
-  await p.reload();await p.waitForTimeout(800);
-  const u=await E(()=>users.map(x=>x.phone+':'+x.role));
-  ok(!u.some(x=>x.startsWith('70000000004')),'старый демо-вход остался: '+u);
-  eq(u.filter(x=>x.endsWith('Руководитель')).length,1,'руководителей');
-  await E(()=>{users=users.filter(x=>x.phone!=="77770000000");persistNow()});await p.reload();await p.waitForTimeout(600);
+  eq((await E(()=>users.filter(x=>x.email).map(x=>x.email))).sort().join(','),'admin@djigittau.kz,director@djigittau.kz,manager@djigittau.kz,sales@djigittau.kz,trainer@djigittau.kz','аккаунты');
+  await p.fill('#lg_p','');await p.fill('#lg_w','DJigitTest2026!');await p.click('#lgForm button[type=submit]');await p.waitForTimeout(200);
+  ok(await p.locator('#login').count(),'вошёл с пустым логином');
 });
 await step('Руководитель создаёт аккаунт; второго руководителя создать нельзя',async()=>{
   await login(p,0);await go("Команда");
@@ -216,21 +212,18 @@ await step('Руководитель меняет свой пароль — по
   await p.locator('.modalbg form').last().locator('button.btn:not(.secondary)').click();await p.waitForTimeout(400);
   eq(await E(()=>me.pass),'Boss-777','пароль');
   await E(()=>logout());await p.waitForTimeout(300);
-  eq(await p.locator('[data-fill]').count(),0,'пароль руководителя всё ещё виден на входе');
-  await p.fill('#lg_p','+70000000001');await p.fill('#lg_w','1111');await p.click('#lgForm button[type=submit]');await p.waitForTimeout(300);
+  await p.fill('#lg_p','director@djigittau.kz');await p.fill('#lg_w','Dir-2026!');await p.click('#lgForm button[type=submit]');await p.waitForTimeout(300);
   ok(await p.locator('#login').count(),'вошёл со старым паролем');
 });
-await step('Сотрудник «Отдел продаж» входит: воронка есть, «Сотрудники» и удаления нет',async()=>{
+await step('Сотрудник «Отдел продаж» входит: меню по ТЗ, «Сотрудников» нет',async()=>{
   await p.fill('#lg_p','+7 705 111 22 33');await p.fill('#lg_w','bek2027');await p.click('#lgForm button[type=submit]');await p.waitForTimeout(500);
   eq(await E(()=>me?.name),'Бекзат','вход');
   eq(await p.locator('#nav [data-page="Команда"]').count(),0,'раздел «Сотрудники» виден');
-  await go("Заявки и воронка");
-  ok(await p.locator('.columns .lead').count()>0,'нет карточек');await p.locator('.columns .lead').first().click();await p.waitForTimeout(300);
-  eq(await p.locator('#deal [data-del]').count(),0,'кнопка удаления видна');await p.keyboard.press('Escape');
+  eq((await p.$$eval('#nav button span:first-of-type',e=>e.map(x=>x.textContent))).join('|'),'Профиль|Смена|Заполнение пробников|Обработка пробников','меню отдела продаж');
 });
 await step('Мобильная версия: воронка и карточка',async()=>{
   const m=await b.newContext({...devices['iPhone 13']});const mp=await m.newPage();mp.on('pageerror',e=>errs.push('mobile pageerror: '+e.message));
-  await mp.goto(URL);await mp.waitForTimeout(400);await mp.locator('[data-fill]').first().click();await mp.click('#lgForm button[type=submit]');await mp.waitForTimeout(400);
+  await mp.goto(URL);await mp.waitForTimeout(400);await mp.evaluate(()=>{const u=users.find(x=>x.role==='Руководитель');delete u.mustChange;enter(u)});await mp.waitForTimeout(400);
   await mp.evaluate(()=>{demoSeed();persist();init();go("Заявки и воронка")});await mp.waitForTimeout(400);
   const ow=await mp.evaluate(()=>document.documentElement.scrollWidth-innerWidth);ok(ow<=1,'горизонтальный скролл страницы: '+ow+'px');
   await mp.screenshot({path:OUT+'/m-pipe.png'});

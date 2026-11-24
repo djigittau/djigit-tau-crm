@@ -790,7 +790,7 @@ const views={
   return `<div class="card"><h3>Занятия</h3><div class="hint">Добавляйте занятия кнопкой «+ Занятие»</div>${ls.map(x=>`<div class="row"><b>${esc(x.date)} · ${esc(x.time)} · ${esc(x.group)}</b><span>${esc(branchName(x.branch))} · ${esc(x.teacher||"—")} · ${esc(x.room||"—")} <button class="mini" data-edit-any="lessons:${x.id}">Изменить</button>${isBoss()?` <button class="mini del" data-del-any="lessons:${x.id}">Удалить</button>`:""}</span></div>`).join("")||'<div class="empty">Занятий пока нет</div>'}</div>`},
 "Команда":()=>`<div class="notice">Руководитель в CRM один — это вы. Аккаунты сотрудников создаёте только вы: дайте человеку номер и пароль, он войдёт со своими правами. Пароли хранятся в этом браузере; в рабочей версии вход должен проверять сервер.</div>
   ${users.some(isBossDefault)?`<div class="notice" style="background:var(--red-bg);color:var(--red)">У вас стандартный пароль 1111, и он виден на экране входа. Смените его в блоке «Мой вход».</div>`:""}
-  <div class="card" style="margin-bottom:16px"><h3>Мой вход</h3><div class="hint">Руководитель · ${esc(me.name)} · +${esc(me.phone)}</div><div class="modalfoot" style="justify-content:flex-start"><button class="btn secondary" data-act="mylogin">Изменить имя, номер или пароль</button></div></div>
+  <div class="card" style="margin-bottom:16px"><h3>Мой вход</h3><div class="hint">Директор · ${esc(me.name)} · ${esc(me.email||"+"+me.phone)}</div><div class="modalfoot" style="justify-content:flex-start"><button class="btn secondary" data-act="mylogin">Изменить имя, номер или пароль</button></div></div>
   <div class="card"><h3>Добавить сотрудника</h3><div class="hint">Сотрудник входит по номеру телефона и паролю</div><div class="formgrid">
   <div class="formfield"><label for="nu_name">Имя</label><input class="field" id="nu_name"></div>
   <div class="formfield"><label for="nu_phone">Номер телефона</label><input class="field" id="nu_phone" inputmode="tel" placeholder="+7 ..."></div>
@@ -2524,15 +2524,16 @@ function logout(){try{sessionStorage.removeItem(SKEY)}catch(e){}me=null;role=nul
 function fillLogin(p,w){$("lg_p").value="+"+p;$("lg_w").value=w}
 function doLogin(e){
   e?.preventDefault();
-  const u=users.find(x=>x.phone===nd($("lg_p").value)&&x.pass===$("lg_w").value);
-  if(u)enter(u);else toast("Неверный номер или пароль");
+  const v=$("lg_p").value.trim(),pw=$("lg_w").value,byMail=v.includes("@");
+  const u=v&&pw?users.find(x=>(byMail?(x.email||"").toLowerCase()===v.toLowerCase():x.phone&&x.phone===nd(v))&&x.pass===pw):null;
+  if(u)enter(u);else toast("Неверный логин или пароль");
 }
 function loginScreen(){
   $("login")?.remove();
   const d=document.createElement("div");d.id="login";
   d.innerHTML=`<form class="modal" id="lgForm"><img class="lglogo" src="${document.querySelector(".brand .lg-light").src}" alt="DJIGIT TAU — студия кавказского танца"><h2 style="text-align:center;font-size:18px">Вход в CRM студии</h2>
   ${users.some(isBossDefault)?`<div class="notice">Первый вход руководителя: нажмите на номер ниже. Потом смените пароль в разделе «Сотрудники» — эта подсказка исчезнет.</div>`:""}
-  <div class="formfield"><label for="lg_p">Номер телефона</label><input class="field" id="lg_p" inputmode="tel" placeholder="+7 ..." autocomplete="username"></div>
+  <div class="formfield"><label for="lg_p">Email или номер телефона</label><input class="field" id="lg_p" placeholder="email или +7 ..." autocomplete="username"></div>
   <div class="formfield"><label for="lg_w">Пароль</label><input class="field" id="lg_w" type="password" autocomplete="current-password"></div>
   <div class="modalfoot"><button class="btn" type="submit">Войти</button></div>
   ${users.some(isBossDefault)?`<div style="margin-top:12px">${DEMO_USERS.map(u=>`<div class="row"><b>${esc(u.role)}</b><button type="button" class="mini" data-fill="${u.phone}:${u.pass}">+${u.phone} · ${u.pass}</button></div>`).join("")}</div>`:`<div class="hint" style="margin-top:12px;text-align:center">Нет входа? Попросите руководителя создать аккаунт.</div>`}</form>`;
@@ -2541,8 +2542,13 @@ function loginScreen(){
   d.querySelectorAll("[data-fill]").forEach(b=>b.onclick=()=>{const[p,w]=b.dataset.fill.split(":");fillLogin(p,w)});
   $("lg_p").focus();
 }
-function enter(u){
-  try{sessionStorage.setItem(SKEY,u.phone)}catch(e){}
+async function enter(u){
+  // Временный пароль: при первом входе сотрудник задаёт свой
+  if(u.mustChange){$("login")?.remove();let ok=false;
+    while(!ok){const v=await askForm("Задайте свой пароль",`<div class="hint">Вы вошли с временным паролем. Придумайте новый — минимум 8 символов.</div>`+FF("a","Новый пароль",`<input class="field" type="password" minlength="8" required autocomplete="new-password">`)+FF("b","Повторите пароль",`<input class="field" type="password" minlength="8" required autocomplete="new-password">`),"Сохранить");
+      if(!v){loginScreen();return}
+      if((v.a||"").length<8)toast("Минимум 8 символов");else if(v.a!==v.b)toast("Пароли не совпадают");else if(v.a===u.pass)toast("Новый пароль должен отличаться от временного");else{u.pass=v.a;delete u.mustChange;persist();ok=true;toast("Пароль сохранён")}}}
+  try{sessionStorage.setItem(SKEY,u.email||u.phone)}catch(e){}
   me=u;role=u.role;
   $("login")?.remove();
   current=homePage();
@@ -2569,12 +2575,12 @@ async function editUser(phone){
   logAct("Изменён сотрудник: "+u.name+" ("+u.role+")"+(v.pass?", новый пароль":""));persist();render();toast(v.pass?"Сохранено, пароль изменён":"Сохранено")}
 async function editMyLogin(){
   if(!isBoss())return;
-  const v=await askForm("Мой вход",FF("name","Имя",`<input class="field" value="${esc(me.name)}" required>`)+FF("phone","Номер телефона",`<input class="field" inputmode="tel" value="+${esc(me.phone)}" required>`)+FF("pass","Новый пароль (пусто — оставить прежний)",`<input class="field" type="password" autocomplete="new-password">`)+FF("pass2","Повторите новый пароль",`<input class="field" type="password" autocomplete="new-password">`));
+  const v=await askForm("Мой вход",FF("name","Имя",`<input class="field" value="${esc(me.name)}" required>`)+FF("phone",me.email?"Номер телефона (необязательно)":"Номер телефона",`<input class="field" inputmode="tel" value="${me.phone?"+"+esc(me.phone):""}" ${me.email?"":"required"}>`)+FF("pass","Новый пароль (пусто — оставить прежний)",`<input class="field" type="password" autocomplete="new-password">`)+FF("pass2","Повторите новый пароль",`<input class="field" type="password" autocomplete="new-password">`));
   if(!v)return;const phone=nd(v.phone);
-  if(!v.name){toast("Введите имя");return}if(phone.length<11){toast("Введите номер полностью");return}
-  if(users.some(x=>x!==me&&x.phone===phone)){toast("Этот номер уже занят другим сотрудником");return}
+  if(!v.name){toast("Введите имя");return}if((phone||!me.email)&&phone.length<11){toast("Введите номер полностью");return}
+  if(phone&&users.some(x=>x!==me&&x.phone===phone)){toast("Этот номер уже занят другим сотрудником");return}
   if(v.pass&&v.pass.length<4){toast("Пароль — минимум 4 символа");return}if(v.pass!==v.pass2){toast("Пароли не совпадают");return}
-  me.name=v.name;me.phone=phone;if(v.pass)me.pass=v.pass;try{sessionStorage.setItem(SKEY,phone)}catch(e){}
+  me.name=v.name;me.phone=phone;if(v.pass)me.pass=v.pass;try{sessionStorage.setItem(SKEY,me.email||phone)}catch(e){}
   logAct("Руководитель изменил свой вход");persist();init();toast(v.pass?"Сохранено, пароль изменён":"Сохранено")}
 async function removeUser(phone){
   if(!isBoss())return;const u=users.find(x=>x.phone===phone);if(!u||u.role==="Руководитель")return;
@@ -3211,10 +3217,29 @@ after["Профиль"]=(old=>()=>{if(isTeacher()||isBoss())old&&old()})(after["
     if(key==="fines"){rec.by=me?.name||"";rec.status=rec.status||"Назначен"}
     if(["rent","utilities","insurance","expenses"].includes(key)){rec.approval=canApprove()?"Согласовано":"На согласовании";if(canApprove()){rec.approvedBy=me?.name||"";rec.approvedAt=nowISO()}}}
   return _as(key,rec,isNew)}}
+/* ТЗ v2: CRM начинается пустой — только филиалы студии и 5 тестовых аккаунтов (временный пароль меняется при первом входе) */
+const RESET_V="tz2-empty-2026-11-24";
+const TZ2_BRANCHES=["Айнабулак 3 101а","Мкр Грэсс, Гагарина 11","Мкр Алатау (ияф), Ибрагимова 12","Аксай 1, дом 10, 3-3 подъезд","Орбита 3, дом 4а","Достык, 105а/1","Халык Арена","Талгар, тд Адимак 4 этаж","Абая, 115 4 этаж","Конаев, Мкр4 16/1","Ауэзова 5","Водник","Асыл Арман","Алматы Арена","Астана Левый берег","Астана Правый берег","Тастак","Каскелен","Узнагаш","Пятилетка","Карабулак","Чилик","Иссык"];
+const TZ2_USERS=[["Директор","director@djigittau.kz","Руководитель"],["Управляющий","manager@djigittau.kz","Управляющий"],["Администратор","admin@djigittau.kz","Администратор"],["Отдел продаж","sales@djigittau.kz","Отдел продаж"],["Тренер","trainer@djigittau.kz","Тренер"]];
+async function tz2Reset(){
+  // Резервная копия прежних данных этого браузера — на случай, если их нужно вернуть
+  try{const raw=localStorage.getItem(ZKEY)||localStorage.getItem(UKEY);if(raw&&!localStorage.getItem(UKEY+"_backup_before_tz2"))localStorage.setItem(UKEY+"_backup_before_tz2",raw)}catch(e){}
+  COLS.forEach(k=>db[k]=[]);
+  db.branches=TZ2_BRANCHES.map((name,i)=>({id:i+1,name,address:""}));
+  users=TZ2_USERS.map(([name,email,role])=>({name,email,role,phone:"",pass:"DJigitTest2026!",mustChange:true}));
+  const keep={theme:settings.theme,xlsVersion:XLS?XLS.v:settings.xlsVersion,lastImport:settings.lastImport};// встроенная таблица студии не подтягивается заново
+  settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),keep,{resetV:RESET_V,accounts:DEFAULT_SETTINGS.accounts.map(a=>({...a,start:0}))});
+  try{sessionStorage.removeItem(SKEY)}catch(e){}
+  persistNow(true);
+  try{localStorage.setItem(UKEY+"_resetV",RESET_V)}catch(e){}
+}
 (async function boot(){
   let st=null;try{const z=localStorage.getItem(ZKEY);st=z&&window.DecompressionStream?JSON.parse(await gunz(z)):JSON.parse(localStorage.getItem(UKEY))}catch(e){try{st=JSON.parse(localStorage.getItem(UKEY))}catch(_){}}
   if(st&&st.db){COLS.forEach(k=>db[k]=Array.isArray(st.db[k])?st.db[k]:[]);settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st.settings||{});users=Array.isArray(st.users)&&st.users.length?st.users:DEMO_USERS.map(u=>({...u}))}
   else{cleanSeed();users=DEMO_USERS.map(u=>({...u}));persist()}
+  // флаг хранится отдельно от настроек: «Демо-данные» и импорт не должны запускать сброс повторно
+  let rv=null;try{rv=localStorage.getItem(UKEY+"_resetV")}catch(e){}
+  if(rv!==RESET_V&&settings.resetV!==RESET_V)await tz2Reset();
   settings.teacherAcc=1;if(oneBoss())persist();
   db.leads.forEach(l=>{if(l.price===undefined)l.price=0;l.pipeline=l.pipeline||"sales";l.feed=l.feed||[];if(l.stage===LOST&&!l.reason)l.reason="Другое"});
   settings.robots=settings.robots||{};settings.templates=settings.templates||{};if(!settings.sla)settings.sla=15;
@@ -3222,7 +3247,7 @@ after["Профиль"]=(old=>()=>{if(isTeacher()||isBoss())old&&old()})(after["
   linkPayments();
   {const cm=new Date().toISOString().slice(0,7);if(!db.payments.some(p=>isInc(p)&&(p.date||"").startsWith(cm))){const last=db.payments.filter(isInc).map(p=>(p.date||"").slice(0,7)).filter(Boolean).sort().pop();if(last)panelMonth=last}}
   let sp=null;try{sp=sessionStorage.getItem(SKEY)}catch(e){}
-  const u=users.find(x=>x.phone===sp);
+  const u=sp?users.find(x=>x.phone===sp||x.email===sp):null;
   if(u)enter(u);else loginScreen();
 })();
 </script>
