@@ -3219,13 +3219,13 @@ after["Профиль"]=(old=>()=>{if(isTeacher()||isBoss())old&&old()})(after["
   return _as(key,rec,isNew)}}
 /* ТЗ v2: CRM начинается пустой — только филиалы студии и 5 тестовых аккаунтов (временный пароль меняется при первом входе) */
 const RESET_V="tz2-empty-2026-11-24";
-const TZ2_BRANCHES=["Айнабулак 3 101а","Мкр Грэсс, Гагарина 11","Мкр Алатау (ияф), Ибрагимова 12","Аксай 1, дом 10, 3-3 подъезд","Орбита 3, дом 4а","Достык, 105а/1","Халык Арена","Талгар, тд Адимак 4 этаж","Абая, 115 4 этаж","Конаев, Мкр4 16/1","Ауэзова 5","Водник","Асыл Арман","Алматы Арена","Астана Левый берег","Астана Правый берег","Тастак","Каскелен","Узнагаш","Пятилетка","Карабулак","Чилик","Иссык"];
+/* Филиалы студия добавляет сама. Список ниже — только чтобы убрать филиалы, созданные версией b5a6669 */
+const SEEDED_BRANCHES=["Айнабулак 3 101а","Мкр Грэсс, Гагарина 11","Мкр Алатау (ияф), Ибрагимова 12","Аксай 1, дом 10, 3-3 подъезд","Орбита 3, дом 4а","Достык, 105а/1","Халык Арена","Талгар, тд Адимак 4 этаж","Абая, 115 4 этаж","Конаев, Мкр4 16/1","Ауэзова 5","Водник","Асыл Арман","Алматы Арена","Астана Левый берег","Астана Правый берег","Тастак","Каскелен","Узнагаш","Пятилетка","Карабулак","Чилик","Иссык"];
 const TZ2_USERS=[["Директор","director@djigittau.kz","Руководитель"],["Управляющий","manager@djigittau.kz","Управляющий"],["Администратор","admin@djigittau.kz","Администратор"],["Отдел продаж","sales@djigittau.kz","Отдел продаж"],["Тренер","trainer@djigittau.kz","Тренер"]];
 async function tz2Reset(){
   // Резервная копия прежних данных этого браузера — на случай, если их нужно вернуть
   try{const raw=localStorage.getItem(ZKEY)||localStorage.getItem(UKEY);if(raw&&!localStorage.getItem(UKEY+"_backup_before_tz2"))localStorage.setItem(UKEY+"_backup_before_tz2",raw)}catch(e){}
   COLS.forEach(k=>db[k]=[]);
-  db.branches=TZ2_BRANCHES.map((name,i)=>({id:i+1,name,address:""}));
   users=TZ2_USERS.map(([name,email,role])=>({name,email,role,phone:"",pass:"DJigitTest2026!",mustChange:true}));
   const keep={theme:settings.theme,xlsVersion:XLS?XLS.v:settings.xlsVersion,lastImport:settings.lastImport};// встроенная таблица студии не подтягивается заново
   settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),keep,{resetV:RESET_V,accounts:DEFAULT_SETTINGS.accounts.map(a=>({...a,start:0}))});
@@ -3240,6 +3240,9 @@ async function tz2Reset(){
   // флаг хранится отдельно от настроек: «Демо-данные» и импорт не должны запускать сброс повторно
   let rv=null;try{rv=localStorage.getItem(UKEY+"_resetV")}catch(e){}
   if(rv!==RESET_V&&settings.resetV!==RESET_V)await tz2Reset();
+  // Один раз убрать 23 автоматически созданных филиала, если к ним ещё ничего не привязано
+  try{if(!localStorage.getItem(UKEY+"_seedBrCleared")){const used=new Set(COLS.filter(k=>k!=="branches").flatMap(k=>db[k].map(x=>String(x.branch))));
+    db.branches=db.branches.filter(b=>!(SEEDED_BRANCHES.includes(b.name)&&!b.address&&!used.has(String(b.id))));persistNow(true);localStorage.setItem(UKEY+"_seedBrCleared","1")}}catch(e){}
   settings.teacherAcc=1;if(oneBoss())persist();
   db.leads.forEach(l=>{if(l.price===undefined)l.price=0;l.pipeline=l.pipeline||"sales";l.feed=l.feed||[];if(l.stage===LOST&&!l.reason)l.reason="Другое"});
   settings.robots=settings.robots||{};settings.templates=settings.templates||{};if(!settings.sla)settings.sla=15;
