@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FBF5E6">
+<title>DJIGIT TAU CRM</title>
+<style>
+:root{
+  --bg:#F6F2E9;--card:#fff;--ink:#1A1712;--ink2:#4A3F2C;--muted:#857B69;--line:#ECE3CF;
+  --gold:#B8913A;--gold-d:#9A7629;--gold-l:#D9BE7C;--gold-s:#F5ECD6;--side:#FBF5E6;--side2:#F3E6C6;
+  --ok:#2F8F5B;--bad:#C0473A;--warn:#C98A1B;--info:#3B6FB6;
+  --sw:252px;--r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--gold-d)}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- вход ---------- */
+.login{min-height:100%;display:grid;place-items:center;padding:24px;background:radial-gradient(1200px 600px at 50% -10%,#FFF9EA,transparent),var(--bg)}
+.login-card{width:100%;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:32px 28px;box-shadow:0 20px 60px rgba(90,65,15,.10)}
+.login-card img{display:block;width:210px;margin:0 auto 6px}
+.login-card h1{text-align:center;font-size:15px;letter-spacing:.18em;font-weight:600;color:var(--gold-d);margin:0 0 22px}
+.login-card label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:22px 0 12px}
+.or:before,.or:after{content:"";height:1px;background:var(--line);flex:1}
+.roles{display:grid;gap:8px}
+.roles button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#FFFCF5;text-align:left}
+.roles button:hover{border-color:var(--gold-l);background:var(--gold-s)}
+.roles small{margin-left:auto;color:var(--muted);font-size:12px}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* ---------- каркас ---------- */
+.shell{display:flex;min-height:100%}
+.side{position:fixed;inset:0 auto 0 0;width:var(--sw);background:linear-gradient(180deg,var(--side),var(--side2));border-right:1px solid #E6D6AE;display:flex;flex-direction:column;z-index:40;transition:width .2s ease,transform .25s ease}
+.side .brand{height:72px;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid #E9DBB6}
+.side .brand img{height:30px}
+.side .brand b{font-size:15px;letter-spacing:.06em;white-space:nowrap}
+.side .brand span{display:block;font-size:10px;letter-spacing:.3em;color:var(--gold-d);font-weight:700}
+.nav{flex:1;overflow:auto;padding:12px 10px}
+.nav .it{display:flex;align-items:center;gap:12px;width:100%;height:40px;padding:0 12px;border:0;border-radius:10px;background:none;color:var(--ink2);text-align:left;white-space:nowrap;font-weight:500}
+.nav .it:hover{background:rgba(184,145,58,.13)}
+.nav .it.on{background:linear-gradient(135deg,#C9A24D,#A98130);color:#fff;box-shadow:0 4px 12px rgba(169,129,48,.28)}
+.nav .it .chev{margin-left:auto;transition:transform .2s}
+.nav .grp.open>.it .chev{transform:rotate(90deg)}
+.nav .sub{display:none;padding:2px 0 6px 18px;position:relative}
+.nav .sub:before{content:"";position:absolute;left:21px;top:2px;bottom:8px;width:1px;background:#E2CF9F}
+.nav .grp.open>.sub{display:block}
+.nav .sub .it{height:34px;font-weight:400;font-size:13.5px;padding-left:20px}
+.nav .grp.has-on>.it{color:var(--gold-d);font-weight:600}
+.side .foot{padding:10px;border-top:1px solid #E9DBB6}
+.side .foot .it{display:flex;align-items:center;gap:12px;width:100%;height:40px;padding:0 12px;border:0;border-radius:10px;background:none;color:var(--ink2);white-space:nowrap}
+.side .foot .it:hover{background:rgba(184,145,58,.13)}
+.side.mini{--sw:72px}
+.side.mini .brand b,.side.mini .it span,.side.mini .it .chev,.side.mini .sub{display:none}
+.side.mini .brand{justify-content:center;padding:0}
+.side.mini .it{justify-content:center;padding:0}
+.main{flex:1;margin-left:var(--sw);min-width:0;transition:margin .2s}
+.side.mini~.main{margin-left:72px}
+.top{position:sticky;top:0;z-index:30;height:64px;display:flex;align-items:center;gap:12px;padding:0 24px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top h2{margin:0;font-size:18px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .sp{flex:1}
+.burger{display:none}
+.chip{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border:1px solid var(--line);border-radius:999px;background:#fff;white-space:nowrap}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--gold-s);color:var(--gold-d);font-weight:700;font-size:12px;overflow:hidden;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.chip small{display:block;color:var(--muted);font-size:11px;line-height:1.1}
+.content{padding:24px;max-width:1440px}
+.banner{display:flex;gap:10px;align-items:center;font-size:12.5px;color:#7A5B12;background:#FFF6DF;border:1px solid #F0DDAA;border-radius:12px;padding:9px 14px;margin-bottom:18px}
+.dim{position:fixed;inset:0;background:rgba(26,23,18,.35);z-index:35;display:none}
+
+/* ---------- элементы ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(60,45,10,.04)}
+.card.pad{padding:18px}
+.card h3{margin:0 0 12px;font-size:15px}
+.grid{display:grid;gap:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:16px}
+.kpi{padding:16px 18px}
+.kpi .l{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.kpi .l svg{color:var(--gold)}
+.kpi .v{font-size:25px;font-weight:700;margin-top:6px;letter-spacing:-.01em}
+.kpi .f{font-size:12px;color:var(--muted);margin-top:2px}
+.kpi.gold{background:linear-gradient(135deg,#FFFBF0,#F6E8C5);border-color:#EBD7A4}
+.kpi.gold .v{color:var(--gold-d)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 15px;border-radius:10px;border:1px solid transparent;background:linear-gradient(135deg,#C49C46,#A98130);color:#fff;font-weight:600;white-space:nowrap}
+.btn:hover{filter:brightness(1.05)}
+.btn.ghost{background:#fff;color:var(--ink2);border-color:var(--line);font-weight:500}
+.btn.ghost:hover{border-color:var(--gold-l);background:#FFFCF4}
+.btn.sm{height:30px;padding:0 10px;font-size:12.5px;border-radius:8px}
+.ib{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:none;color:var(--muted)}
+.ib:hover{background:var(--gold-s);color:var(--gold-d)}
+.ib.del:hover{background:#FBEDEA;color:var(--bad)}
+input.in,select.in,textarea.in{width:100%;height:40px;padding:0 12px;border:1px solid #E3D9C3;border-radius:10px;background:#fff;outline:none}
+textarea.in{height:84px;padding:10px 12px;resize:vertical}
+.in:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,145,58,.15)}
+.in:disabled{background:#F7F4EC;color:var(--muted)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.bar .search{position:relative;flex:1;min-width:200px;max-width:360px}
+.bar .search svg{position:absolute;left:11px;top:11px;color:var(--muted)}
+.bar .search input{padding-left:36px}
+.bar select.in{width:auto;min-width:150px}
+.ph{display:flex;align-items:flex-end;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.ph h1{margin:0;font-size:22px}
+.ph p{margin:2px 0 0;color:var(--muted)}
+.ph .sp{flex:1}
+.tw{overflow:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);background:#FCFAF5;white-space:nowrap;user-select:none}
+th.s{cursor:pointer}
+th.s:hover{color:var(--gold-d)}
+td{padding:11px 14px;border-bottom:1px solid #F3EDDF;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#FFFCF4}
+td.num,th.num{text-align:right;white-space:nowrap}
+td.act{text-align:right;white-space:nowrap;width:1%}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#F1ECE0;color:var(--ink2);white-space:nowrap}
+.b-ok{background:#E6F4EC;color:var(--ok)}.b-bad{background:#FBEAE7;color:var(--bad)}.b-warn{background:#FFF3DB;color:#9A6A0F}.b-info{background:#E8F0FA;color:var(--info)}.b-gold{background:var(--gold-s);color:var(--gold-d)}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.empty svg{width:34px;height:34px;color:var(--gold-l);margin-bottom:8px}
+.who{display:flex;align-items:center;gap:10px}
+.who .av{width:34px;height:34px}
+.muted{color:var(--muted)}
+.right{margin-left:auto}
+.hbars .row{display:grid;grid-template-columns:140px 1fr 110px;gap:10px;align-items:center;margin:7px 0;font-size:13px}
+.hbars .track{height:10px;border-radius:6px;background:#F3EDDF;overflow:hidden}
+.hbars .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#D9BE7C,#B8913A)}
+.cols{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:10px}
+.cols .c{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;font-size:11.5px;color:var(--muted)}
+.cols .c i{display:block;width:100%;max-width:42px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,#D9BE7C,#B8913A);min-height:3px}
+.cols .c b{color:var(--ink);font-size:11px;font-weight:600}
+.formula{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px}
+.formula .t{padding:8px 12px;border-radius:10px;background:#FCFAF5;border:1px solid var(--line)}
+.formula .t small{display:block;font-size:11px;color:var(--muted)}
+.formula .eq{color:var(--muted);font-size:18px}
+.formula .t.res{background:linear-gradient(135deg,#FFFBF0,#F6E8C5);border-color:#EBD7A4;font-weight:700}
+
+/* воронка */
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
+.kcol{flex:0 0 260px;background:#FBF8F1;border:1px solid var(--line);border-radius:14px;min-height:200px}
+.kcol.drag{background:var(--gold-s);border-color:var(--gold-l)}
+.kcol h4{margin:0;padding:12px 14px 10px;font-size:13px;display:flex;align-items:center;gap:8px;border-top:3px solid var(--c);border-radius:14px 14px 0 0}
+.kcol h4 .badge{margin-left:auto}
+.kcards{padding:0 10px 10px;display:grid;gap:8px;min-height:60px}
+.kc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 12px;cursor:grab;box-shadow:0 1px 2px rgba(60,45,10,.05)}
+.kc:hover{border-color:var(--gold-l)}
+.kc b{display:block;font-size:13.5px}
+.kc .m{font-size:12px;color:var(--muted);margin-top:3px}
+.kc select{margin-top:8px;height:30px;font-size:12px;padding:0 8px}
+
+/* расписание / посещаемость */
+.week{display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));gap:10px;overflow-x:auto}
+.day{background:#FBF8F1;border:1px solid var(--line);border-radius:12px;min-height:140px}
+.day h4{margin:0;padding:10px 12px;font-size:13px;border-bottom:1px solid var(--line)}
+.day.today h4{color:var(--gold-d)}
+.slot{margin:8px;padding:8px 10px;background:#fff;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:9px;font-size:12.5px;cursor:pointer}
+.slot b{display:block}
+.att{display:flex;gap:6px}
+.att button{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:12.5px}
+.att button.p.on{background:#E6F4EC;border-color:#BFE2CC;color:var(--ok);font-weight:600}
+.att button.a.on{background:#FBEAE7;border-color:#F0C9C2;color:var(--bad);font-weight:600}
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid #F3EDDF}
+.task:last-child{border-bottom:0}
+.task input{width:18px;height:18px;margin-top:2px;accent-color:var(--gold)}
+.task.done b{text-decoration:line-through;color:var(--muted)}
+.perm{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F3EDDF}
+.perm:last-of-type{border:0}
+.perm input{width:18px;height:18px;accent-color:var(--gold)}
+
+/* модальное окно */
+.ov{position:fixed;inset:0;background:rgba(26,23,18,.45);z-index:60;display:grid;place-items:center;padding:20px;animation:f .15s}
+@keyframes f{from{opacity:0}}
+.modal{width:100%;max-width:600px;max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(40,30,10,.25)}
+.modal header{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:1}
+.modal header h3{margin:0;font-size:17px}
+.modal .body{padding:6px 20px 8px;display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.modal .body .full{grid-column:1/-1}
+.modal label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
+.modal footer{display:flex;gap:10px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff}
+.hist{font-size:12.5px;border:1px solid var(--line);border-radius:10px;max-height:160px;overflow:auto}
+.hist div{padding:7px 10px;border-bottom:1px solid #F3EDDF}
+.hist div:last-child{border:0}
+.photo{display:flex;align-items:center;gap:12px}
+.photo .av{width:56px;height:56px;font-size:16px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;z-index:80;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+
+@media (max-width:900px){
+  .side,.side.mini{transform:translateX(-100%);--sw:272px;box-shadow:0 0 40px rgba(0,0,0,.15)}
+  .side.mini .brand b,.side.mini .it span,.side.mini .it .chev{display:revert}
+  .side.mini .grp.open>.sub{display:block}
+  .side.mini .it{justify-content:flex-start;padding:0 12px}
+  .side.open{transform:none}
+  .side.open~.dim{display:block}
+  .side .collapse{display:none!important}
+  .main,.side.mini~.main{margin-left:0}
+  .burger{display:inline-grid}
+  .top{padding:0 12px;gap:8px}
+  .top h2{font-size:16px}
+  .chip .nm{display:none}
+  .content{padding:14px}
+  .two{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi{padding:12px 14px}.kpi .v{font-size:20px}
+  .modal .body{grid-template-columns:1fr}
+  .ov{padding:0;align-items:end}
+  .modal{max-height:92vh;border-radius:18px 18px 0 0}
+  .hbars .row{grid-template-columns:96px 1fr 84px}
+  .bar .search{max-width:none}
+  .top select.in{max-width:140px!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* Предпоказ DJIGIT TAU CRM. Данные — только в этом браузере (localStorage). Supabase подключается после согласования дизайна. */
+const KEY="djigit_tau_preview_v1";
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const money=n=>Math.round(+n||0).toLocaleString("ru-RU")+" ₸";
+const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const month=()=>today().slice(0,7);
+const fdate=d=>d?String(d).split("-").reverse().join("."):"";
+const pct=(a,b)=>b?Math.round(a/b*100)+"%":"—";
+const ini=n=>String(n||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+
+/* ---------- иконки ---------- */
+const IP={
+ home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+ building:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/>',
+ users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 4.5a3 3 0 010 6M21 20c0-2.6-1.6-4.8-4-5.6"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
+ layers:'<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
+ music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ check:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9"/>',
+ funnel:'<path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/>',
+ cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 002 1.6h8.6a2 2 0 002-1.5L22 8H6"/>',
+ wallet:'<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M16 15h2"/><path d="M6 6l9-3 1 3"/>',
+ undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/>',
+ percent:'<path d="M19 5L5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+ coins:'<ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M9 15v3c0 1.7 2.7 3 6 3s6-1.3 6-3v-5c0-1.7-2.7-3-6-3"/>',
+ chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/>',
+ tasks:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/>',
+ log:'<path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9l-6-6z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+ chev:'<path d="M9 6l6 6-6 6"/>',
+ menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+ out:'<path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/>',
+ side:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/>',
+ trash:'<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ debt:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+ profile:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17c.6-1.8 2-3 3.5-3s2.9 1.2 3.5 3M15 10h3M15 14h3"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>',
+ star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'
+};
+const ic=(n,c="")=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${IP[n]||""}</svg>`;
+
+/* ---------- справочники ---------- */
+const STAGES=["Новая заявка","Связались","Записан на пробное","Пробное проведено","Думает","Купил абонемент","Отказ"];
+const STC=["#3B6FB6","#6A5ACD","#C98A1B","#B8913A","#8C8C8C","#2F8F5B","#C0473A"];
+const DAYS=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+const COSTS=["Зарплаты тренеров","Аренда","Реклама","Коммунальные расходы","Расходы на мероприятия","Прочие расходы"];
+const SOURCES=["Instagram","WhatsApp","TikTok","2ГИС","Сайт","Рекомендация","Другое"];
+const METHODS=["Kaspi","Halyk","Наличные","Банковская карта","Перевод"];
+const ROLE_NAMES={boss:"Руководитель",admin:"Администратор",badmin:"Администратор филиала",trainer:"Тренер",sales:"Менеджер отдела продаж"};
+
+function seed(){
+  return {
+    branches:[],trainers:[],groups:[],students:[],schedule:[],attendance:[],leads:[],sales:[],refunds:[],expenses:[],tasks:[],users:[],log:[],
+    categories:["Групповые занятия","Индивидуальные занятия","Мини-группа","Семейный тариф","Постановка танца"].map(name=>({id:uid(),name,desc:""})),
+    dances:["Лезгинка","Игра на барабанах","Вайнахский танец","Чеченский танец","Грузинский танец"].map(name=>({id:uid(),name})),
+    perms:{salesDiscounts:true,salesRefunds:false,badminOther:false}
+  };
+}
+let S; try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.branches) S=seed();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Не удалось сохранить: память браузера заполнена")}};
+
+/* ---------- состояние интерфейса ---------- */
+const UI={role:null,page:"dash",q:{},bf:{},sort:{},open:{},mini:localStorage.getItem(KEY+"_mini")==="1",me:{},f:{branch:"",month:"",cat:"",dance:"",emp:""},attG:"",attD:today()};
+try{Object.assign(UI,JSON.parse(sessionStorage.getItem(KEY+"_ui"))||{})}catch(e){}
+const keepUI=()=>sessionStorage.setItem(KEY+"_ui",JSON.stringify({role:UI.role,page:UI.page,me:UI.me,open:UI.open}));
+
+/* ---------- меню по ролям ---------- */
+const STUDIO=[["Филиалы","branches"],["Тренеры","trainers"],["Группы","groups"],["Ученики","students"],["Расписание","schedule"],["Посещаемость","attendance"],["Категории занятий","categories"],["Виды танцев","dances"]];
+const SALES_M=[["Воронка заявок","leads"],["Продажи","sales"],["Клиенты","clients"],["Оплаты","payments"],["Задолженности","debts"]];
+const MENU={
+ boss:[["Главная","home","dash"],["Управление студией","building",STUDIO],["Отдел продаж","funnel",SALES_M],
+   ["Финансы","coins",[["Продажи и выручка","fin_sales"],["Возвраты","refunds"],["Скидки","discounts"],["Себестоимость","costs"]]],
+   ["Аналитика и LTV","chart","analytics"],["Задачи","tasks","tasks"],
+   ["Доступ и безопасность","shield",[["Сотрудники и права","users"],["Журнал действий","log"]]]],
+ admin:[["Главная","home","dash"],["Управление студией","building",STUDIO],["Отдел продаж","funnel",SALES_M],["Задачи","tasks","tasks"]],
+ badmin:[["Главная","home","dash"],["Ученики","users","students"],["Тренеры","user","trainers"],["Группы","layers","groups"],["Расписание","cal","schedule"],
+   ["Посещаемость","check","attendance"],["Оплаты","wallet","payments"],["Задолженности","debt","debts"],["Задачи","tasks","tasks"]],
+ trainer:[["Главная","home","dash"],["Мои группы","layers","groups"],["Посещаемость","check","attendance"],["Расписание","cal","schedule"],["Задачи и постановки","tasks","tasks"],["Профиль","profile","profile"]],
+ sales:[["Главная","home","dash"],["Заявки","funnel","leads"],["Продажи","cart","sales"],["Клиенты","users","clients"],["Оплаты","wallet","payments"],
+   ["Возвраты","undo","refunds"],["Скидки","percent","discounts"],["История продаж","log","saleshist"]]
+};
+const ICON_OF={branches:"building",trainers:"user",groups:"layers",students:"users",schedule:"cal",attendance:"check",categories:"star",dances:"music",
+  leads:"funnel",sales:"cart",payments:"wallet",debts:"debt",refunds:"undo",discounts:"percent",expenses:"coins",users:"shield",tasks:"tasks"};
+const pagesOf=r=>MENU[r].flatMap(m=>Array.isArray(m[2])?m[2].map(s=>s[1]):[m[2]]);
+
+/* ---------- поля: [ключ, подпись, тип, справочник/варианты, обязательное, подсказка] ---------- */
+const E={
+ branches:{one:"филиал",add:"Добавить филиал",f:[["name","Название","text",null,1],["address","Адрес"],["admin","Ответственный администратор"],["status","Статус филиала","sel",["Действующий","Новый","Закрыт"]]],
+   cols:[["name","Филиал","b"],["address","Адрес"],["admin","Администратор"],[x=>S.students.filter(s=>s.branch===x.id&&s.status!=="Ушёл").length,"Учеников","num"],[x=>S.trainers.filter(t=>t.branch===x.id&&t.status!=="Не работает").length,"Тренеров","num"],["status","Статус","badge"]]},
+ trainers:{one:"тренера",add:"Добавить тренера",f:[["photo","Фотография","photo"],["name","ФИО","text",null,1],["phone","Телефон","tel"],["branch","Филиал","ref","branches"],["spec","Специализация","ref","dances"],["position","Должность"],["salary","Зарплата в месяц, ₸","money"],["status","Статус работы","sel",["Работает","В отпуске","Не работает"]]],
+   cols:[["name","Тренер","who"],["phone","Телефон"],["branch","Филиал"],["spec","Специализация"],[x=>S.groups.filter(g=>g.trainer===x.id).map(g=>g.name).join(", ")||"—","Группы"],["salary","Зарплата","money"],["status","Статус","badge"]]},
+ groups:{one:"группу",add:"Добавить группу",f:[["name","Название группы","text",null,1],["branch","Филиал","ref","branches"],["trainer","Тренер","ref","trainers"],["category","Категория занятий","ref","categories"],["dance","Вид танца","ref","dances"],["age","Возраст учеников","text",null,0,"например, 7–10 лет"],["hall","Зал"]],
+   cols:[["name","Группа","b"],["age","Возраст"],["branch","Филиал"],["trainer","Тренер"],["dance","Вид танца"],["category","Категория"],[x=>S.students.filter(s=>s.group===x.id&&s.status!=="Ушёл").length,"Учеников","num"],[x=>S.schedule.filter(s=>s.group===x.id).sort(bySlot).map(s=>s.day+" "+s.time).join(", ")||"—","Расписание"]]},
+ students:{one:"ученика",add:"Добавить ученика",f:[["name","ФИО ученика","text",null,1],["age","Возраст","num"],["parent","Имя родителя"],["phone","Телефон","tel"],["branch","Филиал","ref","branches"],["group","Группа","ref","groups"],["status","Статус","sel",["Активный","Заморозка","Ушёл"]]],
+   cols:[["name","Ученик","who"],["age","Возраст","num"],["parent","Родитель"],["phone","Телефон"],["branch","Филиал"],["group","Группа"],[x=>debtOf(x.id),"Долг","money"],["status","Статус","badge"]]},
+ schedule:{one:"занятие",add:"Добавить занятие",f:[["group","Группа","ref","groups",1],["day","День недели","sel",DAYS],["time","Начало","time",null,1],["end","Окончание","time"],["hall","Зал"]],cols:[]},
+ categories:{one:"категорию",add:"Добавить категорию",f:[["name","Название","text",null,1],["desc","Описание и условия","area"]],
+   cols:[["name","Категория","b"],["desc","Описание"],[x=>S.groups.filter(g=>g.category===x.id).length,"Групп","num"]]},
+ dances:{one:"вид танца",add:"Добавить свой вид танца",f:[["name","Название","text",null,1]],
+   cols:[["name","Вид танца","b"],[x=>S.groups.filter(g=>g.dance===x.id).length,"Групп","num"],[x=>S.trainers.filter(t=>t.spec===x.id).length,"Тренеров","num"]]},
+ leads:{one:"заявку",add:"Новая заявка",f:[["name","Имя клиента","text",null,1],["parent","Имя родителя"],["phone","Телефон","tel"],["age","Возраст ребёнка","num"],["branch","Желаемый филиал","ref","branches"],["category","Категория занятий","ref","categories"],["source","Источник заявки","sel",SOURCES],["manager","Ответственный менеджер"],["stage","Этап воронки","sel",STAGES],["comment","Комментарий","area"]],cols:[]},
+ sales:{one:"продажу",add:"Новая продажа",f:[["date","Дата","date"],["student","Ученик","ref","students"],["newStudent","…или новый клиент (ФИО)","text"],["branch","Филиал","ref","branches"],["category","Категория занятий","ref","categories"],["tariff","Тариф","text",null,0,"например, 12 занятий / месяц"],["price","Полная стоимость, ₸","money"],["discount","Скидка, ₸","money"],["discountReason","Причина скидки"],["paid","Фактически оплачено, ₸","money",null,0,"пусто = стоимость − скидка"],["method","Способ оплаты","sel",METHODS],["manager","Менеджер"]],
+   cols:[["date","Дата","date"],["student","Ученик","b"],["branch","Филиал"],["category","Категория"],["tariff","Тариф"],["price","Стоимость","money"],["discount","Скидка","money"],["paid","Оплачено","money"],["method","Оплата"],["manager","Менеджер"]]},
+ refunds:{one:"возврат",add:"Оформить возврат",f:[["date","Дата","date"],["student","Ученик","ref","students",1],["branch","Филиал","ref","branches"],["amount","Сумма возврата, ₸","money",null,1],["reason","Причина","text"],["by","Ответственный сотрудник"]],
+   cols:[["date","Дата","date"],["student","Ученик","b"],["branch","Филиал"],["amount","Сумма","money"],["reason","Причина"],["by","Ответственный"]]},
+ expenses:{one:"расход",add:"Добавить расход",f:[["date","Дата","date"],["kind","Статья","sel",COSTS],["branch","Филиал","ref","branches"],["amount","Сумма, ₸","money",null,1],["note","Комментарий"]],
+   cols:[["date","Дата","date"],["kind","Статья","b"],["branch","Филиал"],["amount","Сумма","money"],["note","Комментарий"]]},
+ tasks:{one:"задачу",add:"Добавить задачу",f:[["title","Задача","text",null,1],["kind","Тип","sel",["Задача","Постановка танца"]],["assignee","Кому (тренер)","ref","trainers"],["due","Срок","date"],["desc","Описание (для постановки — музыка, рисунок, костюмы)","area"],["done","Выполнено","check"]],cols:[]},
+ users:{one:"сотрудника",add:"Добавить сотрудника",f:[["name","ФИО","text",null,1],["login","Телефон или email"],["role","Роль","sel",Object.values(ROLE_NAMES)],["branch","Филиал","ref","branches"],["status","Статус","sel",["Активен","Заблокирован"]]],
+   cols:[["name","Сотрудник","who"],["login","Вход"],["role","Роль","badge"],["branch","Филиал"],["status","Статус","badge"]]}
+};
+const nm=(ent,id)=>(S[ent]||[]).find(x=>x.id===id)?.name||"";
+const fieldOf=(ent,k)=>E[ent]?.f.find(f=>f[0]===k);
+const sum=(a,k)=>a.reduce((s,x)=>s+(+x[k]||0),0);
+const bySlot=(a,b)=>DAYS.indexOf(a.day)-DAYS.indexOf(b.day)||String(a.time).localeCompare(b.time);
+const grpBranch=g=>S.groups.find(x=>x.id===g)?.branch||"";
+const debtOf=sid=>Math.max(0,S.sales.filter(s=>s.student===sid).reduce((t,s)=>t+(+s.price||0)-(+s.discount||0)-(+s.paid||0),0));
+
+const raw=(c,x)=>typeof c[0]==="function"?c[0](x):x[c[0]];
+function show(ent,c,x){
+  const v=raw(c,x),f=typeof c[0]==="string"&&fieldOf(ent,c[0]);
+  if(f&&f[2]==="ref") return nm(f[3],v)||"—";
+  if(c[2]==="money") return money(v);
+  if(c[2]==="date") return fdate(v);
+  return v===""||v==null?"—":v;
+}
+const BADGE={"Действующий":"ok","Работает":"ok","Активный":"ok","Активен":"ok","Новый":"info","В отпуске":"warn","Заморозка":"warn","Закрыт":"bad","Не работает":"bad","Ушёл":"bad","Заблокирован":"bad"};
+function cell(ent,c,x){
+  const t=show(ent,c,x);
+  if(c[2]==="badge") return `<span class="badge b-${BADGE[t]||"gold"}">${esc(t)}</span>`;
+  if(c[2]==="who") return `<div class="who">${avatar(x)}<b>${esc(t)}</b></div>`;
+  if(c[2]==="b") return `<b>${esc(t)}</b>`;
+  return esc(t);
+}
+const avatar=x=>`<span class="av">${x.photo?`<img src="${x.photo}" alt="">`:esc(ini(x.name))}</span>`;
+
+/* ---------- права ---------- */
+const R=()=>UI.role;
+function scope(ent,rows){
+  const r=R(),me=UI.me;rows=rows||S[ent]||[];
+  if(r==="badmin"&&!S.perms.badminOther){
+    const b=me.branch;if(!b) return [];
+    if(ent==="schedule"||ent==="attendance") return rows.filter(x=>grpBranch(x.group)===b);
+    if(ent==="branches") return rows.filter(x=>x.id===b);
+    if(E[ent]?.f.some(f=>f[0]==="branch")) return rows.filter(x=>x.branch===b);
+  }
+  if(r==="trainer"){
+    const gs=S.groups.filter(g=>g.trainer===me.trainer).map(g=>g.id);
+    if(ent==="groups") return rows.filter(g=>gs.includes(g.id));
+    if(ent==="students") return rows.filter(s=>gs.includes(s.group));
+    if(ent==="schedule"||ent==="attendance") return rows.filter(x=>gs.includes(x.group));
+    if(ent==="tasks") return rows.filter(t=>t.assignee===me.trainer);
+    if(["sales","refunds","expenses","leads","users"].includes(ent)) return [];
+  }
+  if(r==="sales"){
+    if(ent==="sales") return rows.filter(x=>x.manager===me.name);
+    if(ent==="refunds") return rows.filter(x=>x.by===me.name||S.sales.some(s=>s.manager===me.name&&s.student===x.student));
+    if(ent==="leads") return rows.filter(x=>!x.manager||x.manager===me.name);
+  }
+  return rows;
+}
+function canEdit(ent){
+  const r=R();
+  if(r==="boss") return true;
+  if(r==="admin") return !["users","expenses","refunds"].includes(ent);
+  if(r==="badmin") return ["students","groups","schedule","attendance","sales","tasks"].includes(ent);
+  if(r==="trainer") return ["tasks","attendance"].includes(ent);
+  if(r==="sales") return ["leads","sales","students"].includes(ent)||(ent==="refunds"&&S.perms.salesRefunds);
+  return false;
+}
+function locked(ent,k){
+  const r=R();
+  if(r==="badmin"&&k==="branch"&&!S.perms.badminOther) return true;
+  if(r==="sales"&&(k==="manager"||k==="by")) return true;
+  if(r==="sales"&&ent==="sales"&&(k==="discount"||k==="discountReason")&&!S.perms.salesDiscounts) return true;
+  if(r==="trainer"&&k==="assignee") return true;
+  return false;
+}
+function defaults(ent){
+  const d={},me=UI.me;
+  for(const f of E[ent].f){ if(f[2]==="sel") d[f[0]]=f[3][0]; if(f[2]==="date"&&f[0]!=="due") d[f[0]]=today(); }
+  if(me.branch) d.branch=me.branch;
+  if(UI.bf[ent]) d.branch=UI.bf[ent];
+  if(R()==="sales"){d.manager=me.name;d.by=me.name}
+  if(R()==="trainer") d.assignee=me.trainer;
+  return d;
+}
+function logIt(action,ent,x){
+  S.log.unshift({id:uid(),at:new Date().toISOString(),who:(UI.me.name||ROLE_NAMES[R()])+" · "+ROLE_NAMES[R()],action,ent,name:x.name||x.title||nm("students",x.student)||x.kind||""});
+  S.log=S.log.slice(0,500);
+}
+
+/* ---------- каркас ---------- */
+function render(){
+  keepUI();
+  if(!UI.role) return renderLogin();
+  if(!pagesOf(R()).includes(UI.page)) UI.page="dash";
+  const active=UI.page;
+  const nav=MENU[R()].map((m,i)=>{
+    if(!Array.isArray(m[2])) return `<button class="it ${active===m[2]?"on":""}" data-go="${m[2]}" title="${esc(m[0])}">${ic(m[1])}<span>${esc(m[0])}</span></button>`;
+    const has=m[2].some(s=>s[1]===active),open=UI.open[i]??has;
+    return `<div class="grp ${open?"open":""} ${has?"has-on":""}"><button class="it" data-grp="${i}" title="${esc(m[0])}" aria-expanded="${open}">${ic(m[1])}<span>${esc(m[0])}</span>${ic("chev","chev")}</button>
+      <div class="sub">${m[2].map(s=>`<button class="it ${active===s[1]?"on":""}" data-go="${s[1]}"><span>${esc(s[0])}</span></button>`).join("")}</div></div>`;
+  }).join("");
+  $("#app").innerHTML=`<div class="shell">
+   <aside class="side ${UI.mini?"mini":""}" id="side">
+     <div class="brand"><img src="img/eagle.png" alt=""><b>DJIGIT TAU<span>CRM</span></b></div>
+     <nav class="nav">${nav}</nav>
+     <div class="foot"><button class="it collapse" data-act="mini" title="${UI.mini?"Развернуть меню":"Свернуть меню"}">${ic("side")}<span>${UI.mini?"Развернуть":"Свернуть меню"}</span></button>
+       <button class="it" data-act="logout" title="Выйти">${ic("out")}<span>Выйти</span></button></div>
+   </aside>
+   <div class="dim" data-act="closeSide"></div>
+   <main class="main">
+     <div class="top"><button class="ib burger" data-act="openSide" aria-label="Открыть меню">${ic("menu")}</button><h2>${esc(titleOf(active))}</h2><span class="sp"></span>${viewAs()}
+       <div class="chip"><span class="av">${esc(ini(UI.me.name||ROLE_NAMES[R()]))}</span><div class="nm"><b>${esc(UI.me.name||ROLE_NAMES[R()])}</b>${UI.me.name&&UI.me.name!==ROLE_NAMES[R()]?`<small>${esc(ROLE_NAMES[R()])}</small>`:""}</div></div></div>
+     <div class="content"><div class="banner">${ic("star")}<span><b>Предпоказ.</b> Все кнопки работают, но данные пока хранятся только в этом браузере. После согласования дизайна подключим базу Supabase и настоящие логины.</span></div>${(PAGES[active]||PAGES.dash)()}</div>
+   </main></div>`;
+  restoreFocus();
+}
+function titleOf(p){for(const m of MENU[R()]){if(m[2]===p)return m[0];if(Array.isArray(m[2]))for(const s of m[2])if(s[1]===p)return s[0]}return"Главная"}
+function viewAs(){
+  const r=R();
+  if(r==="badmin") return `<select class="in" style="width:auto;max-width:220px" data-me="branch" title="Предпоказ: ваш филиал"><option value="">— ваш филиал —</option>${S.branches.map(b=>`<option value="${b.id}" ${UI.me.branch===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`;
+  if(r==="trainer") return `<select class="in" style="width:auto;max-width:220px" data-me="trainer" title="Предпоказ: кто вы"><option value="">— выберите тренера —</option>${S.trainers.map(t=>`<option value="${t.id}" ${UI.me.trainer===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select>`;
+  return "";
+}
+let focusKey=null;
+function restoreFocus(){if(!focusKey)return;const el=document.querySelector(`[data-q="${focusKey}"]`);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}focusKey=null}
+
+function renderLogin(){
+  $("#app").innerHTML=`<div class="login"><div class="login-card">
+   <img src="img/logo.png" alt="DJIGIT TAU"><h1>CRM</h1>
+   <form data-form="login"><label>Телефон или email</label><input class="in" name="login" autocomplete="username" placeholder="+7 700 000 00 00 или name@mail.kz">
+   <label>Пароль</label><input class="in" name="pass" type="password" autocomplete="current-password" placeholder="••••••••">
+   <button class="btn" style="width:100%;justify-content:center;margin-top:16px">Войти</button>
+   <div class="note" id="loginNote"></div></form>
+   <div class="or">Предпоказ — войти как</div>
+   <div class="roles">${Object.entries(ROLE_NAMES).map(([k,v])=>`<button data-role="${k}">${ic({boss:"star",admin:"building",badmin:"home",trainer:"user",sales:"funnel"}[k])}<b>${v}</b><small>${{boss:"всё",admin:"студия",badmin:"свой филиал",trainer:"свои группы",sales:"заявки и продажи"}[k]}</small></button>`).join("")}</div>
+  </div></div>`;
+}
+const empty=(t,icon="layers")=>`<div class="empty">${ic(icon)}<div>${t}</div></div>`;
+
+/* ---------- таблица с поиском, фильтром и сортировкой ---------- */
+function crud(ent,opt={}){
+  const d=E[ent];let rows=scope(ent);
+  const q=(UI.q[ent]||"").toLowerCase(),bf=UI.bf[ent]||"";
+  if(bf) rows=rows.filter(x=>x.branch===bf);
+  if(q) rows=rows.filter(x=>d.cols.map(c=>show(ent,c,x)).join(" ").toLowerCase().includes(q));
+  const so=UI.sort[ent];
+  if(so){const c=d.cols[so.i],k=x=>c[2]==="money"||c[2]==="num"?+raw(c,x)||0:c[2]==="date"?String(raw(c,x)):String(show(ent,c,x)).toLowerCase();
+    rows=[...rows].sort((a,b)=>(k(a)>k(b)?1:k(a)<k(b)?-1:0)*so.dir)}
+  const hasBr=d.f.some(f=>f[0]==="branch")&&!(R()==="badmin"&&!S.perms.badminOther)&&S.branches.length>1;
+  const ed=canEdit(ent)&&!opt.readonly;
+  const act=x=>opt.rowAct?`<td class="act">${opt.rowAct(x)}</td>`:ed?`<td class="act">${ent==="categories"?`<button class="btn ghost sm" data-edit="${ent}:${x.id}:desc">Дополнить</button> `:""}<button class="ib" data-edit="${ent}:${x.id}" title="Редактировать" aria-label="Редактировать">${ic("edit")}</button><button class="ib del" data-del="${ent}:${x.id}" title="Удалить" aria-label="Удалить">${ic("trash")}</button></td>`:"";
+  return `<div class="ph"><div><h1>${esc(opt.title||titleOf(UI.page))}</h1><p>${opt.sub||`Всего: ${scope(ent).length}`}</p></div><span class="sp"></span>${ed?`<button class="btn" data-add="${ent}">${ic("plus")}${esc(d.add)}</button>`:""}</div>
+  <div class="bar"><div class="search">${ic("search")}<input class="in" data-q="${ent}" value="${esc(UI.q[ent]||"")}" placeholder="Поиск" aria-label="Поиск"></div>
+   ${hasBr?`<select class="in" data-bf="${ent}" aria-label="Филиал"><option value="">Все филиалы</option>${S.branches.map(b=>`<option value="${b.id}" ${bf===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`:""}</div>
+  <div class="card tw">${rows.length?`<table><thead><tr>${d.cols.map((c,i)=>`<th class="s ${c[2]==="num"||c[2]==="money"?"num":""}" data-sort="${ent}:${i}" title="Сортировать">${esc(c[1])}${so&&so.i===i?(so.dir>0?" ↑":" ↓"):""}</th>`).join("")}${ed||opt.rowAct?"<th></th>":""}</tr></thead>
+   <tbody>${rows.map(x=>`<tr>${d.cols.map(c=>`<td class="${c[2]==="num"||c[2]==="money"?"num":""}">${cell(ent,c,x)}</td>`).join("")}${act(x)}</tr>`).join("")}</tbody></table>`
+   :empty(q||bf?"Ничего не найдено":opt.empty||`Пока пусто.${ed?` Нажмите «${esc(d.add)}».`:""}`,ICON_OF[ent]||"layers")}</div>`;
+}
+
+/* ---------- форма добавления / изменения ---------- */
+function refList(k,o){
+  if(R()==="badmin"&&!S.perms.badminOther&&["branches","groups","trainers","students"].includes(o)) return scope(o);
+  if(R()==="trainer"&&o==="trainers") return S.trainers.filter(t=>t.id===UI.me.trainer);
+  if(R()==="sales"&&o==="students") return S.students;
+  return S[o];
+}
+function openForm(ent,id,focus){
+  const d=E[ent],src=id?S[ent].find(r=>r.id===id):null;if(id&&!src)return;
+  const x=src?{...src}:defaults(ent);
+  const fields=d.f.filter(f=>!(id&&f[0]==="newStudent")).map(([k,l,t="text",o,req,ph])=>{
+    const dis=locked(ent,k)?"disabled":"",v=x[k]??"",full=t==="area"||t==="photo"||(k==="name"||k==="title")&&d.f.length>2?"full":"";
+    let inp;
+    if(t==="sel") inp=`<select class="in" name="${k}" ${dis}>${o.map(s=>`<option ${s===v?"selected":""}>${esc(s)}</option>`).join("")}</select>`;
+    else if(t==="ref") inp=`<select class="in" name="${k}" ${dis} ${req?"required":""}><option value="">—</option>${refList(k,o).map(r=>`<option value="${r.id}" ${r.id===v?"selected":""}>${esc(r.name)}</option>`).join("")}</select>`;
+    else if(t==="area") inp=`<textarea class="in" name="${k}" ${dis}>${esc(v)}</textarea>`;
+    else if(t==="check") inp=`<label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:0;height:40px"><input type="checkbox" name="${k}" ${v?"checked":""} style="width:18px;height:18px;accent-color:var(--gold)"> да</label>`;
+    else if(t==="photo") return `<div class="full"><label>${l}</label><div class="photo"><span class="av" id="phPrev">${v?`<img src="${v}" alt="">`:ic("user")}</span><input type="hidden" name="photo" value="${esc(v)}"><label class="btn ghost sm" style="margin:0">Загрузить фото<input type="file" accept="image/*" data-photo hidden></label></div></div>`;
+    else inp=`<input class="in" name="${k}" type="${t==="money"||t==="num"?"number":t}" ${t==="money"?'min="0" step="1" inputmode="numeric"':""} value="${esc(v)}" ${dis} ${req?"required":""} placeholder="${esc(ph||"")}">`;
+    return `<div class="${full}"><label>${l}${req?" *":""}</label>${inp}</div>`;
+  }).join("");
+  const hist=ent==="leads"?`<div class="full"><label>История общения</label><div class="hist">${(x.hist||[]).slice().reverse().map(h=>`<div><span class="muted">${new Date(h.at).toLocaleString("ru-RU",{dateStyle:"short",timeStyle:"short"})}</span> · ${esc(h.text)}</div>`).join("")||'<div class="muted">Пока нет записей</div>'}</div>
+     <label>Добавить запись в историю</label><input class="in" name="_note" placeholder="Например: позвонили, договорились на субботу"></div>`:"";
+  const conv=ent==="leads"&&id&&canEdit("students")?`<button type="button" class="btn ghost" data-conv="${id}">${ic("user")}В ученики</button>`:"";
+  closeModal();
+  const ov=document.createElement("div");ov.className="ov";
+  ov.innerHTML=`<form class="modal" data-save="${ent}:${id||""}" novalidate><header><h3>${id?"Изменить":"Добавить"} ${esc(d.one)}</h3><span class="right"></span><button type="button" class="ib" data-act="close" aria-label="Закрыть">${ic("x")}</button></header>
+    <div class="body">${fields}${hist}</div><footer>${conv}<span class="right"></span><button type="button" class="btn ghost" data-act="close">Отмена</button><button class="btn">Сохранить</button></footer></form>`;
+  document.body.appendChild(ov);
+  const el=ov.querySelector(`[name="${focus||d.f.find(f=>f[2]!=="photo")[0]}"]`);el&&!el.disabled&&el.focus();
+}
+function saveForm(form){
+  const [ent,id]=form.dataset.save.split(":"),d=E[ent],fd=new FormData(form);
+  const old=id?S[ent].find(r=>r.id===id):null,x=old?{...old}:{id:uid(),created:new Date().toISOString(),...defaults(ent)};
+  for(const [k,l,t,,req] of d.f){
+    if(locked(ent,k)) continue;
+    if(t==="check"){x[k]=fd.has(k);continue}
+    if(!fd.has(k)) continue;
+    let v=fd.get(k);v=t==="money"||t==="num"?(v===""?"":+v):String(v).trim();
+    if(req&&v==="") return toast(`Заполните поле «${l}»`);
+    if(t==="money"&&v!==""&&(v<0||!isFinite(v))) return toast(`«${l}»: введите сумму 0 или больше`);
+    x[k]=v;
+  }
+  if(ent==="sales"){
+    if(x.newStudent){
+      if(!canEdit("students")&&R()!=="badmin") return toast("Нет прав на добавление клиентов");
+      const st={id:uid(),name:x.newStudent,branch:x.branch,status:"Активный",created:x.created};S.students.push(st);x.student=st.id;logIt("Добавил","students",st)}
+    delete x.newStudent;
+    if(!x.student) return toast("Выберите ученика или впишите нового клиента");
+    x.price=+x.price||0;x.discount=+x.discount||0;
+    if(x.discount>x.price) return toast("Скидка не может быть больше стоимости");
+    if(x.paid==="") x.paid=x.price-x.discount;
+    if(!x.branch) x.branch=S.students.find(s=>s.id===x.student)?.branch||"";
+  }
+  if(ent==="refunds"&&!x.branch) x.branch=S.students.find(s=>s.id===x.student)?.branch||"";
+  if(ent==="leads"){
+    x.hist=[...(x.hist||[])];const note=(fd.get("_note")||"").trim(),at=new Date().toISOString();
+    if(!old) x.hist.push({at,text:"Заявка создана: "+x.stage});
+    else if(old.stage!==x.stage) x.hist.push({at,text:`Этап: ${old.stage} → ${x.stage}`});
+    if(note) x.hist.push({at,text:note});
+  }
+  if(old) Object.assign(old,x); else S[ent].push(x);
+  logIt(old?"Изменил":"Добавил",ent,x);save();closeModal();render();toast("Сохранено");
+}
+function closeModal(){document.querySelectorAll(".ov").forEach(o=>o.remove())}
+function toast(t){document.querySelectorAll(".toast").forEach(x=>x.remove());const d=document.createElement("div");d.className="toast";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}
+
+/* ---------- расчёты ---------- */
+const F=()=>UI.f;
+function fSales(list){
+  const f=F(),st=id=>S.students.find(s=>s.id===id);
+  return scope("sales",list).filter(s=>(!f.branch||s.branch===f.branch)&&(!f.month||String(s.date).startsWith(f.month))&&(!f.cat||s.category===f.cat)&&(!f.emp||s.manager===f.emp)
+    &&(!f.dance||S.groups.find(g=>g.id===st(s.student)?.group)?.dance===f.dance));
+}
+const fRef=()=>{const f=F();return scope("refunds").filter(r=>(!f.branch||r.branch===f.branch)&&(!f.month||String(r.date).startsWith(f.month))&&(!f.emp||r.by===f.emp))};
+const fExp=()=>{const f=F();return scope("expenses").filter(r=>(!f.branch||r.branch===f.branch)&&(!f.month||String(r.date).startsWith(f.month)))};
+/* Выручка = фактически оплачено. Скидка хранится отдельно и из выручки повторно не вычитается. */
+function totals(){
+  const s=fSales(),rev=sum(s,"paid"),disc=sum(s,"discount"),gross=sum(s,"price"),ref=sum(fRef(),"amount"),cost=sum(fExp(),"amount");
+  return {s,rev,disc,gross,ref,cost,profit:rev-ref-cost,avg:s.length?rev/s.length:0};
+}
+const attRate=rows=>pct(rows.filter(a=>a.status==="Был").length,rows.length);
+const kpi=(l,v,f="",icon="chart",cls="")=>`<div class="card kpi ${cls}"><div class="l">${ic(icon)}${esc(l)}</div><div class="v">${v}</div>${f?`<div class="f">${f}</div>`:""}</div>`;
+function hbars(pairs,fmt=money){
+  const mx=Math.max(1,...pairs.map(p=>p[1]));
+  if(!pairs.some(p=>p[1])) return empty("Нет данных за выбранный период","chart");
+  return `<div class="hbars">${[...pairs].sort((a,b)=>b[1]-a[1]).map(([l,v])=>`<div class="row"><span>${esc(l||"Без названия")}</span><div class="track"><div class="fill" style="width:${v/mx*100}%"></div></div><b style="text-align:right">${fmt(v)}</b></div>`).join("")}</div>`;
+}
+function monthCols(list,key,val){
+  const ms=[],d=new Date();
+  for(let i=5;i>=0;i--){const x=new Date(d.getFullYear(),d.getMonth()-i,1);ms.push(x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0"))}
+  const vals=ms.map(m=>list.filter(r=>String(r[key]).startsWith(m)).reduce((t,r)=>t+(+val(r)||0),0)),mx=Math.max(1,...vals);
+  if(!vals.some(Boolean)) return empty("График появится после первых продаж","chart");
+  return `<div class="cols">${ms.map((m,i)=>`<div class="c"><b>${vals[i]?(vals[i]>=1000?Math.round(vals[i]/1000)+" тыс":vals[i]):""}</b><i style="height:${vals[i]/mx*130}px"></i>${new Date(m+"-01T00:00").toLocaleString("ru-RU",{month:"short"})}</div>`).join("")}</div>`;
+}
+const groupBy=(list,keyFn,valFn)=>{const m=new Map();for(const x of list){const k=keyFn(x);m.set(k,(m.get(k)||0)+valFn(x))}return[...m]};
+function filters(opts=["branch","month","cat","dance","emp"]){
+  const f=F(),emps=[...new Set([...S.sales.map(s=>s.manager),...S.refunds.map(r=>r.by)].filter(Boolean))];
+  const sel=(k,label,list)=>`<select class="in" data-f="${k}" aria-label="${label}"><option value="">${label}</option>${list.map(([v,t])=>`<option value="${esc(v)}" ${f[k]===v?"selected":""}>${esc(t)}</option>`).join("")}</select>`;
+  return `<div class="bar">${opts.includes("branch")&&R()!=="badmin"?sel("branch","Все филиалы",S.branches.map(b=>[b.id,b.name])):""}
+   ${opts.includes("month")?`<input class="in" type="month" data-f="month" value="${f.month}" style="width:auto" aria-label="Месяц">`:""}
+   ${opts.includes("cat")?sel("cat","Все категории",S.categories.map(c=>[c.id,c.name])):""}
+   ${opts.includes("dance")?sel("dance","Все виды танцев",S.dances.map(c=>[c.id,c.name])):""}
+   ${opts.includes("emp")?sel("emp","Все сотрудники",emps.map(e=>[e,e])):""}
+   ${Object.values(f).some(Boolean)?`<button class="btn ghost sm" data-act="resetF">Сбросить фильтры</button>`:""}</div>`;
+}
+
+/* ---------- страницы ---------- */
+const PAGES={
+ dash(){
+  const r=R();
+  if(r==="trainer") return trainerDash();
+  if(r==="sales") return salesDash();
+  if(r==="badmin"&&!UI.me.branch) return `<div class="card">${empty("Выберите свой филиал вверху справа. Если филиалов нет — их добавляет руководитель.","building")}</div>`;
+  const m=totals(),fb=F().branch,st=scope("students").filter(s=>s.status!=="Ушёл"&&(!fb||s.branch===fb));
+  const grp=scope("groups").filter(g=>!fb||g.branch===fb),tr=scope("trainers").filter(t=>t.status!=="Не работает"&&(!fb||t.branch===fb));
+  const debts=st.reduce((t,s)=>t+debtOf(s.id),0),att=scope("attendance").filter(a=>!F().month||a.date.startsWith(F().month));
+  const fin=r==="boss";
+  return `<div class="ph"><div><h1>${r==="badmin"?"Филиал «"+esc(nm("branches",UI.me.branch))+"»":"Главная панель"}</h1><p>${new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"})}</p></div></div>
+   ${fin?filters():r==="badmin"?filters(["month"]):""}
+   <div class="kpis">${kpi("Ученики",st.length,"активные и в заморозке","users")}${kpi("Новые заявки",scope("leads").filter(l=>l.stage==="Новая заявка"&&(!fb||l.branch===fb)).length,"ждут звонка","funnel")}
+    ${kpi("Активные группы",grp.length,"","layers")}${kpi("Тренеры",tr.length,"работают","user")}
+    ${fin?kpi("Выручка",money(m.rev),m.s.length+" продаж","coins")+kpi("Возвраты",money(m.ref),"","undo")+kpi("Скидки",money(m.disc),m.gross?pct(m.disc,m.gross)+" от полной стоимости":"","percent")+kpi("Себестоимость",money(m.cost),"","wallet")+kpi("Прибыль",money(m.profit),"выручка − возвраты − себестоимость","star","gold"):kpi("Оплаты",money(m.rev),m.s.length+" оплат","wallet")}
+    ${kpi("Долги",money(debts),"","debt")}${kpi("Посещаемость",attRate(att),att.length+" отметок","check")}</div>
+   <div class="two"><div class="card pad"><h3>Выручка по месяцам</h3>${monthCols(fSales(),"date",x=>x.paid)}</div>
+    <div class="card pad"><h3>Воронка заявок</h3>${hbars(STAGES.map(s=>[s,scope("leads").filter(l=>l.stage===s&&(!fb||l.branch===fb)).length]),v=>v)}</div></div>
+   ${fin?`<div class="two"><div class="card pad"><h3>Продажи по филиалам</h3>${hbars(groupBy(m.s,x=>nm("branches",x.branch)||"Без филиала",x=>+x.paid||0))}</div>
+    <div class="card pad"><h3>Продажи по менеджерам</h3>${hbars(groupBy(m.s,x=>x.manager||"Не указан",x=>+x.paid||0))}</div></div>`:""}`;
+ },
+ branches:()=>crud("branches",{sub:`Действующих: ${S.branches.filter(b=>b.status==="Действующий").length} · новых: ${S.branches.filter(b=>b.status==="Новый").length}`}),
+ trainers:()=>crud("trainers"),
+ groups:()=>R()==="trainer"?myGroups():crud("groups"),
+ students:()=>crud("students"),
+ clients:()=>crud("students",{title:"Клиенты",sub:"Ученики и их родители"}),
+ categories:()=>crud("categories",{sub:"Свои категории можно добавлять, редактировать, дополнять описанием и удалять"}),
+ dances:()=>crud("dances",{sub:"Любой вид танца добавляется кнопкой «Добавить свой вид танца»"}),
+ schedule(){
+  if(R()==="trainer"&&!UI.me.trainer) return `<div class="card">${empty("Выберите тренера вверху справа","user")}</div>`;
+  const rows=scope("schedule"),dn=(new Date().getDay()+6)%7,ed=canEdit("schedule");
+  return `<div class="ph"><div><h1>Расписание</h1><p>Занятий в неделю: ${rows.length}</p></div><span class="sp"></span>${ed&&scope("groups").length?`<button class="btn" data-add="schedule">${ic("plus")}Добавить занятие</button>`:""}</div>
+   ${!scope("groups").length&&ed?`<div class="card" style="margin-bottom:14px">${empty("Сначала создайте группу в разделе «Группы»","layers")}</div>`:""}
+   <div class="week">${DAYS.map((d,i)=>`<div class="day ${i===dn?"today":""}"><h4>${d}${i===dn?" · сегодня":""}</h4>${rows.filter(s=>s.day===d).sort(bySlot).map(s=>{const g=S.groups.find(x=>x.id===s.group)||{};
+     return `<div class="slot" ${ed?`data-edit="schedule:${s.id}" title="Изменить"`:""}><b>${esc(s.time)}${s.end?"–"+esc(s.end):""}</b>${esc(g.name||"Группа удалена")}<div class="muted">${esc([s.hall||g.hall,nm("trainers",g.trainer)].filter(Boolean).join(" · "))}</div></div>`}).join("")}</div>`).join("")}</div>`;
+ },
+ attendance(){
+  if(R()==="trainer"&&!UI.me.trainer) return `<div class="card">${empty("Выберите тренера вверху справа","user")}</div>`;
+  const gs=scope("groups");
+  if(!gs.length) return `<div class="ph"><div><h1>Посещаемость</h1></div></div><div class="card">${empty(R()==="trainer"?"У вас пока нет групп. Их назначает руководитель.":"Сначала создайте группы и добавьте в них учеников.","check")}</div>`;
+  if(!gs.some(g=>g.id===UI.attG)) UI.attG=gs[0].id;
+  const g=UI.attG,d=UI.attD,st=S.students.filter(s=>s.group===g&&s.status!=="Ушёл"),ed=canEdit("attendance");
+  const rec=sid=>S.attendance.find(a=>a.group===g&&a.date===d&&a.student===sid);
+  const hist=S.attendance.filter(a=>a.group===g).sort((a,b)=>b.date.localeCompare(a.date));
+  return `<div class="ph"><div><h1>Посещаемость</h1><p>Отметьте, кто был на занятии</p></div></div>
+   <div class="bar"><select class="in" data-att="g" aria-label="Группа">${gs.map(x=>`<option value="${x.id}" ${x.id===g?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
+    <input class="in" type="date" data-att="d" value="${d}" style="width:auto" aria-label="Дата занятия"></div>
+   <div class="card tw" style="margin-bottom:16px">${st.length?`<table><thead><tr><th>Ученик</th><th>Отметка</th><th>Причина отсутствия</th><th class="num">Посещаемость</th></tr></thead><tbody>
+    ${st.map(s=>{const r=rec(s.id)||{},all=S.attendance.filter(a=>a.student===s.id);return `<tr><td><div class="who">${avatar(s)}<b>${esc(s.name)}</b></div></td>
+     <td><div class="att"><button class="p ${r.status==="Был"?"on":""}" ${ed?`data-mark="${s.id}:Был"`:"disabled"}>Был</button><button class="a ${r.status==="Не был"?"on":""}" ${ed?`data-mark="${s.id}:Не был"`:"disabled"}>Не был</button></div></td>
+     <td>${r.status==="Не был"?`<input class="in" data-reason="${s.id}" value="${esc(r.reason||"")}" placeholder="Болеет, уехал…" style="height:32px" ${ed?"":"disabled"}>`:'<span class="muted">—</span>'}</td><td class="num">${attRate(all)}</td></tr>`}).join("")}</tbody></table>`:empty("В группе пока нет учеников","users")}</div>
+   <div class="card"><div style="padding:16px 18px 0"><h3>История посещений · ${attRate(hist)}</h3></div><div class="tw">${hist.length?`<table><thead><tr><th>Дата</th><th>Ученик</th><th>Отметка</th><th>Причина</th></tr></thead><tbody>${hist.slice(0,60).map(a=>`<tr><td>${fdate(a.date)}</td><td>${esc(nm("students",a.student))}</td><td><span class="badge ${a.status==="Был"?"b-ok":"b-bad"}">${a.status}</span></td><td>${esc(a.reason||"—")}</td></tr>`).join("")}</tbody></table>`:empty("Отметок ещё нет","check")}</div></div>`;
+ },
+ leads(){
+  const q=(UI.q.leads||"").toLowerCase(),vis=scope("leads").filter(l=>!q||[l.name,l.parent,l.phone,l.manager].join(" ").toLowerCase().includes(q));
+  return `<div class="ph"><div><h1>Воронка заявок</h1><p>Перетащите карточку в другой этап или выберите этап в карточке. Нажмите на карточку — откроется история.</p></div><span class="sp"></span><button class="btn" data-add="leads">${ic("plus")}Новая заявка</button></div>
+   <div class="bar"><div class="search">${ic("search")}<input class="in" data-q="leads" value="${esc(UI.q.leads||"")}" placeholder="Поиск по имени, телефону, менеджеру" aria-label="Поиск"></div></div>
+   <div class="kanban">${STAGES.map((s,i)=>{const c=vis.filter(l=>l.stage===s);return `<div class="kcol" data-stage="${s}" style="--c:${STC[i]}"><h4>${s}<span class="badge">${c.length}</span></h4>
+    <div class="kcards">${c.map(l=>`<div class="kc" draggable="true" data-lead="${l.id}"><b>${esc(l.name)}</b><div class="m">${esc([l.phone,l.age?l.age+" лет":"",nm("branches",l.branch)].filter(Boolean).join(" · "))}</div>
+     <div class="m">${esc([nm("categories",l.category),l.source,l.manager].filter(Boolean).join(" · "))}</div>
+     <select class="in" data-stagesel="${l.id}" aria-label="Этап">${STAGES.map(x=>`<option ${x===l.stage?"selected":""}>${x}</option>`).join("")}</select></div>`).join("")}</div></div>`}).join("")}</div>`;
+ },
+ sales:()=>crud("sales",{sub:"Полная стоимость, скидка и фактическая оплата хранятся отдельно — скидка не учитывается дважды"}),
+ saleshist:()=>crud("sales",{title:"История продаж",readonly:true}),
+ payments:()=>crud("sales",{title:"Оплаты",readonly:true,sub:`Получено: ${money(sum(scope("sales"),"paid"))}`}),
+ debts(){
+  const st=scope("students").map(s=>({...s,_d:debtOf(s.id)})).filter(s=>s._d>0);
+  return `<div class="ph"><div><h1>Задолженности</h1><p>Итого: ${money(st.reduce((t,s)=>t+s._d,0))}</p></div></div>
+   <div class="card tw">${st.length?`<table><thead><tr><th>Ученик</th><th>Родитель</th><th>Телефон</th><th>Филиал</th><th class="num">Долг</th></tr></thead><tbody>${st.sort((a,b)=>b._d-a._d).map(s=>`<tr><td><b>${esc(s.name)}</b></td><td>${esc(s.parent||"—")}</td><td>${esc(s.phone||"—")}</td><td>${esc(nm("branches",s.branch)||"—")}</td><td class="num"><b style="color:var(--bad)">${money(s._d)}</b></td></tr>`).join("")}</tbody></table>`:empty("Долгов нет. Долг = полная стоимость − скидка − оплачено.","debt")}</div>`;
+ },
+ fin_sales(){
+  const m=totals();
+  return `<div class="ph"><div><h1>Продажи и выручка</h1><p>Только реальные продажи, внесённые в CRM</p></div></div>${filters()}
+   <div class="kpis">${kpi("Выручка",money(m.rev),"фактически получено","coins","gold")}${kpi("Количество сделок",m.s.length,"","cart")}${kpi("Средний чек",money(m.avg),"","wallet")}${kpi("Полная стоимость",money(m.gross),"до скидок","layers")}</div>
+   <div class="two"><div class="card pad"><h3>По филиалам</h3>${hbars(groupBy(m.s,x=>nm("branches",x.branch)||"Без филиала",x=>+x.paid||0))}</div>
+    <div class="card pad"><h3>По менеджерам</h3>${hbars(groupBy(m.s,x=>x.manager||"Не указан",x=>+x.paid||0))}</div></div>
+   <div class="two"><div class="card pad"><h3>По категориям</h3>${hbars(groupBy(m.s,x=>nm("categories",x.category)||"Без категории",x=>+x.paid||0))}</div>
+    <div class="card pad"><h3>По месяцам</h3>${monthCols(fSales(),"date",x=>x.paid)}</div></div>`;
+ },
+ refunds:()=>crud("refunds",{sub:`Сумма возвратов: ${money(sum(scope("refunds"),"amount"))}`,empty:R()==="sales"&&!S.perms.salesRefunds?"Возвраты оформляет руководитель. Право можно выдать в «Доступ и безопасность».":null}),
+ discounts(){
+  const all=scope("sales"),s=all.filter(x=>+x.discount>0),gross=sum(all,"price"),d=sum(s,"discount");
+  return `<div class="ph"><div><h1>Скидки</h1><p>Размер, причина, кто дал и на какую услугу — из продаж</p></div></div>
+   <div class="kpis">${kpi("Сумма скидок",money(d),"","percent","gold")}${kpi("Продаж со скидкой",s.length,"из "+all.length,"cart")}${kpi("Финансовое влияние",gross?pct(d,gross):"—","доля от полной стоимости","chart")}</div>
+   <div class="two"><div class="card pad"><h3>Кто предоставил</h3>${hbars(groupBy(s,x=>x.manager||"Не указан",x=>+x.discount))}</div><div class="card pad"><h3>На какие услуги</h3>${hbars(groupBy(s,x=>nm("categories",x.category)||"Без категории",x=>+x.discount))}</div></div>
+   <div class="card tw">${s.length?`<table><thead><tr><th>Дата</th><th>Ученик</th><th>Услуга</th><th class="num">Стоимость</th><th class="num">Скидка</th><th>Причина</th><th>Кто дал</th></tr></thead><tbody>${s.map(x=>`<tr><td>${fdate(x.date)}</td><td><b>${esc(nm("students",x.student))}</b></td><td>${esc(nm("categories",x.category)||x.tariff||"—")}</td><td class="num">${money(x.price)}</td><td class="num">${money(x.discount)}</td><td>${esc(x.discountReason||"—")}</td><td>${esc(x.manager||"—")}</td></tr>`).join("")}</tbody></table>`:empty("Скидок пока нет. Скидка указывается при создании продажи.","percent")}</div>`;
+ },
+ costs(){
+  const m=totals();
+  return `<div class="ph"><div><h1>Себестоимость</h1><p>Расходы студии по статьям</p></div></div>${filters(["branch","month"])}
+   <div class="card pad" style="margin-bottom:16px"><h3>Прибыль до учёта прочих расходов</h3><div class="formula">
+    <div class="t"><small>Выручка</small>${money(m.rev)}</div><span class="eq">−</span><div class="t"><small>Возвраты</small>${money(m.ref)}</div><span class="eq">−</span>
+    <div class="t"><small>Себестоимость</small>${money(m.cost)}</div><span class="eq">=</span><div class="t res"><small>Прибыль</small>${money(m.profit)}</div></div></div>
+   <div class="kpis">${COSTS.map(k=>kpi(k,money(sum(fExp().filter(e=>e.kind===k),"amount")),"","wallet")).join("")}</div>
+   ${crud("expenses",{title:"Расходы",sub:`Всего: ${money(m.cost)}`})}`;
+ },
+ analytics(){
+  const pays=new Map();
+  for(const s of S.sales){const p=pays.get(s.student)||{sum:0,n:0,first:s.date,last:s.date,cat:s.category};p.sum+=+s.paid||0;p.n++;if(s.date<p.first){p.first=s.date;p.cat=s.category}if(s.date>p.last)p.last=s.date;pays.set(s.student,p)}
+  for(const r of S.refunds){const p=pays.get(r.student);if(p)p.sum-=+r.amount||0}
+  const arr=[...pays].map(([id,p])=>({st:S.students.find(s=>s.id===id)||{},...p,months:(+p.last.slice(0,4)-+p.first.slice(0,4))*12+(+p.last.slice(5,7)-+p.first.slice(5,7))+1}));
+  const tot=arr.reduce((t,a)=>t+a.sum,0),n=arr.length,ret=n?arr.reduce((t,a)=>t+a.months,0)/n:0,rep=arr.filter(a=>a.n>1).length,gone=S.students.filter(s=>s.status==="Ушёл").length;
+  const ltvBy=fn=>{const m=new Map();for(const a of arr){const k=fn(a)||"Не указано",v=m.get(k)||[0,0];v[0]+=a.sum;v[1]++;m.set(k,v)}return[...m].map(([k,v])=>[k,v[0]/v[1]])};
+  const ageG=a=>{const g=+a.st.age;return !g?"Возраст не указан":g<=6?"до 6 лет":g<=10?"7–10 лет":g<=14?"11–14 лет":g<=17?"15–17 лет":"18+"};
+  return `<div class="ph"><div><h1>Аналитика и LTV</h1><p>Считается по реальным оплатам и возвратам учеников</p></div></div>
+   <div class="kpis">${kpi("Средний LTV ученика",money(n?tot/n:0),n+" платящих учеников","star","gold")}${kpi("Общий LTV",money(tot),"оплаты − возвраты","coins")}${kpi("Срок удержания",ret?ret.toFixed(1)+" мес.":"—","от первой до последней оплаты","cal")}
+    ${kpi("Повторные покупки",pct(rep,n),rep+" из "+n+" учеников","cart")}${kpi("Отток",pct(gone,S.students.length),gone+" ушли","undo")}</div>
+   <div class="two"><div class="card pad"><h3>LTV по филиалам</h3>${hbars(ltvBy(a=>nm("branches",a.st.branch)))}</div>
+    <div class="card pad"><h3>LTV по категориям (первая покупка)</h3>${hbars(ltvBy(a=>nm("categories",a.cat)))}</div></div>
+   <div class="two"><div class="card pad"><h3>LTV по возрастным группам</h3>${hbars(ltvBy(ageG))}</div><div class="card pad"><h3>Оплаты по месяцам</h3>${monthCols(S.sales,"date",x=>x.paid)}</div></div>`;
+ },
+ tasks(){
+  if(R()==="trainer"&&!UI.me.trainer) return `<div class="card">${empty("Выберите тренера вверху справа","user")}</div>`;
+  const rows=scope("tasks").sort((a,b)=>a.done-b.done||String(a.due||"9").localeCompare(b.due||"9")),ed=canEdit("tasks");
+  return `<div class="ph"><div><h1>${R()==="trainer"?"Задачи и постановки":"Задачи"}</h1><p>Открыто: ${rows.filter(t=>!t.done).length}</p></div><span class="sp"></span>${ed?`<button class="btn" data-add="tasks">${ic("plus")}Добавить задачу</button>`:""}</div>
+   <div class="card">${rows.length?rows.map(x=>`<div class="task ${x.done?"done":""}"><input type="checkbox" data-done="${x.id}" ${x.done?"checked":""} ${ed?"":"disabled"} aria-label="Выполнено"><div style="flex:1"><b>${esc(x.title)}</b> <span class="badge ${x.kind==="Постановка танца"?"b-gold":""}">${esc(x.kind)}</span>
+    <div class="muted" style="font-size:12.5px">${esc([x.assignee?"Кому: "+nm("trainers",x.assignee):"",x.due?"Срок: "+fdate(x.due):""].filter(Boolean).join(" · "))}</div>${x.desc?`<div style="margin-top:4px;font-size:13px;white-space:pre-wrap">${esc(x.desc)}</div>`:""}</div>
+    ${ed?`<button class="ib" data-edit="tasks:${x.id}" aria-label="Редактировать">${ic("edit")}</button><button class="ib del" data-del="tasks:${x.id}" aria-label="Удалить">${ic("trash")}</button>`:""}</div>`).join(""):empty("Задач нет","tasks")}</div>`;
+ },
+ users(){
+  const p=S.perms,chk=(k,t)=>`<label class="perm"><input type="checkbox" data-perm="${k}" ${p[k]?"checked":""}><span>${t}</span></label>`;
+  return `<div class="card pad" style="margin-bottom:16px"><h3>Права доступа</h3>
+    ${chk("salesDiscounts","Менеджеры продаж могут давать скидки")}${chk("salesRefunds","Менеджеры продаж могут оформлять возвраты")}${chk("badminOther","Администраторы филиалов видят другие филиалы")}
+    <div class="note">Тренер не видит финансы, продажи, возвраты, скидки и себестоимость — это не настраивается.</div></div>
+   ${crud("users",{sub:"Аккаунты сотрудников. Пароли появятся с подключением Supabase и будут храниться в зашифрованном виде.",
+     rowAct:x=>`<button class="btn ghost sm" data-block="${x.id}">${ic("lock")}${x.status==="Заблокирован"?"Разблокировать":"Заблокировать"}</button> <button class="ib" data-edit="users:${x.id}" aria-label="Редактировать">${ic("edit")}</button><button class="ib del" data-del="users:${x.id}" aria-label="Удалить">${ic("trash")}</button>`})}`;
+ },
+ log(){
+  return `<div class="ph"><div><h1>Журнал действий</h1><p>Кто, что и когда изменил</p></div></div><div class="card tw">${S.log.length?`<table><thead><tr><th>Когда</th><th>Сотрудник</th><th>Действие</th><th>Раздел</th><th>Запись</th></tr></thead><tbody>${S.log.slice(0,200).map(l=>`<tr><td>${new Date(l.at).toLocaleString("ru-RU",{dateStyle:"short",timeStyle:"short"})}</td><td>${esc(l.who)}</td><td><span class="badge ${l.action==="Удалил"?"b-bad":l.action==="Добавил"?"b-ok":"b-info"}">${esc(l.action)}</span></td><td>${esc(titleEnt(l.ent))}</td><td>${esc(l.name)}</td></tr>`).join("")}</tbody></table>`:empty("Журнал пуст. Здесь появится каждое добавление, изменение и удаление.","log")}</div>`;
+ },
+ profile(){
+  const t=S.trainers.find(x=>x.id===UI.me.trainer);
+  if(!t) return `<div class="card">${empty("Выберите тренера вверху справа","user")}</div>`;
+  const gs=scope("groups"),months=groupBy(scope("attendance"),a=>a.date.slice(0,7),()=>1).sort((a,b)=>b[0].localeCompare(a[0]));
+  return `<div class="two"><div class="card pad"><div class="who" style="gap:16px"><span class="av" style="width:72px;height:72px;font-size:22px">${t.photo?`<img src="${t.photo}" alt="">`:esc(ini(t.name))}</span><div><h1 style="margin:0;font-size:22px">${esc(t.name)}</h1><div class="muted">${esc(t.position||"Тренер")} · ${esc(nm("dances",t.spec)||"специализация не указана")}</div></div></div>
+    <table style="margin-top:14px"><tbody><tr><td class="muted">Телефон</td><td>${esc(t.phone||"—")}</td></tr><tr><td class="muted">Филиал</td><td>${esc(nm("branches",t.branch)||"—")}</td></tr><tr><td class="muted">Статус</td><td>${esc(t.status)}</td></tr><tr><td class="muted">Группы</td><td>${esc(gs.map(g=>g.name).join(", ")||"—")}</td></tr></tbody></table></div>
+   <div class="card pad"><h3>История работы</h3>${months.length?hbars(months.map(([m,v])=>[new Date(m+"-01T00:00").toLocaleString("ru-RU",{month:"long",year:"numeric"}),v]),v=>v+" отметок"):empty("Появится после отметок посещаемости","cal")}</div></div>`;
+ }
+};
+const titleEnt=e=>({branches:"Филиалы",trainers:"Тренеры",groups:"Группы",students:"Ученики",schedule:"Расписание",categories:"Категории",dances:"Виды танцев",leads:"Заявки",sales:"Продажи",refunds:"Возвраты",expenses:"Себестоимость",tasks:"Задачи",users:"Сотрудники",attendance:"Посещаемость"}[e]||e);
+
+function myGroups(){
+  if(!UI.me.trainer) return `<div class="card">${empty("Выберите тренера вверху справа","user")}</div>`;
+  const gs=scope("groups");
+  return `<div class="ph"><div><h1>Мои группы</h1><p>Групп: ${gs.length}</p></div></div>
+   ${gs.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${gs.map(g=>{const st=S.students.filter(s=>s.group===g.id&&s.status!=="Ушёл");
+    return `<div class="card pad"><h3>${esc(g.name)}</h3><div class="muted" style="margin-bottom:10px">${esc([g.age,nm("branches",g.branch),nm("dances",g.dance)].filter(Boolean).join(" · "))}</div>
+     <div style="font-size:13px;margin-bottom:10px;display:flex;gap:6px;align-items:center">${ic("cal")} ${esc(S.schedule.filter(s=>s.group===g.id).sort(bySlot).map(s=>s.day+" "+s.time).join(", ")||"Расписание не задано")}</div>
+     <b style="font-size:13px">Ученики (${st.length})</b><div style="margin-top:6px">${st.map(s=>`<div class="who" style="padding:4px 0">${avatar(s)}<span>${esc(s.name)}</span><span class="muted right">${attRate(S.attendance.filter(a=>a.student===s.id))}</span></div>`).join("")||'<div class="muted">Пока нет</div>'}</div></div>`}).join("")}</div>`
+    :`<div class="card">${empty("Групп пока нет. Руководитель назначает тренера в разделе «Группы».","layers")}</div>`}`;
+}
+function trainerDash(){
+  if(!UI.me.trainer) return `<div class="card">${empty("Предпоказ: выберите тренера вверху справа. Если тренеров нет — добавьте их в аккаунте руководителя.","user")}</div>`;
+  const gs=scope("groups"),st=scope("students").filter(s=>s.status!=="Ушёл"),di=(new Date().getDay()+6)%7,dn=DAYS[di],sch=scope("schedule");
+  const td=sch.filter(s=>s.day===dn).sort(bySlot),next=sch.filter(s=>DAYS.indexOf(s.day)>di).sort(bySlot).slice(0,5),tasks=scope("tasks").filter(t=>!t.done);
+  const slot=s=>`<div class="task"><b style="width:90px;flex:none">${esc(s.day)} ${esc(s.time)}</b><div>${esc(nm("groups",s.group))}<div class="muted" style="font-size:12.5px">${esc(s.hall||"")}</div></div></div>`;
+  return `<div class="ph"><div><h1>Здравствуйте, ${esc(nm("trainers",UI.me.trainer).split(" ")[0])}</h1><p>${new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"})}</p></div></div>
+   <div class="kpis">${kpi("Мои группы",gs.length,"","layers")}${kpi("Учеников",st.length,"","users")}${kpi("Посещаемость",attRate(scope("attendance")),"","check")}${kpi("Занятий сегодня",td.length,"","cal","gold")}${kpi("Мои задачи",tasks.length,"не выполнено","tasks")}</div>
+   <div class="two"><div class="card"><div style="padding:16px 18px 4px"><h3>Занятия сегодня</h3></div>${td.map(slot).join("")||empty("Сегодня занятий нет","cal")}</div>
+    <div class="card"><div style="padding:16px 18px 4px"><h3>Ближайшие занятия</h3></div>${next.map(slot).join("")||empty("На этой неделе больше нет","cal")}</div></div>
+   <div class="card"><div style="padding:16px 18px 4px"><h3>Мои задачи</h3></div>${tasks.slice(0,5).map(t=>`<div class="task"><b>${esc(t.title)}</b><span class="muted right">${t.due?fdate(t.due):""}</span></div>`).join("")||empty("Задач нет","tasks")}</div>`;
+}
+function salesDash(){
+  const me=UI.me.name,mine=S.leads.filter(l=>l.manager===me),sales=scope("sales").filter(s=>String(s.date).startsWith(month()));
+  const done=mine.filter(l=>l.stage!=="Новая заявка").length,won=mine.filter(l=>l.stage==="Купил абонемент").length,closed=mine.filter(l=>["Купил абонемент","Отказ"].includes(l.stage)).length,rev=sum(sales,"paid");
+  return `<div class="ph"><div><h1>Мои результаты</h1><p>${esc(me)} · ${new Date().toLocaleString("ru-RU",{month:"long",year:"numeric"})}</p></div></div>
+   <div class="kpis">${kpi("Новые заявки",scope("leads").filter(l=>l.stage==="Новая заявка").length,"ждут звонка","funnel")}${kpi("Обработано",done,"из "+mine.length+" моих","check")}
+    ${kpi("Продажи за месяц",money(rev),sales.length+" сделок","coins","gold")}${kpi("Конверсия",pct(won,closed),"купили / закрытые заявки","chart")}${kpi("Средний чек",money(sales.length?rev/sales.length:0),"","wallet")}</div>
+   <div class="two"><div class="card pad"><h3>Мои заявки по этапам</h3>${hbars(STAGES.map(s=>[s,mine.filter(l=>l.stage===s).length]),v=>v)}</div>
+    <div class="card pad"><h3>Мои продажи по месяцам</h3>${monthCols(scope("sales"),"date",x=>x.paid)}</div></div>`;
+}
+
+/* ---------- события ---------- */
+function moveLead(id,stage){
+  const l=S.leads.find(x=>x.id===id);if(!l||l.stage===stage||!STAGES.includes(stage))return;
+  l.hist=[...(l.hist||[]),{at:new Date().toISOString(),text:`Этап: ${l.stage} → ${stage}`}];l.stage=stage;
+  if(!l.manager&&R()==="sales") l.manager=UI.me.name;
+  logIt("Изменил","leads",l);save();render();toast("Этап: "+stage);
+}
+document.addEventListener("click",e=>{
+  if(e.target.classList?.contains("ov")) return closeModal();
+  const t=e.target.closest("[data-go],[data-grp],[data-act],[data-role],[data-add],[data-edit],[data-del],[data-sort],[data-mark],[data-conv],[data-block],.kc");
+  if(!t) return;
+  const ds=t.dataset;
+  if(t.classList.contains("kc")){if(!e.target.closest("select"))openForm("leads",ds.lead);return}
+  if(ds.role){UI.role=ds.role;UI.page="dash";UI.open={};UI.f={branch:"",month:"",cat:"",dance:"",emp:""};
+    UI.me={boss:{name:"Руководитель"},admin:{name:"Администратор"},sales:{name:"Менеджер 1"}}[ds.role]||{};
+    if(ds.role==="badmin"&&S.branches[0]) UI.me={branch:S.branches[0].id,name:"Администратор филиала"};
+    if(ds.role==="trainer"&&S.trainers[0]) UI.me={trainer:S.trainers[0].id,name:S.trainers[0].name};
+    return render()}
+  if(ds.go){UI.page=ds.go;render();scrollTo(0,0);return}
+  if(ds.grp!=null){
+    if(UI.mini&&innerWidth>900){UI.mini=false;localStorage.setItem(KEY+"_mini","0");UI.open[ds.grp]=true;return render()}
+    const g=t.parentElement;g.classList.toggle("open");UI.open[ds.grp]=g.classList.contains("open");t.setAttribute("aria-expanded",UI.open[ds.grp]);keepUI();return}
+  if(ds.add) return openForm(ds.add);
+  if(ds.edit){const [en,id,fo]=ds.edit.split(":");return openForm(en,id,fo)}
+  if(ds.del){const [en,id]=ds.del.split(":"),x=S[en].find(r=>r.id===id);if(!x)return;
+    if(!confirm(`Удалить «${x.name||x.title||nm("students",x.student)||"запись"}»?`))return;
+    S[en]=S[en].filter(r=>r.id!==id);logIt("Удалил",en,x);save();render();return toast("Удалено")}
+  if(ds.sort){const [en,i]=ds.sort.split(":");const s=UI.sort[en];UI.sort[en]={i:+i,dir:s&&s.i===+i?-s.dir:1};return render()}
+  if(ds.mark){const [sid,st]=ds.mark.split(":");let a=S.attendance.find(x=>x.group===UI.attG&&x.date===UI.attD&&x.student===sid);
+    if(!a){a={id:uid(),group:UI.attG,date:UI.attD,student:sid};S.attendance.push(a)}a.status=st;if(st==="Был")a.reason="";
+    logIt("Изменил","attendance",{name:nm("students",sid)+" — "+st+", "+fdate(UI.attD)});save();return render()}
+  if(ds.conv){const l=S.leads.find(x=>x.id===ds.conv);const st={id:uid(),name:l.name,age:l.age,parent:l.parent,phone:l.phone,branch:l.branch,status:"Активный",created:new Date().toISOString()};
+    S.students.push(st);l.hist=[...(l.hist||[]),{at:new Date().toISOString(),text:"Переведён в ученики"}];logIt("Добавил","students",st);save();closeModal();render();return toast("Ученик создан — теперь оформите продажу")}
+  if(ds.block){const u=S.users.find(x=>x.id===ds.block);u.status=u.status==="Заблокирован"?"Активен":"Заблокирован";logIt(u.status==="Заблокирован"?"Заблокировал":"Разблокировал","users",u);save();return render()}
+  switch(ds.act){
+    case "close": return closeModal();
+    case "mini": UI.mini=!UI.mini;localStorage.setItem(KEY+"_mini",UI.mini?"1":"0");return render();
+    case "logout": UI.role=null;UI.me={};return render();
+    case "openSide": return $("#side").classList.add("open");
+    case "closeSide": return $("#side").classList.remove("open");
+    case "resetF": UI.f={branch:"",month:"",cat:"",dance:"",emp:""};return render();
+  }
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();$("#side")?.classList.remove("open")}});
+document.addEventListener("submit",e=>{
+  e.preventDefault();const f=e.target;
+  if(f.dataset.form==="login"){$("#loginNote").textContent="Вход по паролю включится, когда подключим базу данных. Сейчас выберите роль ниже.";return}
+  if(f.dataset.save) saveForm(f);
+});
+document.addEventListener("input",e=>{
+  const t=e.target,ds=t.dataset;
+  if(ds.q!=null){UI.q[ds.q]=t.value;focusKey=ds.q;return render()}
+  if(ds.reason){const a=S.attendance.find(x=>x.group===UI.attG&&x.date===UI.attD&&x.student===ds.reason);if(a){a.reason=t.value;save()}}
+});
+document.addEventListener("change",e=>{
+  const t=e.target,ds=t.dataset;
+  if(ds.bf){UI.bf[ds.bf]=t.value;return render()}
+  if(ds.f){UI.f[ds.f]=t.value;return render()}
+  if(ds.me){UI.me[ds.me]=t.value;UI.me.name=ds.me==="trainer"?nm("trainers",t.value):"Администратор филиала";return render()}
+  if(ds.att){if(ds.att==="g")UI.attG=t.value;else UI.attD=t.value||today();return render()}
+  if(ds.stagesel) return moveLead(ds.stagesel,t.value);
+  if(ds.perm){S.perms[ds.perm]=t.checked;logIt("Изменил","users",{name:"Права доступа"});save();return toast("Права сохранены")}
+  if(ds.done!=null){const x=S.tasks.find(r=>r.id===ds.done);x.done=t.checked;logIt(t.checked?"Выполнил":"Изменил","tasks",x);save();return render()}
+  if(t.matches("[data-photo]")&&t.files[0]){
+    const img=new Image(),rd=new FileReader();
+    rd.onload=()=>{img.onload=()=>{const c=document.createElement("canvas"),s=160,k=Math.max(s/img.width,s/img.height);c.width=c.height=s;
+      c.getContext("2d").drawImage(img,(s-img.width*k)/2,(s-img.height*k)/2,img.width*k,img.height*k);
+      const url=c.toDataURL("image/jpeg",.82);t.closest("form").querySelector('[name="photo"]').value=url;$("#phPrev").innerHTML=`<img src="${url}" alt="">`};img.src=rd.result};
+    rd.readAsDataURL(t.files[0]);
+  }
+});
+// перетаскивание карточек воронки
+document.addEventListener("dragstart",e=>{const c=e.target.closest?.(".kc");if(c){e.dataTransfer.setData("text/plain",c.dataset.lead);e.dataTransfer.effectAllowed="move"}});
+document.addEventListener("dragover",e=>{const col=e.target.closest?.(".kcol");if(col){e.preventDefault();document.querySelectorAll(".kcol.drag").forEach(x=>x!==col&&x.classList.remove("drag"));col.classList.add("drag")}});
+document.addEventListener("dragleave",e=>{const col=e.target.closest?.(".kcol");if(col&&!col.contains(e.relatedTarget))col.classList.remove("drag")});
+document.addEventListener("drop",e=>{const col=e.target.closest?.(".kcol");if(!col)return;e.preventDefault();col.classList.remove("drag");moveLead(e.dataTransfer.getData("text/plain"),col.dataset.stage)});
+
+render();
+</script>
+</body>
+</html>
