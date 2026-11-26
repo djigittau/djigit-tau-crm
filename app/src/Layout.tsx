@@ -20,6 +20,7 @@ export const MENU: MenuItem[] = [
   { to: '/groups', label: 'Группы', icon: 'layers', roles: ['director', 'manager', 'admin'] },
   { to: '/schedule', label: 'Расписание', icon: 'calendar', roles: ['director', 'manager', 'admin', 'trainer'] },
   { to: '/shifts', label: 'Смены сотрудников', icon: 'clock', roles: ['director', 'manager', 'admin'] },
+  { to: '/analytics', label: 'Аналитика и LTV', icon: 'funnel', roles: ['director', 'manager'] },
   { to: '/finance', label: 'Финансы', icon: 'layers', roles: ['director', 'manager', 'admin'] },
   { to: '/salaries', label: 'Зарплаты', icon: 'user', roles: ['director', 'manager', 'admin'] },
   { to: '/rent', label: 'Аренда и коммунальные', icon: 'building', roles: ['director', 'manager', 'admin'] },

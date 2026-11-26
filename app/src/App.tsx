@@ -23,6 +23,7 @@ import Salaries from './pages/Salaries'
 import Expenses from './pages/Expenses'
 import Insurance from './pages/Insurance'
 import Fines from './pages/Fines'
+import Analytics from './pages/Analytics'
 
 const PAGES: Record<string, () => React.JSX.Element> = {
   '/': Home,
@@ -45,6 +46,7 @@ const PAGES: Record<string, () => React.JSX.Element> = {
   '/expenses': () => <Expenses title="Дополнительные расходы" />,
   '/insurance': Insurance,
   '/fines': Fines,
+  '/analytics': Analytics,
 }
 
 function Gate() {
