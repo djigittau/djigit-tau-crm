@@ -1,38 +1,40 @@
 import { useState } from 'react'
-import { sb, ROLE_LABEL, PHONE_EMAIL_DOMAIN } from '../lib/supabase'
+import { sb, PHONE_EMAIL_DOMAIN } from '../lib/supabase'
 import { useAuth, useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, act, money, initials, fmtDate, lessons } from '../lib/ui'
+import { useLoad, must, State, PageHead, Field, act, money, fmtDate } from '../lib/ui'
+import { StaffHead, TrainerStats } from './StaffCard'
 import ChangePassword from './ChangePassword'
 
 type MyBranch = { base_salary: number; branches: { name: string } | null }
 
+// Свой профиль: фото, телефон, дата рождения, «О себе». Роль, филиалы, дату приёма и процент меняет директор.
 export default function Profile() {
   const me = useMe()
   const { reload: reloadMe, session } = useAuth()
-  const [phone, setPhone] = useState(me.phone ?? '')
+  const [f, setF] = useState({ phone: me.phone ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' })
   const login = session?.user.email ?? ''
   const { data, loading, error } = useLoad(
     async () => must(await sb.from('employee_branches').select('base_salary, branches(name)').eq('profile_id', me.id)) as unknown as MyBranch[],
     [me.id],
   )
+  async function save(photo = me.photo_url ?? '') {
+    must(await sb.rpc('update_my_profile', { p_phone: f.phone, p_photo_url: photo, p_birth_date: f.birth || null, p_bio: f.bio }))
+    await reloadMe()
+  }
 
   return (
     <>
       <PageHead title="Профиль" />
       <div className="grid-2">
         <section className="card">
-          <div className="person">
-            <span className="avatar xl">{me.photo_url ? <img src={me.photo_url} alt="" /> : initials(me.full_name)}</span>
-            <div>
-              <h2>{me.full_name}</h2>
-              <span className="badge gold">{ROLE_LABEL[me.role]}</span>
-            </div>
-          </div>
+          <StaffHead p={me} onPhoto={(url) => save(url)} />
           <dl className="props">
             <dt>Вход</dt>
             <dd>{login.endsWith('@' + PHONE_EMAIL_DOMAIN) ? 'по телефону' : login}</dd>
             <dt>Email</dt>
             <dd>{me.email || '—'}</dd>
+            <dt>Дата приёма</dt>
+            <dd>{fmtDate(me.hired_at)}</dd>
             <dt>Филиалы</dt>
             <dd>
               <State loading={loading} error={error}>
@@ -40,29 +42,36 @@ export default function Profile() {
                   ? data.map((b, i) => (
                       <div key={i}>
                         {b.branches?.name}
-                        {b.base_salary > 0 && <span className="muted"> · оклад {money(b.base_salary)}</span>}
+                        {b.base_salary > 0 && me.role !== 'trainer' && <span className="muted"> · оклад {money(b.base_salary)}</span>}
                       </div>
                     ))
-                  : 'не назначены'}
+                  : me.role === 'director' ? 'все' : 'не назначены'}
               </State>
             </dd>
           </dl>
           <form
-            className="row"
+            className="form-grid"
             onSubmit={async (e) => {
               e.preventDefault()
-              if (await act(async () => must(await sb.rpc('update_my_profile', { p_phone: phone, p_photo_url: me.photo_url ?? '' })), 'Телефон сохранён'))
-                reloadMe()
+              await act(() => save(), 'Профиль сохранён')
             }}
           >
-            <label className="field grow">
-              <span>Телефон</span>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" />
-            </label>
-            <button className="btn ghost">Сохранить</button>
+            <Field label="Телефон">
+              <input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} inputMode="tel" />
+            </Field>
+            <Field label="Дата рождения">
+              <input type="date" value={f.birth} onChange={(e) => setF({ ...f, birth: e.target.value })} />
+            </Field>
+            <Field label="О себе" hint="Опыт, направления, награды — видят руководители" full>
+              <textarea value={f.bio} maxLength={2000} onChange={(e) => setF({ ...f, bio: e.target.value })} />
+            </Field>
+            <div className="full">
+              <button className="btn">Сохранить профиль</button>
+            </div>
           </form>
         </section>
-        <MyPay />
+        {me.role === 'trainer' && <TrainerStats p={me} />}
+        {me.role !== 'director' && <MyPay />}
         <section className="card">
           <h3>Сменить пароль</h3>
           <ChangePassword />
@@ -77,12 +86,12 @@ function MyPay() {
   const me = useMe()
   const { data } = useLoad(async () => {
     const [acc, bonuses, fines] = await Promise.all([
-      sb.from('salary_accruals').select('period, lessons_count, lessons_amount, base_amount, bonus_amount, fine_amount, total, status, salary_payments(amount)').eq('profile_id', me.id).order('period', { ascending: false }).limit(6).then(must),
+      sb.from('salary_accruals').select('period, sales_amount, percent, percent_amount, base_amount, bonus_amount, fine_amount, total, status, salary_payments(amount)').eq('profile_id', me.id).order('period', { ascending: false }).limit(6).then(must),
       sb.from('bonuses').select('amount, reason, given_on').eq('profile_id', me.id).order('given_on', { ascending: false }).limit(5).then(must),
       sb.from('fines').select('amount, reason, fined_on').eq('profile_id', me.id).order('fined_on', { ascending: false }).limit(5).then(must),
     ])
     return {
-      acc: acc as unknown as { period: string; lessons_count: number; lessons_amount: number; base_amount: number; bonus_amount: number; fine_amount: number; total: number; status: string; salary_payments: { amount: number }[] }[],
+      acc: acc as unknown as { period: string; sales_amount: number; percent: number; percent_amount: number; base_amount: number; bonus_amount: number; fine_amount: number; total: number; status: string; salary_payments: { amount: number }[] }[],
       bonuses: bonuses as { amount: number; reason: string; given_on: string }[],
       fines: fines as { amount: number; reason: string; fined_on: string }[],
     }
@@ -99,8 +108,7 @@ function MyPay() {
                 <td>
                   {new Date(a.period + 'T00:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
                   <small className="muted block">
-                    оклад {money(a.base_amount)}
-                    {a.lessons_count > 0 && ` · ${lessons(a.lessons_count)} ${money(a.lessons_amount)}`}
+                    {me.role === 'trainer' ? `${a.percent}% от абонементов ${money(a.sales_amount)} = ${money(a.percent_amount)}` : `оклад ${money(a.base_amount)}`}
                     {a.bonus_amount > 0 && ` · бонусы ${money(a.bonus_amount)}`}
                     {a.fine_amount > 0 && ` · штрафы −${money(a.fine_amount)}`}
                   </small>

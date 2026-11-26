@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { sb, normPhone } from '../lib/supabase'
-import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate } from '../lib/ui'
-import { loadBranches, STUDENT_STATUS } from '../lib/refs'
+import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, money, Contact } from '../lib/ui'
+import { loadBranches, STUDENT_STATUS, METHODS } from '../lib/refs'
 
 type Row = {
   id: string
@@ -13,19 +12,18 @@ type Row = {
   comment: string | null
   created_at: string
   branch: { name: string } | null
-  students: { id: string; full_name: string; status: string }[]
+  students: { id: string; full_name: string; status: string; group_members: { left_at: string | null; groups: { name: string } | null }[] }[]
 }
 type Draft = { id?: string; full_name: string; phone: string; phone2: string; branch_id: string; comment: string }
 
 export default function Parents() {
-  const me = useMe()
   const [q, setQ] = useState('')
   const [draft, setDraft] = useState<Draft | null>(null)
   const [card, setCard] = useState<Row | null>(null)
 
   const { data, loading, error, reload } = useLoad(async () => {
     const [parents, branches] = await Promise.all([
-      sb.from('parents').select('*, branch:branches(name), students(id, full_name, status)').order('full_name').then(must),
+      sb.from('parents').select('*, branch:branches(name), students(id, full_name, status, group_members(left_at, groups(name))))').order('full_name').then(must),
       loadBranches(),
     ])
     return { parents: parents as unknown as Row[], branches }
@@ -128,7 +126,10 @@ export default function Parents() {
         >
           <dl className="props">
             <dt>Телефон</dt>
-            <dd>{card.phone}</dd>
+            <dd>
+              {card.phone}
+              <Contact phone={card.phone} />
+            </dd>
             <dt>Доп. телефон</dt>
             <dd>{card.phone2 ?? '—'}</dd>
             <dt>Филиал</dt>
@@ -144,7 +145,10 @@ export default function Parents() {
               <tbody>
                 {card.students.map((s) => (
                   <tr key={s.id}>
-                    <td>{s.full_name}</td>
+                    <td>
+                      {s.full_name}
+                      <small className="muted block">{s.group_members.find((m) => !m.left_at)?.groups?.name ?? 'без группы'}</small>
+                    </td>
                     <td className="num">{STUDENT_STATUS[s.status]}</td>
                   </tr>
                 ))}
@@ -153,7 +157,7 @@ export default function Parents() {
           ) : (
             <p className="muted">Детей пока не привязано</p>
           )}
-          {me.role !== 'sales' && <p className="muted small">История оплат появится вместе с модулем продаж.</p>}
+          <ParentPayments ids={card.students.map((s) => s.id)} names={Object.fromEntries(card.students.map((s) => [s.id, s.full_name]))} />
         </Modal>
       )}
 
@@ -197,6 +201,49 @@ export default function Parents() {
             </Field>
           </div>
         </Modal>
+      )}
+    </>
+  )
+}
+
+// Все оплаты и возвраты по детям родителя (RLS: офис филиала; продажи — только свои продажи).
+function ParentPayments({ ids, names }: { ids: string[]; names: Record<string, string> }) {
+  const { data } = useLoad(
+    async () =>
+      ids.length
+        ? (must(await sb.from('payments').select('id, student_id, amount, kind, method, paid_at, comment').in('student_id', ids).order('paid_at', { ascending: false })) as {
+            id: string; student_id: string; amount: number; kind: string; method: string; paid_at: string; comment: string | null
+          }[])
+        : [],
+    [ids.join()],
+  )
+  if (!data) return null
+  const total = data.reduce((t, p) => t + (p.kind === 'refund' ? -p.amount : +p.amount), 0)
+  return (
+    <>
+      <h3>Оплаты {data.length > 0 && <span className="badge gold">итого {money(total)}</span>}</h3>
+      {data.length ? (
+        <table>
+          <tbody>
+            {data.map((p) => (
+              <tr key={p.id}>
+                <td>
+                  {fmtDate(p.paid_at)} · {names[p.student_id]}
+                  <small className="muted block">
+                    {METHODS[p.method]}
+                    {p.kind === 'refund' && ` · возврат: ${p.comment}`}
+                  </small>
+                </td>
+                <td className={'num' + (p.kind === 'refund' ? ' danger-text' : '')}>
+                  {p.kind === 'refund' ? '−' : ''}
+                  {money(p.amount)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="muted">Оплат пока нет</p>
       )}
     </>
   )

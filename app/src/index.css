@@ -312,3 +312,6 @@ tr.clickable { cursor: pointer; }
 }
 /* iPhone: поле ввода мельче 16px Safari приближает при фокусе. */
 @media (max-width: 900px) { input, select, textarea { font-size: 16px; } .modal footer { padding-bottom: max(14px, env(safe-area-inset-bottom)); } }
+.link { border: 0; background: none; padding: 0; color: var(--gold-hi); text-decoration: underline dotted; cursor: pointer; }
+.contact { display: inline-flex; gap: 6px; margin-left: 8px; vertical-align: middle; flex-wrap: wrap; }
+.contact .btn { text-decoration: none; }

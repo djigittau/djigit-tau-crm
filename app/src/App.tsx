@@ -9,7 +9,6 @@ import Profile from './pages/Profile'
 import Shift from './pages/Shift'
 import Branches from './pages/Branches'
 import Employees from './pages/Employees'
-import Settings from './pages/Settings'
 import Students from './pages/Students'
 import Parents from './pages/Parents'
 import Groups from './pages/Groups'
@@ -33,7 +32,6 @@ const PAGES: Record<string, () => React.JSX.Element> = {
   '/shift': Shift,
   '/branches': Branches,
   '/employees': Employees,
-  '/settings': Settings,
   '/students': Students,
   '/parents': Parents,
   '/groups': Groups,

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money, lessons } from '../lib/ui'
+import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money, lessons, initials, tenure, Contact, years } from '../lib/ui'
+import { uploadPhoto, studentPhotoUrl } from '../lib/photo'
 import { loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, METHODS, age, today } from '../lib/refs'
 import SaleModal from './SaleModal'
 
@@ -15,10 +16,11 @@ type Row = {
   start_date: string | null
   status: string
   comment: string | null
+  photo_path: string | null
   parent: { full_name: string; phone: string } | null
   dance: { name: string } | null
   branch: { name: string } | null
-  group_members: { group_id: string; joined_at: string; left_at: string | null; groups: { name: string } | null }[]
+  group_members: { group_id: string; joined_at: string; left_at: string | null; groups: { name: string; group_trainers: { profiles: { full_name: string } | null }[] } | null }[]
 }
 type Draft = {
   id?: string
@@ -50,7 +52,7 @@ export default function Students() {
     const [students, branches, groups, dances] = await Promise.all([
       sb
         .from('students')
-        .select('*, parent:parents(full_name, phone), dance:dance_types(name), branch:branches(name), group_members(group_id, joined_at, left_at, groups(name))')
+        .select('*, parent:parents(full_name, phone), dance:dance_types(name), branch:branches(name), group_members(group_id, joined_at, left_at, groups(name, group_trainers(profiles(full_name))))')
         .order('full_name')
         .then(must),
       loadBranches(),
@@ -193,7 +195,7 @@ export default function Students() {
                     <tr key={s.id} className="clickable" onClick={() => setCard(s)}>
                       <td>
                         <b>{s.full_name}</b>
-                        {age(s.birth_date) != null && <small className="muted"> · {age(s.birth_date)} лет</small>}
+                        {age(s.birth_date) != null && <small className="muted"> · {years(age(s.birth_date)!)}</small>}
                       </td>
                       {me.role !== 'trainer' && (
                         <td>
@@ -227,7 +229,7 @@ export default function Students() {
 
       {card && (
         <Modal
-          title={card.full_name}
+          title="Карточка ученика"
           onClose={() => setCard(null)}
           footer={
             canEdit && (
@@ -242,20 +244,39 @@ export default function Students() {
             )
           }
         >
+          <StudentHead
+            s={card}
+            canEdit={canEdit}
+            onPhoto={(path) => {
+              setCard({ ...card, photo_path: path })
+              reload()
+            }}
+          />
           <dl className="props">
             <dt>Статус</dt>
             <dd>{STUDENT_STATUS[card.status]}</dd>
+            <dt>Группа</dt>
+            <dd>
+              {currentGroup(card)?.groups?.name ?? 'без группы'}
+              {(() => {
+                const t = currentGroup(card)?.groups?.group_trainers.map((x) => x.profiles?.full_name).filter(Boolean)
+                return t?.length ? <span className="muted"> · тренер {t.join(', ')}</span> : null
+              })()}
+            </dd>
             <dt>Дата рождения</dt>
             <dd>
               {fmtDate(card.birth_date)}
-              {age(card.birth_date) != null && ` (${age(card.birth_date)} лет)`}
+              {age(card.birth_date) != null && ` (${years(age(card.birth_date)!)})`}
             </dd>
             <dt>Пол</dt>
             <dd>{card.gender ? GENDER[card.gender] : '—'}</dd>
             {me.role !== 'trainer' && (
               <>
                 <dt>Родитель</dt>
-                <dd>{card.parent ? `${card.parent.full_name}, ${card.parent.phone}` : '—'}</dd>
+                <dd>
+                  {card.parent ? `${card.parent.full_name}, ${card.parent.phone}` : '—'}
+                  <Contact phone={card.parent?.phone} />
+                </dd>
               </>
             )}
             <dt>Филиал</dt>
@@ -263,7 +284,10 @@ export default function Students() {
             <dt>Направление</dt>
             <dd>{card.dance?.name ?? '—'}</dd>
             <dt>Начало обучения</dt>
-            <dd>{fmtDate(card.start_date)}</dd>
+            <dd>
+              {fmtDate(card.start_date)}
+              {tenure(card.start_date) && <span className="muted"> · учится {tenure(card.start_date)}</span>}
+            </dd>
             <dt>Комментарий</dt>
             <dd>{card.comment ?? '—'}</dd>
           </dl>
@@ -561,5 +585,44 @@ function SalesHistory({ studentId }: { studentId: string }) {
         </Modal>
       )}
     </>
+  )
+}
+
+// Фото ученика: закрытая корзина, временная ссылка. Менять может офис и продажи филиала (проверяет Storage).
+function StudentHead({ s, canEdit, onPhoto }: { s: Row; canEdit: boolean; onPhoto: (path: string) => void }) {
+  const { data: url } = useLoad(() => studentPhotoUrl(s.photo_path), [s.photo_path])
+  const [busy, setBusy] = useState(false)
+  return (
+    <div className="person">
+      <span className="avatar xl">{url ? <img src={url} alt="" /> : initials(s.full_name)}</span>
+      <div>
+        <h2>{s.full_name}</h2>
+        {s.birth_date && <small className="muted block">{years(age(s.birth_date)!)}</small>}
+        {canEdit && (
+          <label className="btn ghost sm" style={{ marginTop: 8 }}>
+            {busy ? 'Загрузка…' : s.photo_path ? 'Сменить фото' : 'Добавить фото'}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              disabled={busy}
+              onChange={async (e) => {
+                const f = e.target.files?.[0]
+                e.target.value = ''
+                if (!f) return
+                setBusy(true)
+                let path = ''
+                const ok = await act(async () => {
+                  path = await uploadPhoto('students', s.id, f)
+                  must(await sb.from('students').update({ photo_path: path }).eq('id', s.id))
+                }, 'Фото сохранено')
+                setBusy(false)
+                if (ok) onPhoto(path)
+              }}
+            />
+          </label>
+        )}
+      </div>
+    </div>
   )
 }

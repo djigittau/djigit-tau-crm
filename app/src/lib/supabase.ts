@@ -23,6 +23,10 @@ export type Profile = {
   role: Role
   status: Status
   photo_url: string | null
+  hired_at: string | null
+  birth_date: string | null
+  bio: string | null
+  salary_percent: number | null
 }
 
 export type Branch = {

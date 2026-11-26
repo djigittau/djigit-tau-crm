@@ -11,7 +11,7 @@ const OFFICE: Role[] = ['director', 'manager', 'admin']
 export const MENU: MenuItem[] = [
   { to: '/', label: 'Главная', icon: 'home', roles: ['director', 'manager'], group: '' },
   { to: '/profile', label: 'Профиль', icon: 'user', roles: ALL, group: '' },
-  { to: '/shift', label: 'Смена', icon: 'clock', roles: ALL, group: '' },
+  { to: '/shift', label: 'Смена', icon: 'clock', roles: ['manager', 'admin', 'sales', 'trainer'], group: '' },
   { to: '/trial-new', label: 'Заполнение пробников', icon: 'plus', roles: ['sales'], group: '' },
   { to: '/trials', label: 'Обработка пробников', icon: 'funnel', roles: ['sales'], group: '' },
   { to: '/trials', label: 'Пробники', icon: 'funnel', roles: OFFICE, group: 'Клиенты' },
@@ -32,7 +32,6 @@ export const MENU: MenuItem[] = [
   { to: '/employees', label: 'Сотрудники', icon: 'user', roles: ['director', 'manager'], group: 'Управление' },
   { to: '/audit', label: 'Журнал действий', icon: 'lock', roles: ['director', 'manager'], group: 'Управление' },
   { to: '/amocrm', label: 'Интеграция amoCRM', icon: 'key', roles: ['director'], group: 'Управление' },
-  { to: '/settings', label: 'Настройки', icon: 'settings', roles: ['director'], group: 'Управление' },
 ]
 export const homeOf = (r: Role) => (r === 'director' || r === 'manager' ? '/' : '/profile')
 

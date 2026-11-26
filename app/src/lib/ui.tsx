@@ -128,6 +128,22 @@ export function State({ loading, error, children }: { loading: boolean; error: s
   return <>{children}</>
 }
 
+// Быстрая связь: звонок и WhatsApp (телефон к виду 7XXXXXXXXXX).
+export function Contact({ phone }: { phone: string | null | undefined }) {
+  const d = (phone ?? '').replace(/\D/g, '').replace(/^8(?=\d{10}$)/, '7')
+  if (d.length < 10) return null
+  return (
+    <span className="contact">
+      <a className="btn ghost sm" href={`tel:+${d}`}>
+        Позвонить
+      </a>
+      <a className="btn ghost sm" href={`https://wa.me/${d}`} target="_blank" rel="noreferrer">
+        WhatsApp
+      </a>
+    </span>
+  )
+}
+
 // ---------- форматирование ----------
 // Время студии — всегда по Алматы, на каком бы устройстве ни открыли CRM.
 export const TZ = 'Asia/Almaty'
@@ -150,6 +166,19 @@ export function plural(n: number, [one, few, many]: [string, string, string]) {
 }
 const LESSON: [string, string, string] = ['занятие', 'занятия', 'занятий']
 export const lessons = (n: number) => plural(n, LESSON)
+export const years = (n: number) => plural(n, ['год', 'года', 'лет'])
+// Стаж или срок обучения от даты: «2 года 3 мес.».
+export function tenure(from: string | null | undefined) {
+  if (!from) return null
+  const a = new Date(from)
+  const n = new Date()
+  let m = (n.getFullYear() - a.getFullYear()) * 12 + n.getMonth() - a.getMonth() - (n.getDate() < a.getDate() ? 1 : 0)
+  if (m < 0) return null
+  if (m === 0) return 'меньше месяца'
+  const y = Math.floor(m / 12)
+  m %= 12
+  return [y && years(y), m && `${m} мес.`].filter(Boolean).join(' ')
+}
 export const initials = (n: string) =>
   n
     .trim()

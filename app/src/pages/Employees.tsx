@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { sb, ROLE_LABEL, STATUS_LABEL, PHONE_EMAIL_DOMAIN, type Profile, type Role, type Status } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, initials, money } from '../lib/ui'
+import { StaffHead, StaffProps, TrainerStats } from './StaffCard'
 
 type Row = Profile & { employee_branches: { branch_id: string; base_salary: number; branches: { name: string } | null }[] }
 type Draft = {
@@ -12,6 +13,10 @@ type Draft = {
   role: Role
   branches: Record<string, string> // branch_id → оклад
   password?: string
+  hired_at: string
+  birth_date: string
+  bio: string
+  salary_percent: string // пусто — процент по умолчанию
 }
 
 const ROLES: Role[] = ['director', 'manager', 'admin', 'sales', 'trainer']
@@ -42,6 +47,7 @@ export default function Employees() {
   const me = useMe()
   const isDirector = me.role === 'director'
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [view, setView] = useState<Row | null>(null)
   const [issued, setIssued] = useState<{ login: string; password: string } | null>(null)
   const [q, setQ] = useState('')
   const [roleF, setRoleF] = useState('')
@@ -67,14 +73,23 @@ export default function Employees() {
       email: draft.email.trim() || null,
       phone: draft.phone.trim() || null,
       role: draft.role,
-      branches: Object.entries(draft.branches).map(([branch_id, s]) => ({ branch_id, base_salary: Number(s) || 0 })),
+      branches: Object.entries(draft.branches).map(([branch_id, s]) => ({ branch_id, base_salary: draft.role === 'trainer' ? 0 : Number(s) || 0 })),
       password: draft.password,
     }
     const ok = await act(async () => {
       if (!body.full_name) throw new Error('Введите ФИО')
       if (!body.email && !body.phone) throw new Error('Нужен телефон или email для входа')
       if (!draft.id && (draft.password ?? '').length < 8) throw new Error('Временный пароль — минимум 8 символов')
+      const pct = draft.salary_percent.trim() === '' ? null : Number(draft.salary_percent.replace(',', '.'))
+      if (pct != null && !(pct >= 0 && pct <= 100)) throw new Error('Процент — от 0 до 100')
       const r = await adminCall(body)
+      // Дополнительные поля профиля директор пишет напрямую (RLS: profiles_update — только директор).
+      must(
+        await sb
+          .from('profiles')
+          .update({ hired_at: draft.hired_at || null, birth_date: draft.birth_date || null, bio: draft.bio.trim() || null, salary_percent: draft.role === 'trainer' ? pct : null })
+          .eq('id', draft.id ?? r.id),
+      )
       if (!draft.id) setIssued({ login: r.login, password: draft.password! })
     }, draft.id ? 'Сотрудник сохранён' : 'Аккаунт создан')
     if (ok) {
@@ -100,7 +115,7 @@ export default function Employees() {
     <>
       <PageHead title="Сотрудники" sub={data ? `Активных: ${data.people.filter((p) => p.status === 'active').length}` : undefined}>
         {isDirector && (
-          <button className="btn" onClick={() => setDraft({ full_name: '', email: '', phone: '', role: 'trainer', branches: {}, password: genPassword() })}>
+          <button className="btn" onClick={() => setDraft({ full_name: '', email: '', phone: '', role: 'trainer', branches: {}, password: genPassword(), hired_at: new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Almaty' }), birth_date: '', bio: '', salary_percent: '' })}>
             <Icon name="plus" /> Добавить сотрудника
           </button>
         )}
@@ -139,9 +154,11 @@ export default function Employees() {
                     <tr key={p.id} className={p.status !== 'active' ? 'dimmed' : ''}>
                       <td>
                         <div className="who">
-                          <span className="avatar">{initials(p.full_name)}</span>
+                          <span className="avatar">{p.photo_url ? <img src={p.photo_url} alt="" /> : initials(p.full_name)}</span>
                           <div>
-                            <b>{p.full_name}</b>
+                            <button className="link" onClick={() => setView(p)}>
+                              <b>{p.full_name}</b>
+                            </button>
                             <small>{p.email ?? ''}</small>
                           </div>
                         </div>
@@ -155,7 +172,7 @@ export default function Employees() {
                           ? p.employee_branches.map((b) => (
                               <div key={b.branch_id}>
                                 {b.branches?.name}
-                                {b.base_salary > 0 && <span className="muted"> · {money(b.base_salary)}</span>}
+                                {b.base_salary > 0 && p.role !== 'trainer' && <span className="muted"> · {money(b.base_salary)}</span>}
                               </div>
                             ))
                           : p.role === 'director' ? 'все' : '—'}
@@ -171,6 +188,10 @@ export default function Employees() {
                             title="Изменить"
                             onClick={() =>
                               setDraft({
+                                hired_at: p.hired_at ?? '',
+                                birth_date: p.birth_date ?? '',
+                                bio: p.bio ?? '',
+                                salary_percent: p.salary_percent == null ? '' : String(p.salary_percent),
                                 id: p.id,
                                 full_name: p.full_name,
                                 email: p.email ?? '',
@@ -252,7 +273,7 @@ export default function Employees() {
             </Field>
             {draft.role !== 'director' && (
               <div className="field full">
-                <span>Филиалы и оклад, ₸</span>
+                <span>{draft.role === 'trainer' ? 'Филиалы' : 'Филиалы и оклад, ₸'}</span>
                 {data?.branches.length ? (
                   <div className="branch-pick">
                     {data.branches.map((b) => {
@@ -272,7 +293,7 @@ export default function Employees() {
                             />
                             {b.name}
                           </label>
-                          {on && (
+                          {on && draft.role !== 'trainer' && (
                             <input
                               type="number"
                               min={0}
@@ -290,12 +311,48 @@ export default function Employees() {
                 )}
               </div>
             )}
+            <Field label="Дата приёма" hint="Стаж считается от неё">
+              <input type="date" value={draft.hired_at} onChange={(e) => setDraft({ ...draft, hired_at: e.target.value })} />
+            </Field>
+            <Field label="Дата рождения">
+              <input type="date" value={draft.birth_date} onChange={(e) => setDraft({ ...draft, birth_date: e.target.value })} />
+            </Field>
+            {draft.role === 'trainer' && (
+              <Field label="Процент от абонементов, %" hint="Пусто — процент по умолчанию со страницы «Зарплаты». Оклада у тренера нет." full>
+                <input type="number" min={0} max={100} step="0.5" value={draft.salary_percent} onChange={(e) => setDraft({ ...draft, salary_percent: e.target.value })} />
+              </Field>
+            )}
+            <Field label="О себе" full>
+              <textarea value={draft.bio} maxLength={2000} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} />
+            </Field>
             {!draft.id && (
               <Field label="Временный пароль *" hint="Сотрудник сменит его при первом входе" full>
                 <input value={draft.password ?? ''} onChange={(e) => setDraft({ ...draft, password: e.target.value })} />
               </Field>
             )}
           </div>
+        </Modal>
+      )}
+
+      {view && (
+        <Modal title="Профиль сотрудника" onClose={() => setView(null)}>
+          <StaffHead
+            p={view}
+            onPhoto={
+              isDirector
+                ? async (url) => {
+                    must(await sb.from('profiles').update({ photo_url: url }).eq('id', view.id))
+                    setView({ ...view, photo_url: url })
+                    reload()
+                  }
+                : undefined
+            }
+          />
+          <StaffProps p={view} />
+          <p className="muted small">
+            Филиалы: {view.employee_branches.map((b) => b.branches?.name).join(', ') || (view.role === 'director' ? 'все' : '—')}
+          </p>
+          {view.role === 'trainer' && <TrainerStats p={view} />}
         </Modal>
       )}
 

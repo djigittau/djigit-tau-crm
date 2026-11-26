@@ -12,6 +12,9 @@ type Acc = {
   lessons_count: number
   lesson_rate: number
   lessons_amount: number
+  sales_amount: number
+  percent: number
+  percent_amount: number
   bonus_amount: number
   fine_amount: number
   total: number
@@ -22,7 +25,8 @@ type Acc = {
 }
 const STATUS = { draft: 'Черновик', approved: 'Утверждено', paid: 'Выплачено' }
 
-// Зарплата = Оклад + Занятия (по расписанию, без отменённых) × Ставка + Бонусы − Штрафы. Считает база (accrue_salaries).
+// Тренер: свой % от оплат абонементов учеников его групп за месяц (минус возвраты) + бонусы − штрафы.
+// Остальные: оклад по филиалу + бонусы − штрафы. Считает база (accrue_salaries, миграция 0013).
 export default function Salaries() {
   const me = useMe()
   const boss = me.role === 'director' || me.role === 'manager'
@@ -32,7 +36,7 @@ export default function Salaries() {
   const [bonus, setBonus] = useState<{ profile: string; branch: string; amount: string; reason: string } | null>(null)
 
   const { data, loading, error, reload } = useLoad(async () => {
-    const [acc, branches, staff] = await Promise.all([
+    const [acc, branches, staff, pct] = await Promise.all([
       sb
         .from('salary_accruals')
         .select('*, person:profiles!salary_accruals_profile_id_fkey(full_name, role), branch:branches(name), salary_payments(amount)')
@@ -41,8 +45,9 @@ export default function Salaries() {
         .then(must),
       loadBranches(),
       loadStaff(),
+      sb.from('crm_settings').select('value').eq('key', 'trainer_percent').maybeSingle().then(must),
     ])
-    return { acc: acc as unknown as Acc[], branches, staff }
+    return { acc: acc as unknown as Acc[], branches, staff, pct: Number((pct as { value: unknown } | null)?.value ?? 0) }
   }, [month])
 
   const list = (data?.acc ?? []).filter((a) => !branchF || a.branch_id === branchF)
@@ -59,6 +64,17 @@ export default function Salaries() {
       toast(n ? `Пересчитано начислений: ${n}` : 'Нет черновиков для пересчёта')
       reload()
     }
+  }
+
+  // Процент по умолчанию — для тренеров без своего процента (свой задаёт директор в «Сотрудниках»).
+  async function saveDefaultPct() {
+    const v = prompt('Процент тренера по умолчанию, %', String(data?.pct ?? 0))
+    if (v == null) return
+    const n = Number(v.replace(',', '.'))
+    if (await act(async () => {
+      if (!Number.isFinite(n) || n < 0 || n > 100) throw new Error('Процент — от 0 до 100')
+      must(await sb.from('crm_settings').upsert({ key: 'trainer_percent', value: n }))
+    }, 'Процент сохранён')) reload()
   }
 
   async function setStatus(a: Acc, status: Acc['status']) {
@@ -107,13 +123,13 @@ export default function Salaries() {
 
   return (
     <>
-      <PageHead title="Зарплаты" sub="Оклад + занятия × ставка + бонусы − штрафы">
+      <PageHead title="Зарплаты" sub={<>Тренер: % от абонементов + бонусы − штрафы. Остальные: оклад + бонусы − штрафы.{me.role === 'director' && data && <> · по умолчанию <button className="link" onClick={saveDefaultPct}>{data.pct}% тренерам</button></>}</>}>
         {boss && (
           <button className="btn ghost" onClick={() => setBonus({ profile: '', branch: branchF || (data?.branches.length === 1 ? data.branches[0].id : ''), amount: '', reason: '' })}>
             <Icon name="plus" /> Бонус
           </button>
         )}
-        <button className="btn" onClick={calculate}>
+        <button className="btn" onClick={calculate} disabled={!data}>
           Рассчитать за месяц
         </button>
       </PageHead>
@@ -154,7 +170,7 @@ export default function Salaries() {
                     <tr>
                       <th>Сотрудник</th>
                       <th className="num">Оклад</th>
-                      <th className="num">Занятия</th>
+                      <th className="num">% от абонементов</th>
                       <th className="num">Бонусы</th>
                       <th className="num">Штрафы</th>
                       <th className="num">Итого</th>
@@ -176,11 +192,15 @@ export default function Salaries() {
                           </td>
                           <td className="num">{money(a.base_amount)}</td>
                           <td className="num">
-                            {money(a.lessons_amount)}
-                            {a.lessons_count > 0 && (
-                              <small className="muted block">
-                                {a.lessons_count} × {money(a.lesson_rate)}
-                              </small>
+                            {a.person?.role === 'trainer' ? (
+                              <>
+                                {money(a.percent_amount)}
+                                <small className="muted block">
+                                  {a.percent}% от {money(a.sales_amount)} · занятий {a.lessons_count}
+                                </small>
+                              </>
+                            ) : (
+                              '—'
                             )}
                           </td>
                           <td className="num">{money(a.bonus_amount)}</td>

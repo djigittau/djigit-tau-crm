@@ -12,11 +12,11 @@ CRM студии кавказского танца DJIGIT TAU: филиалы, �
 | Папка | Что внутри |
 |---|---|
 | `app/` | Приложение: React + TypeScript + Vite |
-| `supabase/migrations/` | Схема базы, права (RLS), триггеры, журнал — по порядку `0001…0012` |
+| `supabase/migrations/` | Схема базы, права (RLS), триггеры, журнал — по порядку `0001…0015` |
 | `supabase/functions/admin-users` | Аккаунты сотрудников (создать, заблокировать, сбросить пароль) — только директор |
 | `supabase/functions/amocrm` | Интеграция amoCRM → CRM: OAuth, синхронизация, webhook — только директор и cron |
 | `supabase/first_director.sql` | Шаблон: создать первого директора в новом проекте |
-| `tests/` | Проверка прав через API (`rls.cjs`) и тестовые данные (`qa_setup.sql` / `qa_cleanup.sql`) |
+| `tests/` | Проверка прав через API (`rls.cjs`) и тестовые данные (`qa_setup.sql` / `qa_cleanup.sql`; тестовые фото удалять через Storage API) |
 | корень (`index.html`, `assets/`) | Собранное приложение для GitHub Pages. Не править руками — собирается `npm run publish` |
 
 ## Запуск на компьютере
