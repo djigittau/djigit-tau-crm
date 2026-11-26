@@ -206,6 +206,23 @@ tr.clickable { cursor: pointer; }
 .lesson.cancelled em { color: var(--bad); }
 @media (max-width: 900px) { .week { grid-template-columns: 1fr; } .day { min-height: 0; } }
 
+
+/* ---------- посещаемость ---------- */
+.lesson-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.lesson-tab { flex: none; display: grid; gap: 2px; text-align: left; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); min-width: 170px; }
+.lesson-tab b { color: var(--gold-hi); }
+.lesson-tab small { color: var(--muted); font-size: 12px; }
+.lesson-tab.on { border-color: var(--gold); background: rgba(201,164,76,.08); }
+.lesson-tab.cancelled { opacity: .55; text-decoration: line-through; }
+.board-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.board-foot { padding: 12px 16px; border-top: 1px solid var(--line); }
+.marks { display: flex; gap: 6px; flex-wrap: wrap; }
+.mark { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font-size: 13px; display: inline-flex; align-items: center; }
+.mark:hover { color: var(--text); border-color: var(--gold-lo); }
+.mark.present.on, .mark.makeup.on { color: var(--ok); border-color: rgba(95,179,131,.5); background: rgba(95,179,131,.1); font-weight: 600; }
+.mark.absent.on { color: var(--bad); border-color: rgba(224,112,95,.5); background: rgba(224,112,95,.1); font-weight: 600; }
+.mark.excused.on { color: var(--warn); border-color: rgba(217,164,65,.5); background: rgba(217,164,65,.1); font-weight: 600; }
+
 /* ---------- модальное окно и уведомления ---------- */
 .overlay { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.6); display: grid; place-items: center; padding: 20px; }
 .modal { width: 100%; max-width: 620px; max-height: calc(100vh - 40px); overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 40px 100px rgba(0,0,0,.6); }

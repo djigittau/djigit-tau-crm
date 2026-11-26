@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate } from '../lib/ui'
+import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime } from '../lib/ui'
 import { loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, age, today } from '../lib/refs'
 
 type Row = {
@@ -260,6 +260,7 @@ export default function Students() {
             <dt>Комментарий</dt>
             <dd>{card.comment ?? '—'}</dd>
           </dl>
+          <AttendanceHistory studentId={card.id} />
           <h3>История групп</h3>
           {card.group_members.length ? (
             <table>
@@ -364,6 +365,51 @@ export default function Students() {
             </Field>
           </div>
         </Modal>
+      )}
+    </>
+  )
+}
+
+const ATT: Record<string, string> = { present: 'Был', absent: 'Не был', excused: 'Уважительная', makeup: 'Отработка' }
+
+// Последние 20 отметок ученика.
+function AttendanceHistory({ studentId }: { studentId: string }) {
+  const { data } = useLoad(
+    async () =>
+      must(
+        await sb
+          .from('attendance')
+          .select('status, note, lessons!inner(starts_at, groups(name))')
+          .eq('student_id', studentId)
+          .order('starts_at', { referencedTable: 'lessons', ascending: false })
+          .limit(20),
+      ) as unknown as { status: string; note: string | null; lessons: { starts_at: string; groups: { name: string } | null } }[],
+    [studentId],
+  )
+  if (!data) return null
+  const ok = data.filter((a) => a.status === 'present' || a.status === 'makeup').length
+  return (
+    <>
+      <h3>Посещаемость{data.length ? ` · ${Math.round((ok / data.length) * 100)}% из последних ${data.length}` : ''}</h3>
+      {data.length ? (
+        <table>
+          <tbody>
+            {[...data]
+              .sort((a, b) => b.lessons.starts_at.localeCompare(a.lessons.starts_at))
+              .map((a, i) => (
+                <tr key={i}>
+                  <td>{fmtDateTime(a.lessons.starts_at)}</td>
+                  <td>{a.lessons.groups?.name}</td>
+                  <td className="num">
+                    <span className={'badge ' + (a.status === 'absent' ? 'bad' : a.status === 'excused' ? 'warn-b' : 'ok')}>{ATT[a.status]}</span>
+                    {a.note && <small className="muted block">{a.note}</small>}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="muted">Отметок пока нет</p>
       )}
     </>
   )
