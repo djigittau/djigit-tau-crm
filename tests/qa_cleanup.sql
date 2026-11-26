@@ -10,6 +10,8 @@ begin
   delete from public.lessons where branch_id = any(bs);
   delete from public.group_members where group_id in (select id from public.groups where branch_id = any(bs));
   delete from public.group_trainers where group_id in (select id from public.groups where branch_id = any(bs));
+  delete from public.group_slots where group_id in (select id from public.groups where branch_id = any(bs));
+  -- replica отключает и каскады внешних ключей: дочерние строки удаляются явно
   delete from public.trial_events where trial_lead_id in (select id from public.trial_leads where branch_id = any(bs));
   delete from public.shifts where profile_id = any(ids);
   delete from public.salary_payments where branch_id = any(bs);

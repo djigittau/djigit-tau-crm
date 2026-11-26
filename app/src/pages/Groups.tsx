@@ -48,7 +48,7 @@ export default function Groups() {
   const [newDance, setNewDance] = useState('')
 
   const { data, loading, error, reload } = useLoad(async () => {
-    const [groups, branches, dances, trainers] = await Promise.all([
+    const [groups, branches, dances, trainers, allTrainers] = await Promise.all([
       sb
         .from('groups')
         .select('*, branch:branches(name), dance:dance_types(name), group_trainers(trainer_id, profiles(full_name)), group_slots(weekday, start_time), group_members(left_at, students(id, full_name))')
@@ -57,8 +57,10 @@ export default function Groups() {
       loadBranches(),
       loadDances(true),
       canEdit ? loadTrainers() : Promise.resolve([]),
+      // Директор видит всех тренеров, в том числе без филиала: при сохранении тренер добавится в филиал группы.
+      me.role === 'director' ? sb.from('profiles').select('id, full_name').eq('role', 'trainer').eq('status', 'active').order('full_name').then(must) : Promise.resolve([]),
     ])
-    return { groups: groups as unknown as Row[], branches, dances, trainers }
+    return { groups: groups as unknown as Row[], branches, dances, trainers, allTrainers: allTrainers as { id: string; full_name: string }[] }
   }, [canEdit])
 
   const members = (g: Row) => g.group_members.filter((m) => !m.left_at)
@@ -103,6 +105,11 @@ export default function Groups() {
       let id = draft.id
       if (id) must(await sb.from('groups').update(row).eq('id', id))
       else id = (must(await sb.from('groups').insert(row).select('id').single()) as { id: string }).id
+      // Тренер не из этого филиала — директор добавляет его в филиал (RLS employee_branches: только директор).
+      const inBranch = new Set(data!.trainers.filter((t) => t.branches.includes(draft.branch_id)).map((t) => t.id))
+      const add = draft.trainers.filter((t) => !inBranch.has(t))
+      if (add.length && me.role !== 'director') throw new Error('Тренер не работает в этом филиале. Назначить филиал может директор в «Сотрудниках».')
+      if (add.length) must(await sb.from('employee_branches').upsert(add.map((t) => ({ profile_id: t, branch_id: draft.branch_id })), { onConflict: 'profile_id,branch_id', ignoreDuplicates: true }))
       // тренеры и дни занятий — заменить целиком
       must(await sb.from('group_trainers').delete().eq('group_id', id))
       if (draft.trainers.length) must(await sb.from('group_trainers').insert(draft.trainers.map((t) => ({ group_id: id, trainer_id: t }))))
@@ -311,7 +318,7 @@ export default function Groups() {
               <input autoFocus value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
             </Field>
             <Field label="Филиал *">
-              <select value={draft.branch_id} onChange={(e) => setDraft({ ...draft, branch_id: e.target.value, trainers: [] })}>
+              <select value={draft.branch_id} onChange={(e) => setDraft({ ...draft, branch_id: e.target.value })}>
                 <option value="">—</option>
                 {data?.branches.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -338,27 +345,24 @@ export default function Groups() {
                 <option value="archived">Архив</option>
               </select>
             </Field>
-            <div className="field full">
-              <span>Тренер</span>
-              {data?.trainers.filter((t) => t.branches.includes(draft.branch_id)).length ? (
-                <div className="chips">
-                  {data.trainers
-                    .filter((t) => t.branches.includes(draft.branch_id))
-                    .map((t) => (
-                      <label key={t.id} className="check chip-check">
-                        <input
-                          type="checkbox"
-                          checked={draft.trainers.includes(t.id)}
-                          onChange={(e) => setDraft({ ...draft, trainers: e.target.checked ? [...draft.trainers, t.id] : draft.trainers.filter((x) => x !== t.id) })}
-                        />
+            <Field label="Тренер" hint={!data?.branches.length ? 'Сначала добавьте филиал в разделе «Филиалы»' : undefined}>
+              {(() => {
+                // Тренеры филиала группы; директор видит и остальных — при сохранении тренер добавится в филиал.
+                const own = (data?.trainers ?? []).filter((t) => !draft.branch_id || t.branches.includes(draft.branch_id)).map((t) => ({ id: t.id, name: t.name, other: false }))
+                const other = (data?.allTrainers ?? []).filter((t) => !own.some((o) => o.id === t.id)).map((t) => ({ id: t.id, name: t.full_name, other: !!draft.branch_id }))
+                return (
+                  <select value={draft.trainers[0] ?? ''} onChange={(e) => setDraft({ ...draft, trainers: [e.target.value, ...draft.trainers.slice(1)].filter(Boolean) })}>
+                    <option value="">— без тренера —</option>
+                    {[...own, ...other].map((t) => (
+                      <option key={t.id} value={t.id}>
                         {t.name}
-                      </label>
+                        {t.other ? ' (добавится в филиал)' : ''}
+                      </option>
                     ))}
-                </div>
-              ) : (
-                <small>{draft.branch_id ? 'В этом филиале нет тренеров. Директор назначает их в разделе «Сотрудники».' : 'Сначала выберите филиал'}</small>
-              )}
-            </div>
+                  </select>
+                )
+              })()}
+            </Field>
             <div className="field full">
               <span>Дни и время занятий</span>
               {draft.slots.map((s, i) => (
