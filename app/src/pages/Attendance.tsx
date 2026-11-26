@@ -144,7 +144,7 @@ function Board({ lesson, day }: { lesson: Lesson; day: string }) {
           </div>
           {data.roster.length ? (
             <div className="table-wrap">
-              <table>
+              <table className="stack">
                 <thead>
                   <tr>
                     <th>Ученик</th>
@@ -172,7 +172,7 @@ function Board({ lesson, day }: { lesson: Lesson; day: string }) {
                             {m?.status === 'makeup' && <span className="mark makeup on">Отработка</span>}
                           </div>
                         </td>
-                        <td>
+                        <td className={m && m.status !== 'present' ? '' : 'opt'}>
                           {m && m.status !== 'present' ? (
                             <input
                               defaultValue={m.note ?? ''}
@@ -184,7 +184,7 @@ function Board({ lesson, day }: { lesson: Lesson; day: string }) {
                             <span className="muted">—</span>
                           )}
                         </td>
-                        <td className="num">{st ? `${Math.round((st.ok / st.all) * 100)}% (${st.ok}/${st.all})` : '—'}</td>
+                        <td className="num" data-label="За 30 дней">{st ? `${Math.round((st.ok / st.all) * 100)}% (${st.ok}/${st.all})` : '—'}</td>
                       </tr>
                     )
                   })}

@@ -174,6 +174,7 @@ const PATHS = {
   calendar: 'M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',
   funnel: 'M3 4h18l-7 8v6l-4 2v-8L3 4z',
   check: 'M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9',
+  chevron: 'M6 9l6 6 6-6',
   family: 'M8 9a3 3 0 100-6 3 3 0 000 6zM2 21c0-3.3 2.7-6 6-6s6 2.7 6 6M17 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM15 21c0-2.5 1.2-4.5 3-5.3 1.9.8 3 2.8 3 5.3',
 } as const
 export type IconName = keyof typeof PATHS

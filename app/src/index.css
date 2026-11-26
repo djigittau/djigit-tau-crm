@@ -126,7 +126,7 @@ input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--gold); }
 .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; flex: none; background: rgba(201,164,76,.12); color: var(--gold-hi); font-weight: 700; font-size: 12px; border: 1px solid rgba(201,164,76,.3); }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .avatar.xl { width: 64px; height: 64px; font-size: 20px; }
-.content { padding: 24px; max-width: 1400px; display: grid; gap: 16px; align-content: start; }
+.content { padding: 24px; max-width: 1400px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-content: start; }
 .dim { display: none; }
 
 /* ---------- страницы ---------- */
@@ -282,3 +282,33 @@ tr.clickable { cursor: pointer; }
 .bar i.neg { background: var(--bad); }
 .bar small { color: var(--muted); font-size: 10.5px; }
 .break { word-break: break-all; }
+
+/* ---------- разделы меню ---------- */
+.nav-group { display: grid; gap: 2px; }
+.nav-group + .nav-group { margin-top: 6px; }
+.nav-head { display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 12px; border: 0; background: none; color: var(--gold-lo); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.nav-head:hover { color: var(--gold); }
+.nav-head[aria-expanded=false] .i { transform: rotate(-90deg); }
+.shell.mini .nav-head { display: none; }
+.shell.mini .nav-group + .nav-group { border-top: 1px solid var(--line); padding-top: 6px; }
+@media (max-width: 900px) { .shell.mini .nav-head { display: flex; } }
+
+/* Колонки сеток не растягиваются шире экрана; широкая таблица прокручивается внутри карточки. */
+.grid-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.card { min-width: 0; overflow-x: auto; }
+@media (max-width: 900px) { .grid-2, .form-grid { grid-template-columns: minmax(0, 1fr); } .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Таблица-«стопка»: на телефоне каждая строка — карточка (табло посещаемости). */
+@media (max-width: 900px) {
+  table.stack thead { display: none; }
+  table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { padding: 12px 16px; border-bottom: 1px solid var(--line-soft); }
+  table.stack td { padding: 4px 0; border: 0; text-align: left; }
+  table.stack td:empty { display: none; }
+  table.stack .marks { flex-wrap: wrap; }
+}
+@media (max-width: 900px) {
+  table.stack td.opt { display: none; }
+  table.stack td[data-label]::before { content: attr(data-label) ': '; color: var(--muted); font-size: 12.5px; }
+}
+/* iPhone: поле ввода мельче 16px Safari приближает при фокусе. */
+@media (max-width: 900px) { input, select, textarea { font-size: 16px; } .modal footer { padding-bottom: max(14px, env(safe-area-inset-bottom)); } }

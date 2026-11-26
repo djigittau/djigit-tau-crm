@@ -5,33 +5,34 @@ import { Icon, initials, type IconName } from './lib/ui'
 import { ROLE_LABEL, type Role } from './lib/supabase'
 
 // Меню зависит от роли. Пункты добавляются по мере готовности этапов — неработающих разделов нет.
-export type MenuItem = { to: string; label: string; icon: IconName; roles: Role[] }
+export type MenuItem = { to: string; label: string; icon: IconName; roles: Role[]; group: string }
 const ALL: Role[] = ['director', 'manager', 'admin', 'sales', 'trainer']
+const OFFICE: Role[] = ['director', 'manager', 'admin']
 export const MENU: MenuItem[] = [
-  { to: '/', label: 'Главная', icon: 'home', roles: ['director', 'manager'] },
-  { to: '/profile', label: 'Профиль', icon: 'user', roles: ALL },
-  { to: '/shift', label: 'Смена', icon: 'clock', roles: ALL },
-  { to: '/trial-new', label: 'Заполнение пробников', icon: 'plus', roles: ['sales'] },
-  { to: '/trials', label: 'Обработка пробников', icon: 'funnel', roles: ['sales'] },
-  { to: '/trials', label: 'Пробники', icon: 'funnel', roles: ['director', 'manager', 'admin'] },
-  { to: '/attendance', label: 'Посещаемость', icon: 'check', roles: ['director', 'manager', 'admin', 'trainer'] },
-  { to: '/students', label: 'Ученики', icon: 'users', roles: ['director', 'manager', 'admin', 'trainer'] },
-  { to: '/parents', label: 'Родители', icon: 'family', roles: ['director', 'manager', 'admin'] },
-  { to: '/groups', label: 'Группы', icon: 'layers', roles: ['director', 'manager', 'admin'] },
-  { to: '/schedule', label: 'Расписание', icon: 'calendar', roles: ['director', 'manager', 'admin', 'trainer'] },
-  { to: '/shifts', label: 'Смены сотрудников', icon: 'clock', roles: ['director', 'manager', 'admin'] },
-  { to: '/analytics', label: 'Аналитика и LTV', icon: 'funnel', roles: ['director', 'manager'] },
-  { to: '/finance', label: 'Финансы', icon: 'layers', roles: ['director', 'manager', 'admin'] },
-  { to: '/salaries', label: 'Зарплаты', icon: 'user', roles: ['director', 'manager', 'admin'] },
-  { to: '/rent', label: 'Аренда и коммунальные', icon: 'building', roles: ['director', 'manager', 'admin'] },
-  { to: '/expenses', label: 'Доп. расходы', icon: 'layers', roles: ['director', 'manager', 'admin'] },
-  { to: '/insurance', label: 'Медстраховка', icon: 'plus', roles: ['director', 'manager', 'admin'] },
-  { to: '/fines', label: 'Штрафы', icon: 'x', roles: ['director', 'manager', 'admin'] },
-  { to: '/branches', label: 'Филиалы', icon: 'building', roles: ['director', 'manager', 'admin'] },
-  { to: '/employees', label: 'Сотрудники', icon: 'user', roles: ['director', 'manager'] },
-  { to: '/audit', label: 'Журнал действий', icon: 'lock', roles: ['director', 'manager'] },
-  { to: '/amocrm', label: 'Интеграция amoCRM', icon: 'key', roles: ['director'] },
-  { to: '/settings', label: 'Настройки', icon: 'settings', roles: ['director'] },
+  { to: '/', label: 'Главная', icon: 'home', roles: ['director', 'manager'], group: '' },
+  { to: '/profile', label: 'Профиль', icon: 'user', roles: ALL, group: '' },
+  { to: '/shift', label: 'Смена', icon: 'clock', roles: ALL, group: '' },
+  { to: '/trial-new', label: 'Заполнение пробников', icon: 'plus', roles: ['sales'], group: '' },
+  { to: '/trials', label: 'Обработка пробников', icon: 'funnel', roles: ['sales'], group: '' },
+  { to: '/trials', label: 'Пробники', icon: 'funnel', roles: OFFICE, group: 'Клиенты' },
+  { to: '/students', label: 'Ученики', icon: 'users', roles: [...OFFICE, 'trainer'], group: 'Клиенты' },
+  { to: '/parents', label: 'Родители', icon: 'family', roles: OFFICE, group: 'Клиенты' },
+  { to: '/attendance', label: 'Посещаемость', icon: 'check', roles: [...OFFICE, 'trainer'], group: 'Занятия' },
+  { to: '/groups', label: 'Группы', icon: 'layers', roles: OFFICE, group: 'Занятия' },
+  { to: '/schedule', label: 'Расписание', icon: 'calendar', roles: [...OFFICE, 'trainer'], group: 'Занятия' },
+  { to: '/shifts', label: 'Смены сотрудников', icon: 'clock', roles: OFFICE, group: 'Занятия' },
+  { to: '/finance', label: 'Финансы', icon: 'layers', roles: OFFICE, group: 'Деньги' },
+  { to: '/analytics', label: 'Аналитика и LTV', icon: 'funnel', roles: ['director', 'manager'], group: 'Деньги' },
+  { to: '/salaries', label: 'Зарплаты', icon: 'user', roles: OFFICE, group: 'Деньги' },
+  { to: '/rent', label: 'Аренда и коммунальные', icon: 'building', roles: OFFICE, group: 'Деньги' },
+  { to: '/expenses', label: 'Доп. расходы', icon: 'layers', roles: OFFICE, group: 'Деньги' },
+  { to: '/insurance', label: 'Медстраховка', icon: 'plus', roles: OFFICE, group: 'Деньги' },
+  { to: '/fines', label: 'Штрафы', icon: 'x', roles: OFFICE, group: 'Деньги' },
+  { to: '/branches', label: 'Филиалы', icon: 'building', roles: OFFICE, group: 'Управление' },
+  { to: '/employees', label: 'Сотрудники', icon: 'user', roles: ['director', 'manager'], group: 'Управление' },
+  { to: '/audit', label: 'Журнал действий', icon: 'lock', roles: ['director', 'manager'], group: 'Управление' },
+  { to: '/amocrm', label: 'Интеграция amoCRM', icon: 'key', roles: ['director'], group: 'Управление' },
+  { to: '/settings', label: 'Настройки', icon: 'settings', roles: ['director'], group: 'Управление' },
 ]
 export const homeOf = (r: Role) => (r === 'director' || r === 'manager' ? '/' : '/profile')
 
@@ -43,6 +44,19 @@ export default function Layout() {
   const loc = useLocation()
   const items = MENU.filter((m) => m.roles.includes(me.role))
   const title = items.find((m) => (m.to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(m.to)))?.label ?? ''
+  // Разделы меню (как в amoCRM): заголовок сворачивает раздел, раздел с открытой страницей всегда раскрыт.
+  const groups: [string, MenuItem[]][] = []
+  for (const m of items) {
+    const last = groups[groups.length - 1]
+    if (last?.[0] === m.group) last[1].push(m)
+    else groups.push([m.group, [m]])
+  }
+  const [closed, setClosed] = useState<string[]>(() => JSON.parse(localStorage.getItem('dt_closed') || '[]'))
+  const toggle = (g: string) => {
+    const next = closed.includes(g) ? closed.filter((x) => x !== g) : [...closed, g]
+    setClosed(next)
+    localStorage.setItem('dt_closed', JSON.stringify(next))
+  }
 
   return (
     <div className={'shell' + (mini ? ' mini' : '') + (open ? ' open' : '')}>
@@ -54,12 +68,26 @@ export default function Layout() {
           </b>
         </div>
         <nav>
-          {items.map((m) => (
-            <NavLink key={m.to} to={m.to} end={m.to === '/'} title={m.label} onClick={() => setOpen(false)}>
-              <Icon name={m.icon} />
-              <span>{m.label}</span>
-            </NavLink>
-          ))}
+          {groups.map(([g, list]) => {
+            const shut = !!g && closed.includes(g) && !list.some((m) => m.label === title)
+            return (
+              <div key={g || '-'} className="nav-group">
+                {g && (
+                  <button className="nav-head" onClick={() => toggle(g)} aria-expanded={!shut}>
+                    {g}
+                    <Icon name="chevron" size={14} />
+                  </button>
+                )}
+                {!shut &&
+                  list.map((m) => (
+                    <NavLink key={m.to} to={m.to} end={m.to === '/'} title={m.label} onClick={() => setOpen(false)}>
+                      <Icon name={m.icon} />
+                      <span>{m.label}</span>
+                    </NavLink>
+                  ))}
+              </div>
+            )
+          })}
         </nav>
         <div className="side-foot">
           <button
