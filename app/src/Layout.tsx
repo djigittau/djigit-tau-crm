@@ -29,6 +29,7 @@ export const MENU: MenuItem[] = [
   { to: '/fines', label: 'Штрафы', icon: 'x', roles: ['director', 'manager', 'admin'] },
   { to: '/branches', label: 'Филиалы', icon: 'building', roles: ['director', 'manager', 'admin'] },
   { to: '/employees', label: 'Сотрудники', icon: 'user', roles: ['director', 'manager'] },
+  { to: '/audit', label: 'Журнал действий', icon: 'lock', roles: ['director', 'manager'] },
   { to: '/amocrm', label: 'Интеграция amoCRM', icon: 'key', roles: ['director'] },
   { to: '/settings', label: 'Настройки', icon: 'settings', roles: ['director'] },
 ]

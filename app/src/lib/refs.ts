@@ -48,10 +48,8 @@ export function age(birth: string | null) {
   if (n.getMonth() < b.getMonth() || (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) a--
   return a
 }
-export const today = () => {
-  const d = new Date()
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
-}
+// Сегодня по Алматы, в каком бы поясе ни был браузер.
+export const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Almaty' })
 
 export const TRIAL_STATUS: Record<string, string> = {
   new: 'Новая заявка',
