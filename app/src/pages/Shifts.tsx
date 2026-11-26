@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { sb, ROLE_LABEL, type Role } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDateTime, fmtMinutes, TZ } from '../lib/ui'
-import { loadBranches } from '../lib/refs'
+import { loadBranches, toLocalInput, fromLocalInput } from '../lib/refs'
 
 type Row = {
   id: string
@@ -18,9 +18,8 @@ type Row = {
   branches: { name: string } | null
 }
 
-// Время для поля datetime-local по Алматы и обратно (UTC+5).
-const toLocal = (t: string | null) => (t ? new Date(t).toLocaleString('sv-SE', { timeZone: TZ }).slice(0, 16).replace(' ', 'T') : '')
-const fromLocal = (v: string) => (v ? new Date(`${v}:00+05:00`).toISOString() : null)
+const toLocal = toLocalInput
+const fromLocal = fromLocalInput
 const thisMonth = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ }).slice(0, 7)
 
 // Смены сотрудников: директор — все, управляющий и администратор — свои филиалы (RLS).

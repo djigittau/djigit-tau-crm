@@ -47,3 +47,20 @@ export const today = () => {
   const d = new Date()
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
 }
+
+export const TRIAL_STATUS: Record<string, string> = {
+  new: 'Новая заявка',
+  contacted: 'Менеджер связался',
+  booked: 'Записан на пробное',
+  attended: 'Пробное проведено',
+  thinking: 'Думает',
+  bought: 'Купил абонемент',
+  refused: 'Отказ',
+}
+export const TRIAL_ORDER = ['new', 'contacted', 'booked', 'attended', 'thinking', 'bought', 'refused']
+export const SOURCES = ['Instagram', 'WhatsApp', 'TikTok', '2ГИС', 'Сайт', 'Звонок', 'Рекомендация', 'amoCRM', 'Другое']
+export const METHODS: Record<string, string> = { kaspi: 'Kaspi', halyk: 'Halyk', cash: 'Наличные', card: 'Карта', transfer: 'Перевод', other: 'Другое' }
+
+// Поле datetime-local по Алматы (UTC+5) и обратно.
+export const toLocalInput = (t: string | null) => (t ? new Date(t).toLocaleString('sv-SE', { timeZone: 'Asia/Almaty' }).slice(0, 16).replace(' ', 'T') : '')
+export const fromLocalInput = (v: string) => (v ? new Date(`${v}:00+05:00`).toISOString() : null)

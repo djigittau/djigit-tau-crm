@@ -16,6 +16,8 @@ import Groups from './pages/Groups'
 import Schedule from './pages/Schedule'
 import Attendance from './pages/Attendance'
 import Shifts from './pages/Shifts'
+import Trials from './pages/Trials'
+import TrialFill from './pages/TrialFill'
 
 const PAGES: Record<string, () => React.JSX.Element> = {
   '/': Home,
@@ -30,6 +32,8 @@ const PAGES: Record<string, () => React.JSX.Element> = {
   '/schedule': Schedule,
   '/attendance': Attendance,
   '/shifts': Shifts,
+  '/trials': Trials,
+  '/trial-new': TrialFill,
 }
 
 function Gate() {

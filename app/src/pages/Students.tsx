@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime } from '../lib/ui'
-import { loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, age, today } from '../lib/refs'
+import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money } from '../lib/ui'
+import { loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, METHODS, age, today } from '../lib/refs'
+import SaleModal from './SaleModal'
 
 type Row = {
   id: string
@@ -43,6 +44,7 @@ export default function Students() {
   const [f, setF] = useState({ branch: '', group: '', status: 'active' })
   const [draft, setDraft] = useState<Draft | null>(null)
   const [card, setCard] = useState<Row | null>(null)
+  const [selling, setSelling] = useState<Row | null>(null)
 
   const { data, loading, error, reload } = useLoad(async () => {
     const [students, branches, groups, dances] = await Promise.all([
@@ -229,9 +231,14 @@ export default function Students() {
           onClose={() => setCard(null)}
           footer={
             canEdit && (
-              <button className="btn" onClick={() => open(card)}>
-                <Icon name="edit" /> Изменить
-              </button>
+              <>
+                <button className="btn ghost" onClick={() => setSelling(card)}>
+                  Продать абонемент
+                </button>
+                <button className="btn" onClick={() => open(card)}>
+                  <Icon name="edit" /> Изменить
+                </button>
+              </>
             )
           }
         >
@@ -260,6 +267,7 @@ export default function Students() {
             <dt>Комментарий</dt>
             <dd>{card.comment ?? '—'}</dd>
           </dl>
+          {canEdit && <SalesHistory studentId={card.id} />}
           <AttendanceHistory studentId={card.id} />
           <h3>История групп</h3>
           {card.group_members.length ? (
@@ -281,6 +289,21 @@ export default function Students() {
             <p className="muted">Ещё не был в группах</p>
           )}
         </Modal>
+      )}
+
+      {selling && (
+        <SaleModal
+          studentId={selling.id}
+          branchId={selling.branch_id}
+          groupId={currentGroup(selling)?.group_id}
+          title={selling.full_name}
+          onClose={() => setSelling(null)}
+          onDone={() => {
+            setSelling(null)
+            setCard(null)
+            reload()
+          }}
+        />
       )}
 
       {draft && (
@@ -410,6 +433,58 @@ function AttendanceHistory({ studentId }: { studentId: string }) {
         </table>
       ) : (
         <p className="muted">Отметок пока нет</p>
+      )}
+    </>
+  )
+}
+
+// Абонементы и оплаты ученика. Остаток занятий = занятий в абонементе − посещённых с даты начала.
+function SalesHistory({ studentId }: { studentId: string }) {
+  const { data } = useLoad(async () => {
+    const [sales, visits] = await Promise.all([
+      sb.from('sales').select('id, title, lessons_total, amount_due, valid_from, status, created_at, payments(amount, method, paid_at, kind)').eq('student_id', studentId).order('created_at', { ascending: false }).then(must),
+      sb.from('attendance').select('status, lessons!inner(starts_at)').eq('student_id', studentId).in('status', ['present', 'makeup']).then(must),
+    ])
+    return {
+      sales: sales as unknown as { id: string; title: string; lessons_total: number | null; amount_due: number; valid_from: string; status: string; payments: { amount: number; method: string; paid_at: string; kind: string }[] }[],
+      visits: (visits as unknown as { lessons: { starts_at: string } }[]).map((v) => v.lessons.starts_at),
+    }
+  }, [studentId])
+  if (!data) return null
+  const cur = data.sales.find((s) => s.status === 'active')
+  const left = cur?.lessons_total ? cur.lessons_total - data.visits.filter((t) => t.slice(0, 10) >= cur.valid_from).length : null
+  return (
+    <>
+      <h3>
+        Абонементы и оплаты
+        {left != null && <span className={'badge ' + (left > 2 ? 'ok' : left > 0 ? 'warn-b' : 'bad')}> осталось занятий: {Math.max(0, left)}</span>}
+      </h3>
+      {data.sales.length ? (
+        <table>
+          <tbody>
+            {data.sales.map((s) => {
+              const paid = s.payments.reduce((t, p) => t + (p.kind === 'refund' ? -p.amount : p.amount), 0)
+              return (
+                <tr key={s.id}>
+                  <td>
+                    {s.title}
+                    <small className="muted block">
+                      с {fmtDate(s.valid_from)}
+                      {s.lessons_total ? ` · ${s.lessons_total} занятий` : ''}
+                      {s.payments.length ? ' · ' + s.payments.map((p) => `${money(p.amount)} ${METHODS[p.method]}`).join(', ') : ''}
+                    </small>
+                  </td>
+                  <td className="num">
+                    {money(paid)} / {money(s.amount_due)}
+                    {paid < s.amount_due && <small className="danger-text block">долг {money(s.amount_due - paid)}</small>}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <p className="muted">Абонементов пока нет</p>
       )}
     </>
   )
