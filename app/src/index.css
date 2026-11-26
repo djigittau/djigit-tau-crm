@@ -281,3 +281,4 @@ tr.clickable { cursor: pointer; }
 .bar i { display: block; width: 100%; max-width: 28px; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, var(--gold-hi), var(--gold-lo)); }
 .bar i.neg { background: var(--bad); }
 .bar small { color: var(--muted); font-size: 10.5px; }
+.break { word-break: break-all; }
