@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sb, ROLE_LABEL, PHONE_EMAIL_DOMAIN } from '../lib/supabase'
 import { useAuth, useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, act, money, initials, fmtDate } from '../lib/ui'
+import { useLoad, must, State, PageHead, act, money, initials, fmtDate, lessons } from '../lib/ui'
 import ChangePassword from './ChangePassword'
 
 type MyBranch = { base_salary: number; branches: { name: string } | null }
@@ -100,7 +100,7 @@ function MyPay() {
                   {new Date(a.period + 'T00:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
                   <small className="muted block">
                     оклад {money(a.base_amount)}
-                    {a.lessons_count > 0 && ` · ${a.lessons_count} занятий ${money(a.lessons_amount)}`}
+                    {a.lessons_count > 0 && ` · ${lessons(a.lessons_count)} ${money(a.lessons_amount)}`}
                     {a.bonus_amount > 0 && ` · бонусы ${money(a.bonus_amount)}`}
                     {a.fine_amount > 0 && ` · штрафы −${money(a.fine_amount)}`}
                   </small>

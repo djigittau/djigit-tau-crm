@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money } from '../lib/ui'
+import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money, lessons } from '../lib/ui'
 import { loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, METHODS, age, today } from '../lib/refs'
 import SaleModal from './SaleModal'
 
@@ -470,7 +470,7 @@ function SalesHistory({ studentId }: { studentId: string }) {
                     {s.title}
                     <small className="muted block">
                       с {fmtDate(s.valid_from)}
-                      {s.lessons_total ? ` · ${s.lessons_total} занятий` : ''}
+                      {s.lessons_total ? ` · ${lessons(s.lessons_total)}` : ''}
                       {s.payments.length ? ' · ' + s.payments.map((p) => `${money(p.amount)} ${METHODS[p.method]}`).join(', ') : ''}
                     </small>
                   </td>

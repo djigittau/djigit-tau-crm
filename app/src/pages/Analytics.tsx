@@ -82,6 +82,8 @@ export default function Analytics() {
   const per = pays.filter((x) => inR(x.paid_at))
   const revenue = per.reduce((t, x) => t + sign(x), 0)
   const checks = per.filter((x) => x.kind === 'payment')
+  // Расходы не привязаны к направлению и менеджеру — при этих фильтрах прибыль не считаем, чтобы не вводить в заблуждение.
+  const split = !!(f.dance || f.manager)
   const costs = data.costs.filter((c) => okB(c.branch_id)).reduce((t, c) => t + Number(c.amount), 0)
 
   const studs = data.students.filter((s) => okB(s.branch_id) && (!f.dance || s.dance_type_id === f.dance))
@@ -176,12 +178,13 @@ export default function Analytics() {
           <Kpi l="Пробников" v={leads.length} />
           <Kpi l="Конверсия в покупку" v={pct(bought, leads.length)} />
           <Kpi l="Выручка" v={money(revenue)} />
-          <Kpi l="Расходы" v={money(costs)} />
-          <Kpi l="Прибыль" v={money(revenue - costs)} neg={revenue - costs < 0} />
+          <Kpi l="Расходы" v={split ? '—' : money(costs)} />
+          <Kpi l="Прибыль" v={split ? '—' : money(revenue - costs)} neg={!split && revenue - costs < 0} />
           <Kpi l="Средний чек" v={money(checks.length ? checks.reduce((t, x) => t + Number(x.amount), 0) / checks.length : 0)} />
           <Kpi l="Средний срок обучения" v={avgMonths ? avgMonths.toFixed(1) + ' мес.' : '—'} />
           <Kpi l="LTV ученика" v={money(all?.ltv ?? 0)} />
         </div>
+        {split && <p className="muted small">Расходы и прибыль считаются по филиалу целиком: при фильтре по направлению или менеджеру они не показываются.</p>}
 
         <div className="grid-2">
           <Bars title="Выручка по месяцам" labels={months12} values={revByM} fmt={money} />
@@ -193,7 +196,7 @@ export default function Analytics() {
             <h3>Как считается LTV</h3>
             <p className="muted small">
               LTV ученика — сумма его оплат за выбранный период минус возвраты. Средний LTV — общая сумма, делённая на число учеников, которые платили в этот период. Учитываются
-              только реальные платежи из CRM. «Ушли за период» — ученики со статусом «Ушёл», изменённым в этот период.
+              только реальные платежи из CRM. «Ушли за период» — ученики со статусом «Ушёл», изменённым в этот период. Расходы не делятся по направлениям и менеджерам, поэтому прибыль видна только без этих фильтров.
             </p>
           </section>
         </div>

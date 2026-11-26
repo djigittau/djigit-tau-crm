@@ -142,6 +142,14 @@ export function fmtMinutes(m: number | null | undefined) {
   const h = Math.floor(m / 60)
   return h ? `${h} ч ${m % 60} мин` : `${m} мин`
 }
+// Склонение: plural(3, ['занятие', 'занятия', 'занятий']) → «3 занятия».
+export function plural(n: number, [one, few, many]: [string, string, string]) {
+  const a = Math.abs(n) % 100
+  const b = a % 10
+  return `${n} ${a > 10 && a < 20 ? many : b === 1 ? one : b >= 2 && b <= 4 ? few : many}`
+}
+const LESSON: [string, string, string] = ['занятие', 'занятия', 'занятий']
+export const lessons = (n: number) => plural(n, LESSON)
 export const initials = (n: string) =>
   n
     .trim()
