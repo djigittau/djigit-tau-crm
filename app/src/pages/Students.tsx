@@ -439,20 +439,46 @@ function AttendanceHistory({ studentId }: { studentId: string }) {
 }
 
 // Абонементы и оплаты ученика. Остаток занятий = занятий в абонементе − посещённых с даты начала.
+// Возврат — отдельная запись (платёж не удаляется); оформляет директор или управляющий, база проверяет сумму и права.
+type Sale = { id: string; branch_id: string; title: string; lessons_total: number | null; amount_due: number; valid_from: string; status: string; payments: { amount: number; method: string; paid_at: string; kind: string; comment: string | null }[] }
 function SalesHistory({ studentId }: { studentId: string }) {
-  const { data } = useLoad(async () => {
+  const me = useMe()
+  const [refund, setRefund] = useState<{ sale: Sale; max: number; amount: string; method: string; reason: string; key: string } | null>(null)
+  const { data, reload } = useLoad(async () => {
     const [sales, visits] = await Promise.all([
-      sb.from('sales').select('id, title, lessons_total, amount_due, valid_from, status, created_at, payments(amount, method, paid_at, kind)').eq('student_id', studentId).order('created_at', { ascending: false }).then(must),
+      sb.from('sales').select('id, branch_id, title, lessons_total, amount_due, valid_from, status, created_at, payments(amount, method, paid_at, kind, comment)').eq('student_id', studentId).order('created_at', { ascending: false }).then(must),
       sb.from('attendance').select('status, lessons!inner(starts_at)').eq('student_id', studentId).in('status', ['present', 'makeup']).then(must),
     ])
     return {
-      sales: sales as unknown as { id: string; title: string; lessons_total: number | null; amount_due: number; valid_from: string; status: string; payments: { amount: number; method: string; paid_at: string; kind: string }[] }[],
+      sales: sales as unknown as Sale[],
       visits: (visits as unknown as { lessons: { starts_at: string } }[]).map((v) => v.lessons.starts_at),
     }
   }, [studentId])
   if (!data) return null
   const cur = data.sales.find((s) => s.status === 'active')
   const left = cur?.lessons_total ? cur.lessons_total - data.visits.filter((t) => t.slice(0, 10) >= cur.valid_from).length : null
+  const paidOf = (s: Sale) => s.payments.reduce((t, p) => t + (p.kind === 'refund' ? -p.amount : p.amount), 0)
+
+  async function doRefund() {
+    if (!refund) return
+    const ok = await act(async () => {
+      const v = Number(refund.amount)
+      if (!(v > 0)) throw new Error('Сумма возврата должна быть больше нуля')
+      if (v > refund.max) throw new Error(`Можно вернуть не больше ${money(refund.max)}`)
+      if (!refund.reason.trim()) throw new Error('Укажите причину возврата')
+      must(
+        await sb.from('payments').insert({
+          sale_id: refund.sale.id, branch_id: refund.sale.branch_id, kind: 'refund', amount: v, method: refund.method,
+          comment: refund.reason.trim(), received_by: me.id, idempotency_key: refund.key,
+        }),
+      )
+    }, 'Возврат оформлен')
+    if (ok) {
+      setRefund(null)
+      reload()
+    }
+  }
+
   return (
     <>
       <h3>
@@ -463,7 +489,7 @@ function SalesHistory({ studentId }: { studentId: string }) {
         <table>
           <tbody>
             {data.sales.map((s) => {
-              const paid = s.payments.reduce((t, p) => t + (p.kind === 'refund' ? -p.amount : p.amount), 0)
+              const paid = paidOf(s)
               return (
                 <tr key={s.id}>
                   <td>
@@ -471,12 +497,26 @@ function SalesHistory({ studentId }: { studentId: string }) {
                     <small className="muted block">
                       с {fmtDate(s.valid_from)}
                       {s.lessons_total ? ` · ${lessons(s.lessons_total)}` : ''}
-                      {s.payments.length ? ' · ' + s.payments.map((p) => `${money(p.amount)} ${METHODS[p.method]}`).join(', ') : ''}
+                      {s.payments.length
+                        ? ' · ' + s.payments.map((p) => (p.kind === 'refund' ? `возврат −${money(p.amount)} (${p.comment})` : `${money(p.amount)} ${METHODS[p.method]}`)).join(', ')
+                        : ''}
                     </small>
                   </td>
                   <td className="num">
                     {money(paid)} / {money(s.amount_due)}
-                    {paid < s.amount_due && <small className="danger-text block">долг {money(s.amount_due - paid)}</small>}
+                    {s.status === 'cancelled' ? (
+                      <small className="muted block">абонемент закрыт</small>
+                    ) : (
+                      paid < s.amount_due && !s.payments.some((p) => p.kind === 'refund') && <small className="danger-text block">долг {money(s.amount_due - paid)}</small>
+                    )}
+                    {(me.role === 'director' || me.role === 'manager') && paid > 0 && (
+                      <button
+                        className="btn ghost sm"
+                        onClick={() => setRefund({ sale: s, max: paid, amount: String(paid), method: s.payments.find((p) => p.kind === 'payment')?.method ?? 'cash', reason: '', key: crypto.randomUUID() })}
+                      >
+                        Возврат
+                      </button>
+                    )}
                   </td>
                 </tr>
               )
@@ -485,6 +525,40 @@ function SalesHistory({ studentId }: { studentId: string }) {
         </table>
       ) : (
         <p className="muted">Абонементов пока нет</p>
+      )}
+      {refund && (
+        <Modal
+          title={`Возврат: ${refund.sale.title}`}
+          onClose={() => setRefund(null)}
+          footer={
+            <>
+              <button className="btn ghost" onClick={() => setRefund(null)}>
+                Отмена
+              </button>
+              <button className="btn danger" onClick={doRefund}>
+                Оформить возврат
+              </button>
+            </>
+          }
+        >
+          <div className="form-grid">
+            <Field label="Сумма, ₸" hint={`Оплачено по абонементу: ${money(refund.max)}`}>
+              <input type="number" min={1} max={refund.max} value={refund.amount} onChange={(e) => setRefund({ ...refund, amount: e.target.value })} />
+            </Field>
+            <Field label="Способ">
+              <select value={refund.method} onChange={(e) => setRefund({ ...refund, method: e.target.value })}>
+                {Object.entries(METHODS).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Причина" full>
+              <input value={refund.reason} onChange={(e) => setRefund({ ...refund, reason: e.target.value })} placeholder="Переезд, болезнь…" />
+            </Field>
+          </div>
+        </Modal>
       )}
     </>
   )

@@ -56,11 +56,30 @@ const denied = (r) => !!r.error || (Array.isArray(r.data) && r.data.length === 0
   ok((await rows(sal.from('expenses').select('id'))) === 0, 'продажи не видят расходы')
   ok((await rows(tr.from('fines').select('id'))) === 1, 'тренер видит только свой штраф')
   ok(denied(await tr.from('fines').delete().eq('reason', 'QA штраф').select()), 'тренер не удаляет свой штраф')
-  const p1 = (await dir.from('payments').select('id').eq('branch_id', b1).single()).data.id
+  const p1 = (await dir.from('payments').select('id').eq('branch_id', b1).is('sale_id', null).single()).data.id
   await dir.from('payments').delete().eq('id', p1)
   ok((await rows(dir.from('payments').select('id').eq('id', p1))) === 1, 'платёж не удаляется даже директором')
   await man.from('payments').update({ amount: 1 }).eq('id', p1)
   ok((await dir.from('payments').select('amount').eq('id', p1).single()).data.amount == 5000, 'управляющий не меняет сумму платежа')
+
+  // Возвраты: только директор и управляющий филиала, с причиной, не больше оплаченного
+  const sale = (await dir.from('sales').select('id').eq('branch_id', b1).single()).data.id
+  const refund = (c, amount, comment = 'QA причина') => c.from('payments').insert({ sale_id: sale, branch_id: b1, kind: 'refund', amount, method: 'cash', comment, received_by: c.uid })
+  ok(!!(await refund(sal, 1000)).error, 'продажи не оформляют возврат')
+  ok(!!(await refund(adm, 1000)).error, 'админ не оформляет возврат')
+  ok(!!(await refund(man2, 1000)).error, 'управляющий другого филиала не оформляет возврат')
+  ok(!!(await refund(man, 1000, ' ')).error, 'возврат без причины отклонён')
+  const rest = async () => (await dir.from('payments').select('amount, kind').eq('sale_id', sale)).data.reduce((t, p) => t + (p.kind === 'refund' ? -p.amount : +p.amount), 0)
+  const fmt = (n) => n.toLocaleString('ru-RU').replace(/\s/g, ' ') + ' ₸'
+  await dir.from('payments').insert({ sale_id: sale, branch_id: b1, amount: 5000, method: 'cash', received_by: dir.uid }) // свежая оплата: прогон можно повторять
+  const r0 = await rest()
+  const over = await refund(man, r0 + 1)
+  ok(over.error?.message.includes('можно вернуть ' + fmt(r0)), 'возврат больше оплаченного отклонён: ' + over.error?.message)
+  const rr = await refund(man, 1000)
+  ok(!rr.error && (await rest()) === r0 - 1000, 'управляющий своего филиала оформляет возврат 1 000')
+  ok((await refund(dir, r0 - 999)).error?.message.includes('можно вернуть ' + fmt(r0 - 1000)), 'следующий возврат учитывает прошлые')
+  ok(!(await refund(dir, r0 - 1000)).error && (await dir.from('sales').select('status').eq('id', sale).single()).data.status === 'cancelled', 'полный возврат закрывает абонемент')
+  ok(!!(await sal.from('payments').insert({ branch_id: b1, kind: 'refund', amount: 1, method: 'cash', comment: 'x', received_by: sal.uid })).error, 'возврат без продажи через API отклонён')
 
   // Аноним и серверные функции
   for (const t of ['students', 'parents', 'payments', 'profiles', 'branches', 'crm_settings']) ok((await rows(anon.from(t).select('id').limit(1))) <= 0, `аноним не читает ${t}`)

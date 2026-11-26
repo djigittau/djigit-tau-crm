@@ -1,7 +1,7 @@
 -- Тестовые аккаунты и данные для tests/rls.cjs. Пароль всех qa.*: QaTest-2026!
 -- После проверки обязательно выполнить tests/qa_cleanup.sql.
 do $$
-declare r record; uid uuid; b1 uuid; b2 uuid; tr uuid; cat uuid;
+declare r record; uid uuid; b1 uuid; b2 uuid; tr uuid; cat uuid; st uuid; sa uuid;
 begin
   insert into public.branches (name) values ('QA Филиал 1') returning id into b1;
   insert into public.branches (name) values ('QA Филиал 2') returning id into b2;
@@ -16,8 +16,11 @@ begin
     if r.login = 'trainer' then tr := uid; end if;
   end loop;
   select id into cat from public.expense_categories where code = 'rent';
-  insert into public.students (full_name, branch_id) values ('QA Ученик 1', b1), ('QA Ученик 2', b2);
+  insert into public.students (full_name, branch_id) values ('QA Ученик 1', b1) returning id into st;
+  insert into public.students (full_name, branch_id) values ('QA Ученик 2', b2);
   insert into public.expenses (branch_id, category_id, amount) values (b1, cat, 1000), (b2, cat, 2000);
   insert into public.payments (branch_id, amount, method) values (b1, 5000, 'cash'), (b2, 7000, 'cash');
   insert into public.fines (profile_id, branch_id, amount, reason) values (tr, b1, 500, 'QA штраф');
+  insert into public.sales (student_id, branch_id, title, price, lessons_total) values (st, b1, 'QA Абонемент 8 занятий', 30000, 8) returning id into sa;
+  insert into public.payments (sale_id, student_id, branch_id, amount, method) values (sa, st, b1, 30000, 'kaspi');
 end $$;

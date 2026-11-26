@@ -12,7 +12,7 @@ CRM студии кавказского танца DJIGIT TAU: филиалы, �
 | Папка | Что внутри |
 |---|---|
 | `app/` | Приложение: React + TypeScript + Vite |
-| `supabase/migrations/` | Схема базы, права (RLS), триггеры, журнал — по порядку `0001…0011` |
+| `supabase/migrations/` | Схема базы, права (RLS), триггеры, журнал — по порядку `0001…0012` |
 | `supabase/functions/admin-users` | Аккаунты сотрудников (создать, заблокировать, сбросить пароль) — только директор |
 | `supabase/functions/amocrm` | Интеграция amoCRM → CRM: OAuth, синхронизация, webhook — только директор и cron |
 | `supabase/first_director.sql` | Шаблон: создать первого директора в новом проекте |
@@ -60,7 +60,7 @@ npm run publish              # проверка типов, сборка и ко
 
 ```bash
 # 1. Supabase → SQL Editor: выполнить tests/qa_setup.sql (тестовые филиалы QA и аккаунты qa.*@test.djigittau.kz)
-node tests/rls.cjs            # 37 проверок под каждой ролью через публичный API (нужен npm install в app/)
+node tests/rls.cjs            # 45 проверок под каждой ролью через публичный API (нужен npm install в app/)
 # 2. SQL Editor: выполнить tests/qa_cleanup.sql — удаляет всё тестовое
 ```
 

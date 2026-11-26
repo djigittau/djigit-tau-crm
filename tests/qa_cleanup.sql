@@ -17,6 +17,7 @@ begin
   delete from public.bonuses where branch_id = any(bs);
   delete from public.fines where branch_id = any(bs);
   delete from public.payments where branch_id = any(bs);
+  delete from public.sales where branch_id = any(bs);
   delete from public.expenses where branch_id = any(bs);
   delete from public.students where branch_id = any(bs);
   delete from public.trial_leads where branch_id = any(bs);
