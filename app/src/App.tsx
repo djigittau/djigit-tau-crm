@@ -18,6 +18,11 @@ import Attendance from './pages/Attendance'
 import Shifts from './pages/Shifts'
 import Trials from './pages/Trials'
 import TrialFill from './pages/TrialFill'
+import Finance from './pages/Finance'
+import Salaries from './pages/Salaries'
+import Expenses from './pages/Expenses'
+import Insurance from './pages/Insurance'
+import Fines from './pages/Fines'
 
 const PAGES: Record<string, () => React.JSX.Element> = {
   '/': Home,
@@ -34,6 +39,12 @@ const PAGES: Record<string, () => React.JSX.Element> = {
   '/shifts': Shifts,
   '/trials': Trials,
   '/trial-new': TrialFill,
+  '/finance': Finance,
+  '/salaries': Salaries,
+  '/rent': () => <Expenses only={['rent', 'utilities']} title="Аренда и коммунальные" />,
+  '/expenses': () => <Expenses title="Дополнительные расходы" />,
+  '/insurance': Insurance,
+  '/fines': Fines,
 }
 
 function Gate() {

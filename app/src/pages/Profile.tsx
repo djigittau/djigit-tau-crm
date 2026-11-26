@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sb, ROLE_LABEL, PHONE_EMAIL_DOMAIN } from '../lib/supabase'
 import { useAuth, useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, act, money, initials } from '../lib/ui'
+import { useLoad, must, State, PageHead, act, money, initials, fmtDate } from '../lib/ui'
 import ChangePassword from './ChangePassword'
 
 type MyBranch = { base_salary: number; branches: { name: string } | null }
@@ -62,11 +62,82 @@ export default function Profile() {
             <button className="btn ghost">Сохранить</button>
           </form>
         </section>
+        <MyPay />
         <section className="card">
           <h3>Сменить пароль</h3>
           <ChangePassword />
         </section>
       </div>
     </>
+  )
+}
+
+// Свои начисления, бонусы и штрафы (RLS отдаёт только свои записи).
+function MyPay() {
+  const me = useMe()
+  const { data } = useLoad(async () => {
+    const [acc, bonuses, fines] = await Promise.all([
+      sb.from('salary_accruals').select('period, lessons_count, lessons_amount, base_amount, bonus_amount, fine_amount, total, status, salary_payments(amount)').eq('profile_id', me.id).order('period', { ascending: false }).limit(6).then(must),
+      sb.from('bonuses').select('amount, reason, given_on').eq('profile_id', me.id).order('given_on', { ascending: false }).limit(5).then(must),
+      sb.from('fines').select('amount, reason, fined_on').eq('profile_id', me.id).order('fined_on', { ascending: false }).limit(5).then(must),
+    ])
+    return {
+      acc: acc as unknown as { period: string; lessons_count: number; lessons_amount: number; base_amount: number; bonus_amount: number; fine_amount: number; total: number; status: string; salary_payments: { amount: number }[] }[],
+      bonuses: bonuses as { amount: number; reason: string; given_on: string }[],
+      fines: fines as { amount: number; reason: string; fined_on: string }[],
+    }
+  }, [me.id])
+  if (!data) return null
+  return (
+    <section className="card">
+      <h3>Мои начисления</h3>
+      {data.acc.length ? (
+        <table>
+          <tbody>
+            {data.acc.map((a) => (
+              <tr key={a.period}>
+                <td>
+                  {new Date(a.period + 'T00:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+                  <small className="muted block">
+                    оклад {money(a.base_amount)}
+                    {a.lessons_count > 0 && ` · ${a.lessons_count} занятий ${money(a.lessons_amount)}`}
+                    {a.bonus_amount > 0 && ` · бонусы ${money(a.bonus_amount)}`}
+                    {a.fine_amount > 0 && ` · штрафы −${money(a.fine_amount)}`}
+                  </small>
+                </td>
+                <td className="num">
+                  <b>{money(a.total)}</b>
+                  <small className="muted block">выплачено {money(a.salary_payments.reduce((t, p) => t + Number(p.amount), 0))}</small>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="muted">Начислений пока нет</p>
+      )}
+      {(data.bonuses.length > 0 || data.fines.length > 0) && (
+        <table>
+          <tbody>
+            {data.bonuses.map((b, i) => (
+              <tr key={'b' + i}>
+                <td>
+                  Бонус: {b.reason} <small className="muted">{fmtDate(b.given_on)}</small>
+                </td>
+                <td className="num">+{money(b.amount)}</td>
+              </tr>
+            ))}
+            {data.fines.map((f, i) => (
+              <tr key={'f' + i}>
+                <td>
+                  Штраф: {f.reason} <small className="muted">{fmtDate(f.fined_on)}</small>
+                </td>
+                <td className="num danger-text">−{money(f.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
   )
 }

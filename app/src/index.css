@@ -275,3 +275,4 @@ tr.clickable { cursor: pointer; }
   .branch-row { grid-template-columns: 1fr 120px; }
 }
 .modal h3 .badge { margin-left: 8px; vertical-align: middle; }
+.kpi.neg b { color: var(--bad); }

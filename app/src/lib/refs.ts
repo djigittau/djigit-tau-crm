@@ -17,17 +17,22 @@ export async function loadDances(all = false): Promise<(Ref & { is_active: boole
 export async function loadGroups(): Promise<GroupRef[]> {
   return must(await sb.from('groups').select('id, name, branch_id, capacity').eq('status', 'active').order('name')) as GroupRef[]
 }
-export async function loadTrainers(): Promise<Trainer[]> {
+export type Staff = Trainer & { role: string }
+// Сотрудники с филиалами (видимые по RLS). Тренеры — частный случай.
+export async function loadStaff(): Promise<Staff[]> {
   const rows = must(
-    await sb.from('employee_branches').select('branch_id, profiles!inner(id, full_name, role, status)').eq('profiles.role', 'trainer').eq('profiles.status', 'active'),
-  ) as unknown as { branch_id: string; profiles: { id: string; full_name: string } }[]
-  const m = new Map<string, Trainer>()
+    await sb.from('employee_branches').select('branch_id, profiles!inner(id, full_name, role, status)').eq('profiles.status', 'active'),
+  ) as unknown as { branch_id: string; profiles: { id: string; full_name: string; role: string } }[]
+  const m = new Map<string, Staff>()
   for (const r of rows) {
-    const t = m.get(r.profiles.id) ?? { id: r.profiles.id, name: r.profiles.full_name, branches: [] }
+    const t = m.get(r.profiles.id) ?? { id: r.profiles.id, name: r.profiles.full_name, role: r.profiles.role, branches: [] }
     t.branches.push(r.branch_id)
     m.set(t.id, t)
   }
   return [...m.values()].sort((a, b) => a.name.localeCompare(b.name))
+}
+export async function loadTrainers(): Promise<Trainer[]> {
+  return (await loadStaff()).filter((s) => s.role === 'trainer')
 }
 
 export const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
@@ -64,3 +69,11 @@ export const METHODS: Record<string, string> = { kaspi: 'Kaspi', halyk: 'Halyk',
 // Поле datetime-local по Алматы (UTC+5) и обратно.
 export const toLocalInput = (t: string | null) => (t ? new Date(t).toLocaleString('sv-SE', { timeZone: 'Asia/Almaty' }).slice(0, 16).replace(' ', 'T') : '')
 export const fromLocalInput = (v: string) => (v ? new Date(`${v}:00+05:00`).toISOString() : null)
+
+// Месяц студии (YYYY-MM) и его границы: для дат — YYYY-MM-DD, для времени — ISO по Алматы.
+export const thisMonth = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Almaty' }).slice(0, 7)
+export function monthBounds(m: string) {
+  const [y, mo] = m.split('-').map(Number)
+  const next = `${mo === 12 ? y + 1 : y}-${String(mo === 12 ? 1 : mo + 1).padStart(2, '0')}`
+  return { d0: `${m}-01`, d1: `${next}-01`, t0: new Date(`${m}-01T00:00:00+05:00`).toISOString(), t1: new Date(`${next}-01T00:00:00+05:00`).toISOString() }
+}
