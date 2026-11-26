@@ -11,8 +11,12 @@ export const MENU: MenuItem[] = [
   { to: '/', label: 'Главная', icon: 'home', roles: ['director', 'manager'] },
   { to: '/profile', label: 'Профиль', icon: 'user', roles: ALL },
   { to: '/shift', label: 'Смена', icon: 'clock', roles: ALL },
+  { to: '/students', label: 'Ученики', icon: 'users', roles: ALL },
+  { to: '/parents', label: 'Родители', icon: 'family', roles: ['director', 'manager', 'admin', 'sales'] },
+  { to: '/groups', label: 'Группы', icon: 'layers', roles: ['director', 'manager', 'admin', 'sales'] },
+  { to: '/schedule', label: 'Расписание', icon: 'calendar', roles: ['director', 'manager', 'admin', 'trainer'] },
   { to: '/branches', label: 'Филиалы', icon: 'building', roles: ['director', 'manager', 'admin'] },
-  { to: '/employees', label: 'Сотрудники', icon: 'users', roles: ['director', 'manager'] },
+  { to: '/employees', label: 'Сотрудники', icon: 'user', roles: ['director', 'manager'] },
   { to: '/settings', label: 'Настройки', icon: 'settings', roles: ['director'] },
 ]
 export const homeOf = (r: Role) => (r === 'director' || r === 'manager' ? '/' : '/profile')

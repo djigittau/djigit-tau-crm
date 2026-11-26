@@ -129,10 +129,14 @@ export function State({ loading, error, children }: { loading: boolean; error: s
 }
 
 // ---------- форматирование ----------
+// Время студии — всегда по Алматы, на каком бы устройстве ни открыли CRM.
+export const TZ = 'Asia/Almaty'
 export const money = (n: number | null | undefined) => Math.round(Number(n) || 0).toLocaleString('ru-RU') + ' ₸'
-export const fmtDate = (d: string | null | undefined) => (d ? new Date(d).toLocaleDateString('ru-RU') : '—')
+// Чистая дата (YYYY-MM-DD) не сдвигается поясом; дата со временем — показывается по Алматы.
+export const fmtDate = (d: string | null | undefined) =>
+  !d ? '—' : d.length === 10 ? d.split('-').reverse().join('.') : new Date(d).toLocaleDateString('ru-RU', { timeZone: TZ })
 export const fmtDateTime = (d: string | null | undefined) =>
-  d ? new Date(d).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
+  d ? new Date(d).toLocaleString('ru-RU', { timeZone: TZ, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
 export function fmtMinutes(m: number | null | undefined) {
   if (m == null) return '—'
   const h = Math.floor(m / 60)
@@ -167,6 +171,8 @@ const PATHS = {
   play: 'M7 4l13 8-13 8V4z',
   stop: 'M6 6h12v12H6z',
   search: 'M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-3.5-3.5',
+  calendar: 'M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',
+  family: 'M8 9a3 3 0 100-6 3 3 0 000 6zM2 21c0-3.3 2.7-6 6-6s6 2.7 6 6M17 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM15 21c0-2.5 1.2-4.5 3-5.3 1.9.8 3 2.8 3 5.3',
 } as const
 export type IconName = keyof typeof PATHS
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {

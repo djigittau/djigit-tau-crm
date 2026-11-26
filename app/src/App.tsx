@@ -10,6 +10,10 @@ import Shift from './pages/Shift'
 import Branches from './pages/Branches'
 import Employees from './pages/Employees'
 import Settings from './pages/Settings'
+import Students from './pages/Students'
+import Parents from './pages/Parents'
+import Groups from './pages/Groups'
+import Schedule from './pages/Schedule'
 
 const PAGES: Record<string, () => React.JSX.Element> = {
   '/': Home,
@@ -18,6 +22,10 @@ const PAGES: Record<string, () => React.JSX.Element> = {
   '/branches': Branches,
   '/employees': Employees,
   '/settings': Settings,
+  '/students': Students,
+  '/parents': Parents,
+  '/groups': Groups,
+  '/schedule': Schedule,
 }
 
 function Gate() {
