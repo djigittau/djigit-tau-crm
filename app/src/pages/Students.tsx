@@ -182,7 +182,7 @@ export default function Students() {
                 <thead>
                   <tr>
                     <th>Ученик</th>
-                    {me.role !== 'trainer' && <th>Родитель</th>}
+                    {me.role !== 'trainer' && <th>Родитель: ФИО и телефон</th>}
                     <th>Группа</th>
                     <th>Направление</th>
                     <th>Филиал</th>
@@ -200,10 +200,9 @@ export default function Students() {
                       {me.role !== 'trainer' && (
                         <td>
                           {s.parent ? (
-                            <>
-                              {s.parent.full_name}
-                              <small className="muted block">{s.parent.phone}</small>
-                            </>
+                            <span className="nowrap">
+                              {s.parent.full_name} <span className="muted">· {s.parent.phone}</span>
+                            </span>
                           ) : (
                             '—'
                           )}
@@ -362,7 +361,7 @@ export default function Students() {
             <Field label="Телефон родителя" hint="Если родитель уже есть в базе — ученик привяжется к нему">
               <input value={draft.parent_phone} inputMode="tel" placeholder="+7 700 000 00 00" onChange={(e) => setDraft({ ...draft, parent_phone: e.target.value })} onBlur={(e) => lookupParent(e.target.value)} />
             </Field>
-            <Field label="ФИО родителя">
+            <Field label="ФИО родителя" hint="Если изменить — ФИО обновится у родителя">
               <input value={draft.parent_name} onChange={(e) => setDraft({ ...draft, parent_name: e.target.value })} />
             </Field>
             <Field label="Филиал *">
