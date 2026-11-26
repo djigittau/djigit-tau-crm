@@ -14,6 +14,10 @@ export async function loadDances(all = false): Promise<(Ref & { is_active: boole
   if (!all) q = q.eq('is_active', true)
   return must(await q) as (Ref & { is_active: boolean })[]
 }
+// Направление вводится текстом: находит существующее или создаёт новое (RPC dance_id, миграция 0017).
+export async function danceId(name: string): Promise<string | null> {
+  return name.trim() ? (must(await sb.rpc('dance_id', { p_name: name })) as string) : null
+}
 export async function loadGroups(): Promise<GroupRef[]> {
   return must(await sb.from('groups').select('id, name, branch_id, capacity').eq('status', 'active').order('name')) as GroupRef[]
 }
@@ -36,7 +40,7 @@ export async function loadTrainers(): Promise<Trainer[]> {
 }
 
 export const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-export const STUDENT_STATUS: Record<string, string> = { active: 'Учится', frozen: 'Заморозка', left: 'Ушёл' }
+export const STUDENT_STATUS: Record<string, string> = { active: 'Занимается', frozen: 'Заморозка', left: 'Ушёл' }
 export const GENDER: Record<string, string> = { male: 'Мальчик', female: 'Девочка' }
 export const LESSON_STATUS: Record<string, string> = { scheduled: 'По расписанию', completed: 'Проведено', cancelled: 'Отменено' }
 

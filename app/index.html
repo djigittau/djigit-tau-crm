@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./eagle.png" />
     <meta name="theme-color" content="#0b0b0c" />
+    <script>
+      // Тема до отрисовки, чтобы не мигало: выбор пользователя или тёмная.
+      document.documentElement.dataset.theme = localStorage.getItem('dt_theme') || 'dark'
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>DJIGIT TAU CRM</title>
   </head>

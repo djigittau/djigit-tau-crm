@@ -3,7 +3,8 @@ import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money, lessons, initials, tenure, Contact, years } from '../lib/ui'
 import { uploadPhoto, studentPhotoUrl } from '../lib/photo'
-import { loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, METHODS, age, today } from '../lib/refs'
+import { DanceInput } from '../lib/DanceInput'
+import { danceId, loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, METHODS, age, today } from '../lib/refs'
 import SaleModal from './SaleModal'
 
 type Row = {
@@ -29,7 +30,7 @@ type Draft = {
   gender: string
   branch_id: string
   group_id: string
-  dance_type_id: string
+  dance: string // название направления: можно вписать новое
   start_date: string
   status: string
   comment: string
@@ -80,7 +81,7 @@ export default function Students() {
       gender: r?.gender ?? '',
       branch_id: b,
       group_id: r ? currentGroup(r)?.group_id ?? '' : '',
-      dance_type_id: r?.dance_type_id ?? '',
+      dance: r?.dance?.name ?? '',
       start_date: r?.start_date ?? today(),
       status: r?.status ?? 'active',
       comment: r?.comment ?? '',
@@ -109,7 +110,7 @@ export default function Students() {
         birth_date: draft.birth_date || null,
         gender: draft.gender || null,
         branch_id: draft.branch_id,
-        dance_type_id: draft.dance_type_id || null,
+        dance_type_id: await danceId(draft.dance),
         start_date: draft.start_date || null,
         status: draft.status,
         comment: draft.comment.trim() || null,
@@ -385,14 +386,7 @@ export default function Students() {
               </select>
             </Field>
             <Field label="Направление">
-              <select value={draft.dance_type_id} onChange={(e) => setDraft({ ...draft, dance_type_id: e.target.value })}>
-                <option value="">—</option>
-                {data?.dances.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+              <DanceInput dances={data?.dances ?? []} value={draft.dance} onChange={(v) => setDraft({ ...draft, dance: v })} />
             </Field>
             <Field label="Дата начала обучения">
               <input type="date" value={draft.start_date} onChange={(e) => setDraft({ ...draft, start_date: e.target.value })} />

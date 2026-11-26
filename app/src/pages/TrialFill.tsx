@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Field, act, fmtDateTime } from '../lib/ui'
-import { loadBranches, loadDances, loadGroups, SOURCES, TRIAL_STATUS, fromLocalInput } from '../lib/refs'
+import { danceId, loadBranches, loadDances, loadGroups, SOURCES, TRIAL_STATUS, fromLocalInput } from '../lib/refs'
+import { DanceInput } from '../lib/DanceInput'
 
-const blank = { parent_name: '', phone: '', child_name: '', child_birth_date: '', branch_id: '', dance_type_id: '', group_id: '', trial_at: '', source: 'Instagram', comment: '' }
+const blank = { parent_name: '', phone: '', child_name: '', child_birth_date: '', branch_id: '', dance: '', group_id: '', trial_at: '', source: 'Instagram', comment: '' }
 
 // Форма записи на пробное. Родитель без дублей: база находит его по телефону (триггер trial_before).
 export function TrialForm({ onSaved }: { onSaved: () => void }) {
@@ -40,7 +41,7 @@ export function TrialForm({ onSaved }: { onSaved: () => void }) {
           child_name: f.child_name.trim(),
           child_birth_date: f.child_birth_date || null,
           branch_id: f.branch_id,
-          dance_type_id: f.dance_type_id || null,
+          dance_type_id: await danceId(f.dance),
           group_id: f.group_id || null,
           trial_at: fromLocalInput(f.trial_at),
           status: f.trial_at ? 'booked' : 'new',
@@ -88,14 +89,7 @@ export function TrialForm({ onSaved }: { onSaved: () => void }) {
         </select>
       </Field>
       <Field label="Направление">
-        <select value={f.dance_type_id} onChange={(e) => setF({ ...f, dance_type_id: e.target.value })}>
-          <option value="">—</option>
-          {d?.dances.map((x) => (
-            <option key={x.id} value={x.id}>
-              {x.name}
-            </option>
-          ))}
-        </select>
+        <DanceInput dances={d?.dances ?? []} value={f.dance} onChange={(v) => setF({ ...f, dance: v })} />
       </Field>
       <Field label="Группа">
         <select value={f.group_id} onChange={(e) => setF({ ...f, group_id: e.target.value })}>

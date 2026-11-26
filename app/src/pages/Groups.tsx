@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { sb } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act } from '../lib/ui'
-import { loadBranches, loadDances, loadTrainers, WEEKDAYS } from '../lib/refs'
+import { danceId, loadBranches, loadDances, loadTrainers, WEEKDAYS } from '../lib/refs'
+import { DanceInput } from '../lib/DanceInput'
 
 type Slot = { weekday: number; start_time: string }
 type Row = {
@@ -24,7 +25,7 @@ type Draft = {
   id?: string
   name: string
   branch_id: string
-  dance_type_id: string
+  dance: string // название направления: можно вписать новое
   age_category: string
   duration_min: string
   capacity: string
@@ -70,7 +71,7 @@ export default function Groups() {
       id: g?.id,
       name: g?.name ?? '',
       branch_id: g?.branch_id ?? (data?.branches.length === 1 ? data.branches[0].id : ''),
-      dance_type_id: g?.dance_type_id ?? '',
+      dance: g?.dance?.name ?? '',
       age_category: g?.age_category ?? '',
       duration_min: String(g?.duration_min ?? 60),
       capacity: g?.capacity ? String(g.capacity) : '',
@@ -93,7 +94,7 @@ export default function Groups() {
       const row = {
         name: draft.name.trim(),
         branch_id: draft.branch_id,
-        dance_type_id: draft.dance_type_id || null,
+        dance_type_id: await danceId(draft.dance),
         age_category: draft.age_category.trim() || null,
         duration_min: dur,
         capacity: draft.capacity ? Number(draft.capacity) : null,
@@ -320,14 +321,7 @@ export default function Groups() {
               </select>
             </Field>
             <Field label="Направление">
-              <select value={draft.dance_type_id} onChange={(e) => setDraft({ ...draft, dance_type_id: e.target.value })}>
-                <option value="">—</option>
-                {data?.dances.filter((d) => d.is_active || d.id === draft.dance_type_id).map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+              <DanceInput dances={data?.dances.filter((d) => d.is_active) ?? []} value={draft.dance} onChange={(v) => setDraft({ ...draft, dance: v })} />
             </Field>
             <Field label="Возрастная категория">
               <input placeholder="например, 7–10 лет" value={draft.age_category} onChange={(e) => setDraft({ ...draft, age_category: e.target.value })} />

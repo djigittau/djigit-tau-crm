@@ -144,6 +144,27 @@ export function Contact({ phone }: { phone: string | null | undefined }) {
   )
 }
 
+// Светлая и тёмная тема: атрибут на <html>, выбор хранится на устройстве.
+export function ThemeToggle() {
+  const [t, setT] = useState(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark')
+  const next = t === 'light' ? 'dark' : 'light'
+  return (
+    <button
+      className="icon-btn"
+      aria-label={next === 'light' ? 'Светлая тема' : 'Тёмная тема'}
+      title={next === 'light' ? 'Светлая тема' : 'Тёмная тема'}
+      onClick={() => {
+        document.documentElement.dataset.theme = next
+        document.querySelector('meta[name=theme-color]')?.setAttribute('content', next === 'light' ? '#f5f2ea' : '#0b0b0c')
+        localStorage.setItem('dt_theme', next)
+        setT(next)
+      }}
+    >
+      <Icon name={next === 'light' ? 'sun' : 'moon'} />
+    </button>
+  )
+}
+
 // ---------- форматирование ----------
 // Время студии — всегда по Алматы, на каком бы устройстве ни открыли CRM.
 export const TZ = 'Asia/Almaty'
@@ -212,6 +233,8 @@ const PATHS = {
   funnel: 'M3 4h18l-7 8v6l-4 2v-8L3 4z',
   check: 'M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9',
   chevron: 'M6 9l6 6 6-6',
+  sun: 'M12 16a4 4 0 100-8 4 4 0 000 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+  moon: 'M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z',
   family: 'M8 9a3 3 0 100-6 3 3 0 000 6zM2 21c0-3.3 2.7-6 6-6s6 2.7 6 6M17 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM15 21c0-2.5 1.2-4.5 3-5.3 1.9.8 3 2.8 3 5.3',
 } as const
 export type IconName = keyof typeof PATHS

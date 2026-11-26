@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth, useMe } from './lib/auth'
-import { Icon, initials, type IconName } from './lib/ui'
+import { Icon, initials, ThemeToggle, type IconName } from './lib/ui'
 import { ROLE_LABEL, type Role } from './lib/supabase'
 
 // Меню зависит от роли. Пункты добавляются по мере готовности этапов — неработающих разделов нет.
@@ -112,6 +112,7 @@ export default function Layout() {
             <Icon name="menu" />
           </button>
           <h2>{title}</h2>
+          <ThemeToggle />
           <div className="me">
             <span className="avatar">{me.photo_url ? <img src={me.photo_url} alt="" /> : initials(me.full_name)}</span>
             <div>
