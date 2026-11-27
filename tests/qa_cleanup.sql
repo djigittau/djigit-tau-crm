@@ -26,6 +26,7 @@ begin
   delete from public.groups where branch_id = any(bs);
   delete from public.parents where branch_id = any(bs);
   delete from public.dance_types where name ilike 'QA%';
+  delete from public.expense_categories where name ilike 'QA%' and not is_system;
   delete from public.audit_logs where actor_id = any(ids) or branch_id = any(bs) or entity_id = any(select unnest(ids)::text) or entity_id = any(select unnest(bs)::text);
   delete from public.employee_branches where profile_id = any(ids) or branch_id = any(bs);
   delete from public.profiles where id = any(ids);

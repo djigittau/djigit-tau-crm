@@ -29,7 +29,7 @@ export default function Expenses({ only, title = 'Расходы' }: { only?: st
   const [month, setMonth] = useState(thisMonth())
   const [branchF, setBranchF] = useState('')
   const [catF, setCatF] = useState('')
-  const [draft, setDraft] = useState<(Partial<Row> & { amountStr?: string }) | null>(null)
+  const [draft, setDraft] = useState<(Partial<Row> & { amountStr?: string; catName?: string }) | null>(null)
   const [newCat, setNewCat] = useState('')
 
   const { data, loading, error, reload } = useLoad(async () => {
@@ -58,8 +58,8 @@ export default function Expenses({ only, title = 'Расходы' }: { only?: st
   const open = (r?: Row) =>
     setDraft(
       r
-        ? { ...r, amountStr: String(r.amount) }
-        : { spent_on: today(), branch_id: branchF || (data?.branches.length === 1 ? data.branches[0].id : ''), category_id: catF || (data?.cats.length === 1 ? data.cats[0].id : ''), method: 'kaspi', amountStr: '' },
+        ? { ...r, amountStr: String(r.amount), catName: r.cat?.name ?? '' }
+        : { catName: data?.cats.find((c) => c.id === catF)?.name ?? '', spent_on: today(), branch_id: branchF || (data?.branches.length === 1 ? data.branches[0].id : ''), category_id: catF || (data?.cats.length === 1 ? data.cats[0].id : ''), method: 'kaspi', amountStr: '' },
     )
 
   async function save() {
@@ -67,11 +67,19 @@ export default function Expenses({ only, title = 'Расходы' }: { only?: st
     const ok = await act(async () => {
       const amount = Number(draft.amountStr)
       if (!draft.branch_id) throw new Error('Выберите филиал')
-      if (!draft.category_id) throw new Error('Выберите статью')
       if (!(amount > 0)) throw new Error('Сумма должна быть больше нуля')
+      // Доп. расходы: статью можно вписать — найдём существующую (без учёта регистра) или создадим новую.
+      let category_id = draft.category_id
+      if (!only) {
+        const name = (draft.catName ?? '').trim().replace(/\s+/g, ' ')
+        if (!name) throw new Error('Укажите статью')
+        category_id = data!.cats.find((c) => c.name.toLowerCase() === name.toLowerCase())?.id
+        if (!category_id) category_id = (must(await sb.from('expense_categories').insert({ name: name[0].toUpperCase() + name.slice(1) }).select('id').single()) as { id: string }).id
+      }
+      if (!category_id) throw new Error('Выберите статью')
       const row = {
         branch_id: draft.branch_id,
-        category_id: draft.category_id,
+        category_id,
         amount,
         spent_on: draft.spent_on || today(),
         method: draft.method || null,
@@ -220,15 +228,26 @@ export default function Expenses({ only, title = 'Расходы' }: { only?: st
           }
         >
           <div className="form-grid">
-            <Field label="Статья *">
-              <select value={draft.category_id ?? ''} onChange={(e) => setDraft({ ...draft, category_id: e.target.value })}>
-                <option value="">—</option>
-                {data?.cats.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+            <Field label="Статья *" hint={only ? undefined : 'Выберите из подсказок или впишите свою — новая статья сохранится'}>
+              {only ? (
+                <select value={draft.category_id ?? ''} onChange={(e) => setDraft({ ...draft, category_id: e.target.value })}>
+                  <option value="">—</option>
+                  {data?.cats.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input list="expense-cats" value={draft.catName ?? ''} maxLength={60} placeholder="Например, костюмы" onChange={(e) => setDraft({ ...draft, catName: e.target.value })} />
+                  <datalist id="expense-cats">
+                    {data?.cats.map((c) => (
+                      <option key={c.id} value={c.name} />
+                    ))}
+                  </datalist>
+                </>
+              )}
             </Field>
             <Field label="Филиал *">
               <select value={draft.branch_id ?? ''} onChange={(e) => setDraft({ ...draft, branch_id: e.target.value })}>
