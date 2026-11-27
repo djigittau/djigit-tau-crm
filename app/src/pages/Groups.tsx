@@ -32,6 +32,52 @@ type Draft = {
   status: 'active' | 'archived'
   trainers: string[]
   slots: Slot[]
+  add: string[] // ученики, которых добавить в группу при сохранении
+}
+type Pupil = { id: string; full_name: string; group_members: { left_at: string | null; group_id: string; groups: { name: string } | null }[] }
+
+// Ученики филиала с галочками и поиском. Ученик в другой группе при сохранении перейдёт в эту (move_student_group).
+function StudentPick({ branch, group, value, onChange }: { branch: string; group?: string; value: string[]; onChange: (v: string[]) => void }) {
+  const [q, setQ] = useState('')
+  const { data, loading } = useLoad(
+    async () =>
+      branch
+        ? (must(await sb.from('students').select('id, full_name, group_members(left_at, group_id, groups(name))').eq('branch_id', branch).neq('status', 'left').order('full_name')) as unknown as Pupil[])
+        : [],
+    [branch],
+  )
+  if (!branch) return <small>Сначала выберите филиал</small>
+  if (loading) return <small>Загрузка…</small>
+  const cur = (p: Pupil) => p.group_members.find((m) => !m.left_at)
+  const list = (data ?? []).filter((p) => cur(p)?.group_id !== group || !group).filter((p) => !q || p.full_name.toLowerCase().includes(q.toLowerCase()))
+  if (!data?.length) return <small>В филиале пока нет учеников — добавьте их в разделе «Ученики»</small>
+  return (
+    <div className="pick">
+      <input placeholder="Поиск ученика" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Поиск ученика" />
+      <div className="pick-list">
+        {list.map((p) => {
+          const g = cur(p)
+          return (
+            <label key={p.id} className="check">
+              <input type="checkbox" checked={value.includes(p.id)} onChange={(e) => onChange(e.target.checked ? [...value, p.id] : value.filter((x) => x !== p.id))} />
+              <span>
+                {p.full_name}
+                {g && <small className="muted"> · сейчас в «{g.groups?.name}», перейдёт</small>}
+              </span>
+            </label>
+          )
+        })}
+        {!list.length && <small className="muted">Никого не найдено</small>}
+      </div>
+      {value.length > 0 && <small>Выбрано: {value.length}</small>}
+    </div>
+  )
+}
+
+// Добавить выбранных учеников в группу: проверка мест, затем перевод по одному.
+async function addPupils(groupId: string, ids: string[], capacity: number | null, now: number) {
+  if (capacity && now + ids.length > capacity) throw new Error(`Не хватает мест: свободно ${Math.max(capacity - now, 0)}, выбрано ${ids.length}`)
+  for (const id of ids) must(await sb.rpc('move_student_group', { p_student: id, p_group: groupId }))
 }
 
 const slotText = (s: Slot[]) =>
@@ -46,6 +92,7 @@ export default function Groups() {
   const [draft, setDraft] = useState<Draft | null>(null)
   const [card, setCard] = useState<Row | null>(null)
   const [newDance, setNewDance] = useState('')
+  const [adding, setAdding] = useState<{ g: Row; ids: string[] } | null>(null)
 
   const { data, loading, error, reload } = useLoad(async () => {
     const [groups, branches, dances, trainers, allTrainers] = await Promise.all([
@@ -80,6 +127,7 @@ export default function Groups() {
       status: g?.status ?? 'active',
       trainers: g?.group_trainers.map((t) => t.trainer_id) ?? [],
       slots: g?.group_slots.map((s) => ({ ...s, start_time: s.start_time.slice(0, 5) })) ?? [],
+      add: [],
     })
   }
 
@@ -115,6 +163,11 @@ export default function Groups() {
       if (draft.trainers.length) must(await sb.from('group_trainers').insert(draft.trainers.map((t) => ({ group_id: id, trainer_id: t }))))
       must(await sb.from('group_slots').delete().eq('group_id', id))
       if (draft.slots.length) must(await sb.from('group_slots').insert(draft.slots.map((s) => ({ group_id: id, weekday: s.weekday, start_time: s.start_time }))))
+      if (draft.add.length) {
+        if (draft.status !== 'active') throw new Error('Учеников можно добавить только в активную группу')
+        const now = draft.id ? members(data!.groups.find((g) => g.id === draft.id)!).length : 0
+        await addPupils(id!, draft.add, row.capacity, now)
+      }
     }, 'Группа сохранена')
     if (ok) {
       setDraft(null)
@@ -174,6 +227,7 @@ export default function Groups() {
                     <th>Расписание</th>
                     <th className="num">Учеников</th>
                     <th>Статус</th>
+                    {canEdit && <th />}
                   </tr>
                 </thead>
                 <tbody>
@@ -195,6 +249,21 @@ export default function Groups() {
                         {g.capacity ? ` / ${g.capacity}` : ''}
                       </td>
                       <td>{g.status === 'active' ? <span className="badge ok">Активна</span> : <span className="badge">Архив</span>}</td>
+                      {canEdit && (
+                        <td className="act">
+                          {g.status === 'active' && (
+                            <button
+                              className="btn ghost sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setAdding({ g, ids: [] })
+                              }}
+                            >
+                              <Icon name="plus" size={14} /> Ученики
+                            </button>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -249,9 +318,16 @@ export default function Groups() {
           onClose={() => setCard(null)}
           footer={
             canEdit && (
-              <button className="btn" onClick={() => open(card)}>
-                <Icon name="edit" /> Изменить
-              </button>
+              <>
+                {card.status === 'active' && (
+                  <button className="btn ghost" onClick={() => setAdding({ g: card, ids: [] })}>
+                    <Icon name="plus" /> Добавить учеников
+                  </button>
+                )}
+                <button className="btn" onClick={() => open(card)}>
+                  <Icon name="edit" /> Изменить
+                </button>
+              </>
             )
           }
         >
@@ -293,7 +369,7 @@ export default function Groups() {
               </tbody>
             </table>
           ) : (
-            <p className="muted">В группе пока нет учеников. Ученика добавляют в разделе «Ученики».</p>
+            <p className="muted">В группе пока нет учеников.</p>
           )}
         </Modal>
       )}
@@ -363,6 +439,14 @@ export default function Groups() {
                 )
               })()}
             </Field>
+            <Field label="Ученики">
+              <div className="row">
+                <span className="muted">{draft.add.length ? `Добавить: ${draft.add.length}` : 'Ученики из филиала группы'}</span>
+              </div>
+            </Field>
+            <div className="field full">
+              <StudentPick branch={draft.branch_id} group={draft.id} value={draft.add} onChange={(v) => setDraft({ ...draft, add: v })} />
+            </div>
             <div className="field full">
               <span>Дни и время занятий</span>
               {draft.slots.map((s, i) => (
@@ -387,6 +471,39 @@ export default function Groups() {
               </div>
             </div>
           </div>
+        </Modal>
+      )}
+
+      {adding && (
+        <Modal
+          title={`Добавить учеников · ${adding.g.name}`}
+          onClose={() => setAdding(null)}
+          footer={
+            <>
+              <button className="btn ghost" onClick={() => setAdding(null)}>
+                Отмена
+              </button>
+              <button
+                className="btn"
+                disabled={!adding.ids.length}
+                onClick={async () => {
+                  if (await act(() => addPupils(adding.g.id, adding.ids, adding.g.capacity, members(adding.g).length), 'Ученики добавлены')) {
+                    setAdding(null)
+                    setCard(null)
+                    reload()
+                  }
+                }}
+              >
+                Добавить{adding.ids.length ? ` (${adding.ids.length})` : ''}
+              </button>
+            </>
+          }
+        >
+          <p className="muted small" style={{ marginTop: 0 }}>
+            {adding.g.branch?.name} · сейчас {members(adding.g).length}
+            {adding.g.capacity ? ` из ${adding.g.capacity}` : ''}
+          </p>
+          <StudentPick branch={adding.g.branch_id} group={adding.g.id} value={adding.ids} onChange={(ids) => setAdding({ ...adding, ids })} />
         </Modal>
       )}
     </>

@@ -390,3 +390,7 @@ a.btn { text-decoration: none; }
 .hours-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .hours-row input[type='time'] { height: 38px; min-width: 0; }
 .hours-row input:disabled { opacity: 0.35; }
+
+/* Выбор учеников в группу */
+.pick { display: grid; gap: 8px; }
+.pick-list { display: grid; gap: 8px; max-height: 260px; overflow: auto; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
