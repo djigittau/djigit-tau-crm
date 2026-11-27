@@ -16,8 +16,8 @@ export function StaffHead({ p, onPhoto }: { p: Profile; onPhoto?: (url: string) 
         <h2>{p.full_name}</h2>
         <span className="badge gold">{ROLE_LABEL[p.role]}</span>
         <small className="muted block">
-          {t ? `Стаж: ${t}` : 'Стаж: дата приёма не указана'}
-          {a != null && ` · ${years(a)}`}
+          {p.role !== 'director' && (t ? `Стаж: ${t}` : 'Стаж: дата приёма не указана')}
+          {a != null && `${p.role !== 'director' ? ' · ' : ''}${years(a)}`}
         </small>
         {onPhoto && (
           <label className="btn ghost sm" style={{ marginTop: 8 }}>

@@ -28,7 +28,7 @@ function genPassword() {
 }
 
 // Вызов серверной функции директора. Права проверяются на сервере.
-async function adminCall(body: Record<string, unknown>) {
+export async function adminCall(body: Record<string, unknown>) {
   const { data, error } = await sb.functions.invoke('admin-users', { body })
   if (error) {
     const ctx = (error as { context?: Response }).context

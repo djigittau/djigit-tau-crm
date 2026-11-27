@@ -1,5 +1,5 @@
 // DJIGIT TAU CRM · admin-users
-// Только директор: создание аккаунтов, изменение роли и филиалов, блокировка, сброс пароля.
+// Только директор: создание аккаунтов, изменение роли и филиалов, блокировка, сброс пароля, смена логина.
 // Service role key есть только здесь, на сервере (переменная окружения Supabase).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -124,6 +124,24 @@ Deno.serve(async (req) => {
       if (aErr) return fail(aErr.message)
       await audit(status === 'active' ? 'unblock_account' : status === 'blocked' ? 'block_account' : 'deactivate_account', id, { status })
       return reply({ id })
+    }
+
+    // Логин (вход): email или телефон. Телефон превращается в служебный адрес, как при создании.
+    case 'set_login': {
+      const id = String(b.id ?? '')
+      const raw = String(b.login ?? '').trim().toLowerCase()
+      if (!raw) return fail('Введите логин: email или телефон')
+      let login = raw
+      if (!raw.includes('@')) {
+        if (normPhone(raw).length !== 11) return fail('Телефон указан не полностью')
+        login = `${normPhone(raw)}@${PHONE_EMAIL_DOMAIN}`
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) return fail('Неверный email')
+      const { data: t } = await admin.from('profiles').select('id').eq('id', id).maybeSingle()
+      if (!t) return fail('Сотрудник не найден', 404)
+      const { error } = await admin.auth.admin.updateUserById(id, { email: login, email_confirm: true })
+      if (error) return fail(/already|exists|registered/i.test(error.message) ? 'Такой логин уже занят' : error.message)
+      await audit('change_login', id, { login })
+      return reply({ id, login })
     }
 
     case 'reset_password': {

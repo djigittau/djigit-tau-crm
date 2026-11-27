@@ -4,23 +4,35 @@ import { useAuth, useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Field, Modal, Icon, act, money, fmtDate } from '../lib/ui'
 import { StaffHead, TrainerStats } from './StaffCard'
 import ChangePassword from './ChangePassword'
+import { adminCall } from './Employees'
 
 type MyBranch = { base_salary: number; branches: { name: string } | null }
+type Edit = { login: string; phone: string; email: string; birth: string; bio: string }
 
 // Свой профиль: данные показаны текстом, правка — кнопкой «Редактировать профиль» (фото, телефон, дата рождения, «О себе»).
 // Роль, филиалы, дату приёма и процент меняет директор в «Сотрудниках».
 export default function Profile() {
   const me = useMe()
   const { reload: reloadMe, session } = useAuth()
-  const [edit, setEdit] = useState<{ phone: string; birth: string; bio: string } | null>(null)
+  const [edit, setEdit] = useState<Edit | null>(null)
+  const boss = me.role === 'director'
   const login = session?.user.email ?? ''
   const { data, loading, error } = useLoad(
     async () => must(await sb.from('employee_branches').select('base_salary, branches(name)').eq('profile_id', me.id)) as unknown as MyBranch[],
     [me.id],
   )
-  const open = () => setEdit({ phone: me.phone ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' })
-  async function save(f: { phone: string; birth: string; bio: string }, photo = me.photo_url ?? '') {
+  const loginText = login.endsWith('@' + PHONE_EMAIL_DOMAIN) ? '+' + login.split('@')[0] : login
+  const open = () => setEdit({ login: loginText, phone: me.phone ?? '', email: me.email ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' })
+  async function save(f: Edit, photo = me.photo_url ?? '') {
     must(await sb.rpc('update_my_profile', { p_phone: f.phone, p_photo_url: photo, p_birth_date: f.birth || null, p_bio: f.bio }))
+    if (boss) {
+      // Директор меняет и контактный email; логин (вход) — через серверную функцию, она пишет в журнал.
+      must(await sb.from('profiles').update({ email: f.email.trim().toLowerCase() || null }).eq('id', me.id))
+      if (f.login.trim() && f.login.trim().toLowerCase() !== loginText.toLowerCase()) {
+        await adminCall({ action: 'set_login', id: me.id, login: f.login })
+        await sb.auth.refreshSession()
+      }
+    }
     await reloadMe()
   }
 
@@ -36,13 +48,15 @@ export default function Profile() {
           <StaffHead p={me} />
           <dl className="props">
             <dt>Вход</dt>
-            <dd>{login.endsWith('@' + PHONE_EMAIL_DOMAIN) ? 'по телефону' : login}</dd>
+            <dd>{loginText}</dd>
             <dt>Телефон</dt>
             <dd>{me.phone || <span className="muted">не указан</span>}</dd>
             <dt>Email</dt>
             <dd>{me.email || '—'}</dd>
             <dt>Дата рождения</dt>
             <dd>{me.birth_date ? fmtDate(me.birth_date) : <span className="muted">не указана</span>}</dd>
+            {!boss && (
+              <>
             <dt>Дата приёма</dt>
             <dd>{fmtDate(me.hired_at)}</dd>
             <dt>Филиалы</dt>
@@ -60,6 +74,8 @@ export default function Profile() {
             </dd>
             <dt>О себе</dt>
             <dd style={{ whiteSpace: 'pre-wrap' }}>{me.bio || <span className="muted">не заполнено</span>}</dd>
+              </>
+            )}
           </dl>
         </section>
         {me.role === 'trainer' && <TrainerStats p={me} />}
@@ -84,17 +100,29 @@ export default function Profile() {
             </>
           }
         >
-          <StaffHead p={me} onPhoto={(url) => save({ phone: me.phone ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' }, url)} />
+          <StaffHead p={me} onPhoto={(url) => save({ login: loginText, phone: me.phone ?? '', email: me.email ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' }, url)} />
           <div className="form-grid">
+            {boss && (
+              <>
+                <Field label="Вход (логин)" hint="Email или телефон, по которому входите в CRM" full>
+                  <input value={edit.login} onChange={(e) => setEdit({ ...edit, login: e.target.value })} autoComplete="username" />
+                </Field>
+                <Field label="Email" hint="Контакт; может отличаться от логина" full>
+                  <input type="email" value={edit.email} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
+                </Field>
+              </>
+            )}
             <Field label="Телефон">
               <input value={edit.phone} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} inputMode="tel" placeholder="+7 700 000 00 00" />
             </Field>
             <Field label="Дата рождения">
               <input type="date" value={edit.birth} onChange={(e) => setEdit({ ...edit, birth: e.target.value })} />
             </Field>
-            <Field label="О себе" hint="Опыт, направления, награды — видят руководители" full>
-              <textarea value={edit.bio} maxLength={2000} onChange={(e) => setEdit({ ...edit, bio: e.target.value })} />
-            </Field>
+            {!boss && (
+              <Field label="О себе" hint="Опыт, направления, награды — видят руководители" full>
+                <textarea value={edit.bio} maxLength={2000} onChange={(e) => setEdit({ ...edit, bio: e.target.value })} />
+              </Field>
+            )}
           </div>
         </Modal>
       )}

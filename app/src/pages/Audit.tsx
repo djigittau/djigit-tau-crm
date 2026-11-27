@@ -14,7 +14,7 @@ const ENTITY: Record<string, string> = {
 }
 const ACTION: Record<string, string> = {
   insert: 'Создание', update: 'Изменение', delete: 'Удаление',
-  create_account: 'Создан аккаунт', block_account: 'Аккаунт заблокирован', unblock_account: 'Аккаунт разблокирован', deactivate_account: 'Аккаунт деактивирован', reset_password: 'Сброс пароля',
+  create_account: 'Создан аккаунт', block_account: 'Аккаунт заблокирован', unblock_account: 'Аккаунт разблокирован', deactivate_account: 'Аккаунт деактивирован', reset_password: 'Сброс пароля', change_login: 'Изменён логин',
 }
 const BAD = new Set(['delete', 'block_account', 'deactivate_account'])
 const SKIP = new Set(['updated_at', 'created_at'])
