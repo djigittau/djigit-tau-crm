@@ -91,7 +91,6 @@ export default function Groups() {
   const [showArchived, setShowArchived] = useState(false)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [card, setCard] = useState<Row | null>(null)
-  const [newDance, setNewDance] = useState('')
   const [adding, setAdding] = useState<{ g: Row; ids: string[] } | null>(null)
 
   const { data, loading, error, reload } = useLoad(async () => {
@@ -176,6 +175,12 @@ export default function Groups() {
     }
   }
 
+  async function remove(g: Row) {
+    const n = members(g).length
+    if (!confirm(`Удалить группу «${g.name}»?${n ? ` Ученики (${n}) останутся без группы.` : ''} Занятия группы в расписании тоже удалятся.`)) return
+    if (await act(async () => must(await sb.rpc('delete_group', { p_group: g.id })), 'Группа удалена')) reload()
+  }
+
   async function removeMember(g: Row, studentId: string, name: string) {
     if (!confirm(`Убрать «${name}» из группы «${g.name}»? История сохранится.`)) return
     if (await act(async () => must(await sb.rpc('move_student_group', { p_student: studentId, p_group: null })), 'Ученик выведен из группы')) {
@@ -251,17 +256,19 @@ export default function Groups() {
                       <td>{g.status === 'active' ? <span className="badge ok">Активна</span> : <span className="badge">Архив</span>}</td>
                       {canEdit && (
                         <td className="act">
-                          {g.status === 'active' && (
-                            <button
-                              className="btn ghost sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setAdding({ g, ids: [] })
-                              }}
-                            >
-                              <Icon name="plus" size={14} /> Ученики
+                          <div className="row nowrap" onClick={(e) => e.stopPropagation()}>
+                            {g.status === 'active' && (
+                              <button className="btn ghost sm" onClick={() => setAdding({ g, ids: [] })}>
+                                <Icon name="plus" size={14} /> Ученики
+                              </button>
+                            )}
+                            <button className="btn ghost sm" onClick={() => open(g)}>
+                              <Icon name="edit" size={14} /> Изменить
                             </button>
-                          )}
+                            <button className="btn ghost sm danger-text" onClick={() => remove(g)}>
+                              <Icon name="x" size={14} /> Удалить
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -274,42 +281,6 @@ export default function Groups() {
           )}
         </section>
 
-        {canEdit && data && (
-          <section className="card narrow">
-            <h3>Направления танца</h3>
-            <div className="chips">
-              {data.dances.map((d) => (
-                <button
-                  key={d.id}
-                  className={'chip' + (d.is_active ? '' : ' off')}
-                  title={d.is_active ? 'Нажмите, чтобы скрыть' : 'Нажмите, чтобы вернуть'}
-                  onClick={async () => {
-                    if (await act(async () => must(await sb.from('dance_types').update({ is_active: !d.is_active }).eq('id', d.id)))) reload()
-                  }}
-                >
-                  {d.name}
-                </button>
-              ))}
-              {!data.dances.length && <span className="muted">Пока нет. Добавьте первое направление.</span>}
-            </div>
-            <form
-              className="row"
-              onSubmit={async (e) => {
-                e.preventDefault()
-                if (!newDance.trim()) return
-                if (await act(async () => must(await sb.from('dance_types').insert({ name: newDance.trim() })), 'Направление добавлено')) {
-                  setNewDance('')
-                  reload()
-                }
-              }}
-            >
-              <input placeholder="Например, Лезгинка" value={newDance} onChange={(e) => setNewDance(e.target.value)} aria-label="Новое направление" />
-              <button className="btn ghost">
-                <Icon name="plus" /> Добавить
-              </button>
-            </form>
-          </section>
-        )}
       </State>
 
       {card && (

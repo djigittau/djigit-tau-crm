@@ -394,3 +394,4 @@ a.btn { text-decoration: none; }
 /* Выбор учеников в группу */
 .pick { display: grid; gap: 8px; }
 .pick-list { display: grid; gap: 8px; max-height: 260px; overflow: auto; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.row.nowrap { flex-wrap: nowrap; justify-content: flex-end; gap: 6px; }
