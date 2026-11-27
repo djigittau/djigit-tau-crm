@@ -1,5 +1,5 @@
 // DJIGIT TAU CRM · admin-users
-// Только директор: создание аккаунтов, изменение роли и филиалов, блокировка, сброс пароля, смена логина.
+// Только директор: создание аккаунтов, изменение роли и филиалов, блокировка, сброс пароля, смена логина, удаление.
 // Service role key есть только здесь, на сервере (переменная окружения Supabase).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -142,6 +142,22 @@ Deno.serve(async (req) => {
       if (error) return fail(/already|exists|registered/i.test(error.message) ? 'Такой логин уже занят' : error.message)
       await audit('change_login', id, { login })
       return reply({ id, login })
+    }
+
+    // Удалить аккаунт насовсем. С историей зарплат, премий, штрафов или страховки — нельзя (это деньги), только деактивировать.
+    case 'delete': {
+      const id = String(b.id ?? '')
+      if (id === actor) return fail('Нельзя удалить самого себя')
+      const { data: t } = await admin.from('profiles').select('id, full_name, role').eq('id', id).maybeSingle()
+      if (!t) return fail('Сотрудник не найден', 404)
+      for (const table of ['salary_accruals', 'salary_payments', 'bonuses', 'fines', 'employee_insurance']) {
+        const { count } = await admin.from(table).select('profile_id', { count: 'exact', head: true }).eq('profile_id', id)
+        if (count) return fail('У сотрудника есть зарплаты, премии, штрафы или страховка — удалить нельзя. Деактивируйте его.')
+      }
+      const { error } = await admin.auth.admin.deleteUser(id) // профиль, филиалы, группы тренера и смены удаляются каскадом
+      if (error) return fail(error.message)
+      await audit('delete_account', id, { full_name: t.full_name, role: t.role })
+      return reply({ id })
     }
 
     case 'reset_password': {

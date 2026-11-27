@@ -104,6 +104,11 @@ export default function Employees() {
     if (await act(() => adminCall({ action: 'set_status', id: p.id, status }), 'Готово')) reload()
   }
 
+  async function remove(p: Row) {
+    if (!confirm(`Удалить «${p.full_name}» насовсем? Вход, профиль, назначения на филиалы и группы и смены сотрудника удалятся. Если у него есть зарплаты — удалить нельзя, только деактивировать.`)) return
+    if (await act(() => adminCall({ action: 'delete', id: p.id }), 'Сотрудник удалён')) reload()
+  }
+
   async function resetPassword(p: Row) {
     if (!confirm(`Выдать «${p.full_name}» новый временный пароль?`)) return
     const password = genPassword()
@@ -222,6 +227,9 @@ export default function Employees() {
                                   Деактивировать
                                 </button>
                               )}
+                              <button className="btn ghost sm danger-text" onClick={() => remove(p)}>
+                                Удалить
+                              </button>
                             </>
                           )}
                         </td>
