@@ -353,4 +353,30 @@ tr.clickable { cursor: pointer; }
 }
 :root[data-theme=light] .overlay { background: rgba(30,25,15,.35); }
 :root[data-theme=light] .brand img, :root[data-theme=light] .auth-card .logo { filter: brightness(.55) saturate(1.3); }
-.link-card { text-decoration: none; color: inherit; } .link-card:hover { border-color: var(--gold-lo); }
+
+/* ---------- деньги на главной: цвета серий проверены валидатором (тёмная и светлая тема) ---------- */
+:root { --viz-in: #bb9640; --viz-out: #5b8fd6; }
+:root[data-theme=light] { --viz-in: #a8812c; --viz-out: #3f6fb5; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
+.dot.in { background: var(--viz-in); }
+.dot.out { background: var(--viz-out); }
+.kpi small { display: block; margin-top: 4px; font-size: 12px; }
+.legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--muted); margin: -6px 0 10px; }
+.hbars { display: grid; gap: 10px; }
+.hbar { display: grid; grid-template-columns: minmax(110px, 38%) 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.hbar > div { height: 10px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+.hbar i { display: block; height: 100%; background: var(--viz-out); border-radius: 0 4px 4px 0; }
+.hbar b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.gbars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; height: 170px; align-items: end; margin-bottom: 10px; }
+.gbar { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; }
+.gbar .pair { flex: 1; width: 100%; display: flex; justify-content: center; align-items: flex-end; gap: 2px; }
+.gbar .pair i { width: 40%; max-width: 22px; min-height: 2px; border-radius: 4px 4px 0 0; }
+.gbar .pair i.in { background: var(--viz-in); }
+.gbar .pair i.out { background: var(--viz-out); }
+.gbar .pair i:hover { filter: brightness(1.15); }
+.gbar small { color: var(--muted); font-size: 11px; }
+.gbar.on small { color: var(--text); font-weight: 600; }
+details summary { cursor: pointer; margin: 4px 0 8px; }
+a.btn { text-decoration: none; }
+.kpis.k3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 600px) { .kpis.k3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpis.k3 > :last-child { grid-column: 1 / -1; } }
