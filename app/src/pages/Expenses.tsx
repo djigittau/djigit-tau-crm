@@ -30,7 +30,6 @@ export default function Expenses({ only, title = 'Расходы' }: { only?: st
   const [branchF, setBranchF] = useState('')
   const [catF, setCatF] = useState('')
   const [draft, setDraft] = useState<(Partial<Row> & { amountStr?: string; catName?: string }) | null>(null)
-  const [newCat, setNewCat] = useState('')
 
   const { data, loading, error, reload } = useLoad(async () => {
     const { d0, d1 } = monthBounds(month)
@@ -189,27 +188,6 @@ export default function Expenses({ only, title = 'Расходы' }: { only?: st
             <Empty text="Расходов за этот месяц нет" icon="layers" />
           )}
         </section>
-        {!only && (
-          <section className="card narrow">
-            <h3>Свои статьи расходов</h3>
-            <form
-              className="row"
-              onSubmit={async (e) => {
-                e.preventDefault()
-                if (!newCat.trim()) return
-                if (await act(async () => must(await sb.from('expense_categories').insert({ name: newCat.trim() })), 'Статья добавлена')) {
-                  setNewCat('')
-                  reload()
-                }
-              }}
-            >
-              <input placeholder="Например, Костюмы" value={newCat} onChange={(e) => setNewCat(e.target.value)} aria-label="Новая статья" />
-              <button className="btn ghost">
-                <Icon name="plus" /> Добавить статью
-              </button>
-            </form>
-          </section>
-        )}
       </State>
 
       {draft && (
