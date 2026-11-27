@@ -36,6 +36,7 @@ export type Branch = {
   phone: string | null
   manager_id: string | null
   is_active: boolean
+  hours: ([string, string] | null)[] | null
 }
 
 // Телефон к виду 7XXXXXXXXXX — как private.norm_phone в базе.

@@ -384,3 +384,9 @@ a.btn { text-decoration: none; }
 .trial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .trial-card h3 { margin: 4px 0; }
 .trial-when { color: var(--gold-hi); font-weight: 650; font-size: 15px; }
+
+/* Часы работы филиала: день · с · до · выходной */
+.hours-grid { display: grid; gap: 8px; }
+.hours-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.hours-row input[type='time'] { height: 38px; min-width: 0; }
+.hours-row input:disabled { opacity: 0.35; }
