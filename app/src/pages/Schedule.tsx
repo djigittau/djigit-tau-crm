@@ -12,6 +12,7 @@ type Lesson = {
   cancel_reason: string | null
   trainer_id: string | null
   branch_id: string
+  group_id: string
   groups: { name: string; age_category: string | null } | null
   trainer: { full_name: string } | null
   branch: { name: string } | null
@@ -34,12 +35,14 @@ export default function Schedule() {
   const [branchF, setBranchF] = useState('')
   const [sel, setSel] = useState<Lesson | null>(null)
   const [reason, setReason] = useState('')
+  const [trainer, setTrainer] = useState('')
+  const [onward, setOnward] = useState(false)
 
   const { data, loading, error, reload } = useLoad(async () => {
     const [lessons, branches, trainers] = await Promise.all([
       sb
         .from('lessons')
-        .select('id, starts_at, duration_min, status, cancel_reason, trainer_id, branch_id, groups(name, age_category), trainer:profiles!lessons_trainer_id_fkey(full_name), branch:branches(name)')
+        .select('id, starts_at, duration_min, status, cancel_reason, trainer_id, branch_id, group_id, groups(name, age_category), trainer:profiles!lessons_trainer_id_fkey(full_name), branch:branches(name)')
         .gte('starts_at', addDays(week, -1).toISOString()) // запас в сутки: неделя считается по Алматы
         .lt('starts_at', addDays(week, 8).toISOString())
         .order('starts_at')
@@ -58,11 +61,31 @@ export default function Schedule() {
     if (!ids.length) return act(async () => { throw new Error('Нет филиалов') })
     let total = 0
     const ok = await act(async () => {
-      for (const b of ids) total += must(await sb.rpc('generate_lessons', { p_from: iso(week), p_to: iso(addDays(week, 27)), p_branch: b })) as number
+      for (const b of ids) total += must(await sb.rpc('generate_lessons', { p_from: iso(week), p_to: iso(addDays(week, 13)), p_branch: b })) as number
     })
     if (ok) {
       reload()
-      toast(total ? `Добавлено занятий: ${total}` : 'Все занятия на 4 недели уже в расписании')
+      toast(total ? `Добавлено занятий: ${total}` : 'Все занятия на 2 недели уже в расписании')
+    }
+  }
+
+  function pick(l: Lesson) {
+    setSel(l)
+    setTrainer(l.trainer_id ?? '')
+    setOnward(false)
+  }
+
+  // Сменить тренера: только это занятие или это и все следующие запланированные занятия группы.
+  async function reassign() {
+    if (!sel) return
+    const q = sb.from('lessons').update({ trainer_id: trainer || null })
+    const ok = await act(
+      async () => must(await (onward ? q.eq('group_id', sel.group_id).eq('status', 'scheduled').gte('starts_at', sel.starts_at) : q.eq('id', sel.id))),
+      onward ? 'Тренер изменён в этом и следующих занятиях' : 'Тренер изменён',
+    )
+    if (ok) {
+      setSel(null)
+      reload()
     }
   }
 
@@ -82,8 +105,8 @@ export default function Schedule() {
         sub={`${week.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} — ${addDays(week, 6).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`}
       >
         {office && (
-          <button className="btn" onClick={generate} title="Создать занятия по дням групп на 4 недели вперёд">
-            <Icon name="plus" /> Сформировать на 4 недели
+          <button className="btn" onClick={generate} title="Создать занятия по дням групп на 2 недели вперёд">
+            <Icon name="plus" /> Сформировать на 2 недели
           </button>
         )}
       </PageHead>
@@ -120,7 +143,7 @@ export default function Schedule() {
                     {d} <span>{addDays(week, i).getDate()}</span>
                   </h4>
                   {items.map((l) => (
-                    <button key={l.id} className={'lesson ' + l.status} onClick={() => setSel(l)}>
+                    <button key={l.id} className={'lesson ' + l.status} onClick={() => pick(l)}>
                       <b>
                         {hm(l.starts_at)}–{hm(new Date(new Date(l.starts_at).getTime() + l.duration_min * 60000).toISOString())}
                       </b>
@@ -138,7 +161,7 @@ export default function Schedule() {
             <Empty
               text={
                 office
-                  ? 'На эту неделю занятий нет. Задайте дни и время в «Группах», затем нажмите «Сформировать на 4 недели».'
+                  ? 'На эту неделю занятий нет. Задайте дни и время в «Группах», затем нажмите «Сформировать на 2 недели».'
                   : 'На эту неделю занятий нет'
               }
               icon="clock"
@@ -172,8 +195,8 @@ export default function Schedule() {
           </dl>
           {office && (
             <div className="form-grid">
-              <Field label="Тренер занятия" hint="Оплата за занятие начисляется этому тренеру" full>
-                <select value={sel.trainer_id ?? ''} onChange={(e) => update({ trainer_id: e.target.value || null }, 'Тренер изменён')}>
+              <Field label="Тренер занятия" hint="Замена: выберите другого тренера филиала и нажмите «Сменить тренера»" full>
+                <select value={trainer} onChange={(e) => setTrainer(e.target.value)}>
                   <option value="">не назначен</option>
                   {data?.trainers.filter((t) => t.branches.includes(sel.branch_id)).map((t) => (
                     <option key={t.id} value={t.id}>
@@ -182,6 +205,14 @@ export default function Schedule() {
                   ))}
                 </select>
               </Field>
+              <label className="check full">
+                <input type="checkbox" checked={onward} onChange={(e) => setOnward(e.target.checked)} /> И во всех следующих занятиях этой группы
+              </label>
+              <div className="full">
+                <button className="btn" disabled={trainer === (sel.trainer_id ?? '') && !onward} onClick={reassign}>
+                  Сменить тренера
+                </button>
+              </div>
               {sel.status === 'cancelled' ? (
                 <div className="full">
                   <button className="btn ghost" onClick={() => update({ status: 'scheduled', cancel_reason: null }, 'Занятие восстановлено')}>
@@ -190,7 +221,7 @@ export default function Schedule() {
                 </div>
               ) : (
                 <>
-                  <Field label="Причина отмены" hint="Отменённое занятие не оплачивается тренеру" full>
+                  <Field label="Причина отмены" full>
                     <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Например, праздник" />
                   </Field>
                   <div className="full row">
