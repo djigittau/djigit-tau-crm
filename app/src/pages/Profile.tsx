@@ -5,9 +5,10 @@ import { useLoad, must, State, PageHead, Field, Modal, Icon, act, money, fmtDate
 import { StaffHead, TrainerStats } from './StaffCard'
 import ChangePassword from './ChangePassword'
 import { adminCall } from './Employees'
+import { loadBranches } from '../lib/refs'
 
-type MyBranch = { base_salary: number; branches: { name: string } | null }
-type Edit = { login: string; phone: string; email: string; birth: string; bio: string }
+type MyBranch = { branch_id: string; base_salary: number; branches: { name: string } | null }
+type Edit = { login: string; phone: string; email: string; birth: string; bio: string; hired: string; branches: string[] }
 
 // Свой профиль: данные показаны текстом, правка — кнопкой «Редактировать профиль» (фото, телефон, дата рождения, «О себе»).
 // Роль, филиалы, дату приёма и процент меняет директор в «Сотрудниках».
@@ -17,17 +18,26 @@ export default function Profile() {
   const [edit, setEdit] = useState<Edit | null>(null)
   const boss = me.role === 'director'
   const login = session?.user.email ?? ''
-  const { data, loading, error } = useLoad(
-    async () => must(await sb.from('employee_branches').select('base_salary, branches(name)').eq('profile_id', me.id)) as unknown as MyBranch[],
+  const { data, loading, error, reload } = useLoad(
+    async () => must(await sb.from('employee_branches').select('branch_id, base_salary, branches(name)').eq('profile_id', me.id)) as unknown as MyBranch[],
     [me.id],
   )
+  const { data: allBranches } = useLoad(async () => (boss ? loadBranches() : []), [boss])
   const loginText = login.endsWith('@' + PHONE_EMAIL_DOMAIN) ? '+' + login.split('@')[0] : login
-  const open = () => setEdit({ login: loginText, phone: me.phone ?? '', email: me.email ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' })
+  const current = (): Edit => ({ login: loginText, phone: me.phone ?? '', email: me.email ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '', hired: me.hired_at ?? '', branches: (data ?? []).map((b) => b.branch_id) })
+  const open = () => setEdit(current())
   async function save(f: Edit, photo = me.photo_url ?? '') {
     must(await sb.rpc('update_my_profile', { p_phone: f.phone, p_photo_url: photo, p_birth_date: f.birth || null, p_bio: f.bio }))
     if (boss) {
       // Директор меняет и контактный email; логин (вход) — через серверную функцию, она пишет в журнал.
-      must(await sb.from('profiles').update({ email: f.email.trim().toLowerCase() || null }).eq('id', me.id))
+      must(await sb.from('profiles').update({ email: f.email.trim().toLowerCase() || null, hired_at: f.hired || null }).eq('id', me.id))
+      // Филиалы директора: снять лишние, добавить отмеченные (RLS employee_branches — только директор).
+      const had = (data ?? []).map((b) => b.branch_id)
+      const off = had.filter((b) => !f.branches.includes(b))
+      if (off.length) must(await sb.from('employee_branches').delete().eq('profile_id', me.id).in('branch_id', off))
+      const on = f.branches.filter((b) => !had.includes(b))
+      if (on.length) must(await sb.from('employee_branches').insert(on.map((b) => ({ profile_id: me.id, branch_id: b }))))
+      if (off.length || on.length) reload()
       if (f.login.trim() && f.login.trim().toLowerCase() !== loginText.toLowerCase()) {
         await adminCall({ action: 'set_login', id: me.id, login: f.login })
         await sb.auth.refreshSession()
@@ -55,8 +65,6 @@ export default function Profile() {
             <dd>{me.email || '—'}</dd>
             <dt>Дата рождения</dt>
             <dd>{me.birth_date ? fmtDate(me.birth_date) : <span className="muted">не указана</span>}</dd>
-            {!boss && (
-              <>
             <dt>Дата приёма</dt>
             <dd>{fmtDate(me.hired_at)}</dd>
             <dt>Филиалы</dt>
@@ -69,13 +77,11 @@ export default function Profile() {
                         {b.base_salary > 0 && me.role !== 'trainer' && <span className="muted"> · оклад {money(b.base_salary)}</span>}
                       </div>
                     ))
-                  : me.role === 'director' ? 'все' : 'не назначены'}
+                  : boss ? <span className="muted">все (доступ директора)</span> : 'не назначены'}
               </State>
             </dd>
             <dt>О себе</dt>
             <dd style={{ whiteSpace: 'pre-wrap' }}>{me.bio || <span className="muted">не заполнено</span>}</dd>
-              </>
-            )}
           </dl>
         </section>
         {me.role === 'trainer' && <TrainerStats p={me} />}
@@ -100,7 +106,7 @@ export default function Profile() {
             </>
           }
         >
-          <StaffHead p={me} onPhoto={(url) => save({ login: loginText, phone: me.phone ?? '', email: me.email ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' }, url)} />
+          <StaffHead p={me} onPhoto={(url) => save(current(), url)} />
           <div className="form-grid">
             {boss && (
               <>
@@ -118,11 +124,35 @@ export default function Profile() {
             <Field label="Дата рождения">
               <input type="date" value={edit.birth} onChange={(e) => setEdit({ ...edit, birth: e.target.value })} />
             </Field>
-            {!boss && (
-              <Field label="О себе" hint="Опыт, направления, награды — видят руководители" full>
-                <textarea value={edit.bio} maxLength={2000} onChange={(e) => setEdit({ ...edit, bio: e.target.value })} />
-              </Field>
+            {boss && (
+              <>
+                <Field label="Дата приёма" hint="От неё считается стаж">
+                  <input type="date" value={edit.hired} onChange={(e) => setEdit({ ...edit, hired: e.target.value })} />
+                </Field>
+                <div className="field full">
+                  <span>Филиалы</span>
+                  {allBranches?.length ? (
+                    <div className="chips">
+                      {allBranches.map((b) => (
+                        <label key={b.id} className="check chip-check">
+                          <input
+                            type="checkbox"
+                            checked={edit.branches.includes(b.id)}
+                            onChange={(e) => setEdit({ ...edit, branches: e.target.checked ? [...edit.branches, b.id] : edit.branches.filter((x) => x !== b.id) })}
+                          />
+                          {b.name}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <small>Филиалов пока нет — добавьте в разделе «Филиалы». Директор и так видит все филиалы.</small>
+                  )}
+                </div>
+              </>
             )}
+            <Field label="О себе" hint="Опыт, направления, награды" full>
+              <textarea value={edit.bio} maxLength={2000} onChange={(e) => setEdit({ ...edit, bio: e.target.value })} />
+            </Field>
           </div>
         </Modal>
       )}
