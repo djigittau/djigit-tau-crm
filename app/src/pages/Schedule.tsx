@@ -63,10 +63,12 @@ export default function Schedule() {
     const ok = await act(async () => {
       for (const b of ids) total += must(await sb.rpc('generate_lessons', { p_from: iso(week), p_to: iso(addDays(week, 13)), p_branch: b })) as number
     })
-    if (ok) {
-      reload()
-      toast(total ? `Добавлено занятий: ${total}` : 'Все занятия на 2 недели уже в расписании')
-    }
+    if (!ok) return
+    reload()
+    if (total) return toast(`Добавлено занятий: ${total}`)
+    // Ничего не создано: либо всё уже есть, либо у активных групп не заданы дни и время.
+    const { count } = await sb.from('group_slots').select('group_id, groups!inner(branch_id, status)', { count: 'exact', head: true }).in('groups.branch_id', ids).eq('groups.status', 'active')
+    toast(count ? 'Все занятия на 2 недели уже в расписании' : 'У групп не заданы дни и время. Откройте «Группы» → группа → «Изменить» → «Добавить день».', !count)
   }
 
   function pick(l: Lesson) {
