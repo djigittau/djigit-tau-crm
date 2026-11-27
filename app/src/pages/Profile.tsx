@@ -1,38 +1,48 @@
 import { useState } from 'react'
 import { sb, PHONE_EMAIL_DOMAIN } from '../lib/supabase'
 import { useAuth, useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Field, act, money, fmtDate } from '../lib/ui'
+import { useLoad, must, State, PageHead, Field, Modal, Icon, act, money, fmtDate } from '../lib/ui'
 import { StaffHead, TrainerStats } from './StaffCard'
 import ChangePassword from './ChangePassword'
 
 type MyBranch = { base_salary: number; branches: { name: string } | null }
 
-// Свой профиль: фото, телефон, дата рождения, «О себе». Роль, филиалы, дату приёма и процент меняет директор.
+// Свой профиль: данные показаны текстом, правка — кнопкой «Редактировать профиль» (фото, телефон, дата рождения, «О себе»).
+// Роль, филиалы, дату приёма и процент меняет директор в «Сотрудниках».
 export default function Profile() {
   const me = useMe()
   const { reload: reloadMe, session } = useAuth()
-  const [f, setF] = useState({ phone: me.phone ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' })
+  const [edit, setEdit] = useState<{ phone: string; birth: string; bio: string } | null>(null)
   const login = session?.user.email ?? ''
   const { data, loading, error } = useLoad(
     async () => must(await sb.from('employee_branches').select('base_salary, branches(name)').eq('profile_id', me.id)) as unknown as MyBranch[],
     [me.id],
   )
-  async function save(photo = me.photo_url ?? '') {
+  const open = () => setEdit({ phone: me.phone ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' })
+  async function save(f: { phone: string; birth: string; bio: string }, photo = me.photo_url ?? '') {
     must(await sb.rpc('update_my_profile', { p_phone: f.phone, p_photo_url: photo, p_birth_date: f.birth || null, p_bio: f.bio }))
     await reloadMe()
   }
 
   return (
     <>
-      <PageHead title="Профиль" />
+      <PageHead title="Профиль">
+        <button className="btn" onClick={open}>
+          <Icon name="edit" /> Редактировать профиль
+        </button>
+      </PageHead>
       <div className="grid-2">
         <section className="card">
-          <StaffHead p={me} onPhoto={(url) => save(url)} />
+          <StaffHead p={me} />
           <dl className="props">
             <dt>Вход</dt>
             <dd>{login.endsWith('@' + PHONE_EMAIL_DOMAIN) ? 'по телефону' : login}</dd>
+            <dt>Телефон</dt>
+            <dd>{me.phone || <span className="muted">не указан</span>}</dd>
             <dt>Email</dt>
             <dd>{me.email || '—'}</dd>
+            <dt>Дата рождения</dt>
+            <dd>{me.birth_date ? fmtDate(me.birth_date) : <span className="muted">не указана</span>}</dd>
             <dt>Дата приёма</dt>
             <dd>{fmtDate(me.hired_at)}</dd>
             <dt>Филиалы</dt>
@@ -48,27 +58,9 @@ export default function Profile() {
                   : me.role === 'director' ? 'все' : 'не назначены'}
               </State>
             </dd>
+            <dt>О себе</dt>
+            <dd style={{ whiteSpace: 'pre-wrap' }}>{me.bio || <span className="muted">не заполнено</span>}</dd>
           </dl>
-          <form
-            className="form-grid"
-            onSubmit={async (e) => {
-              e.preventDefault()
-              await act(() => save(), 'Профиль сохранён')
-            }}
-          >
-            <Field label="Телефон">
-              <input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} inputMode="tel" />
-            </Field>
-            <Field label="Дата рождения">
-              <input type="date" value={f.birth} onChange={(e) => setF({ ...f, birth: e.target.value })} />
-            </Field>
-            <Field label="О себе" hint="Опыт, направления, награды — видят руководители" full>
-              <textarea value={f.bio} maxLength={2000} onChange={(e) => setF({ ...f, bio: e.target.value })} />
-            </Field>
-            <div className="full">
-              <button className="btn">Сохранить профиль</button>
-            </div>
-          </form>
         </section>
         {me.role === 'trainer' && <TrainerStats p={me} />}
         {me.role !== 'director' && <MyPay />}
@@ -77,6 +69,35 @@ export default function Profile() {
           <ChangePassword />
         </section>
       </div>
+      {edit && (
+        <Modal
+          title="Редактировать профиль"
+          onClose={() => setEdit(null)}
+          footer={
+            <>
+              <button className="btn ghost" onClick={() => setEdit(null)}>
+                Отмена
+              </button>
+              <button className="btn" onClick={async () => (await act(() => save(edit), 'Профиль сохранён')) && setEdit(null)}>
+                Сохранить
+              </button>
+            </>
+          }
+        >
+          <StaffHead p={me} onPhoto={(url) => save({ phone: me.phone ?? '', birth: me.birth_date ?? '', bio: me.bio ?? '' }, url)} />
+          <div className="form-grid">
+            <Field label="Телефон">
+              <input value={edit.phone} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} inputMode="tel" placeholder="+7 700 000 00 00" />
+            </Field>
+            <Field label="Дата рождения">
+              <input type="date" value={edit.birth} onChange={(e) => setEdit({ ...edit, birth: e.target.value })} />
+            </Field>
+            <Field label="О себе" hint="Опыт, направления, награды — видят руководители" full>
+              <textarea value={edit.bio} maxLength={2000} onChange={(e) => setEdit({ ...edit, bio: e.target.value })} />
+            </Field>
+          </div>
+        </Modal>
+      )}
     </>
   )
 }
