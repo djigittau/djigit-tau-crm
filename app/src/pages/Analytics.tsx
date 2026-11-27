@@ -47,7 +47,8 @@ export default function Analytics() {
       sb.from('students').select('id, branch_id, dance_type_id, start_date, status, updated_at').then(must),
       sb.from('trial_leads').select('status, branch_id, manager_id, dance_type_id').gte('created_at', R.t0).lt('created_at', R.t1).then(must),
       sb.from('expenses').select('amount, branch_id').gte('spent_on', R.d0).lt('spent_on', R.d1).then(must),
-      sb.from('salary_payments').select('amount, branch_id').gte('paid_on', R.d0).lt('paid_on', R.d1).then(must),
+      // Зарплата — по начислению за месяцы периода (как в «Финансах»).
+      sb.from('salary_accruals').select('amount:total, branch_id').gte('period', R.d0.slice(0, 7) + '-01').lt('period', R.d1).then(must),
       sb.from('employee_insurance').select('amount, branch_id').gte('paid_on', R.d0).lt('paid_on', R.d1).then(must),
       loadBranches(),
       loadDances(true),

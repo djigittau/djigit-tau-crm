@@ -5,8 +5,8 @@ import { loadBranches, thisMonth, monthBounds } from '../lib/refs'
 
 type Line = { branch_id: string; amount: number }
 
-// Финансы месяца по реальным операциям: поступления − возвраты − расходы − выплаты зарплат − медстраховка.
-// Зарплата учитывается по факту выплаты, медстраховка — по дате оплаты полиса.
+// Финансы месяца по реальным операциям: поступления − возвраты − расходы − начисленные зарплаты − медстраховка.
+// Зарплата учитывается по начислению за месяц («Зарплаты» → «Рассчитать»), медстраховка — по дате оплаты полиса.
 export default function Finance() {
   const [month, setMonth] = useState(thisMonth())
   const { data, loading, error } = useLoad(async () => {
@@ -14,7 +14,7 @@ export default function Finance() {
     const [pays, exps, sal, ins, branches] = await Promise.all([
       sb.from('payments').select('branch_id, amount, kind, purpose').gte('paid_at', t0).lt('paid_at', t1).then(must),
       sb.from('expenses').select('branch_id, amount, cat:expense_categories(name)').gte('spent_on', d0).lt('spent_on', d1).then(must),
-      sb.from('salary_payments').select('branch_id, amount').gte('paid_on', d0).lt('paid_on', d1).then(must),
+      sb.from('salary_accruals').select('branch_id, amount:total').eq('period', d0).then(must),
       sb.from('employee_insurance').select('branch_id, amount').gte('paid_on', d0).lt('paid_on', d1).then(must),
       loadBranches(),
     ])
@@ -71,7 +71,7 @@ export default function Finance() {
                 <table>
                   <tbody>
                     <tr>
-                      <td>Зарплаты (выплачено)</td>
+                      <td>Зарплаты (начислено)</td>
                       <td className="num">{money(all.salaries)}</td>
                     </tr>
                     <tr>
