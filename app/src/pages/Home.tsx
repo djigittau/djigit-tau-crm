@@ -1,7 +1,10 @@
 import { sb } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, fmtDateTime } from '../lib/ui'
+import { Link } from 'react-router-dom'
+import { useLoad, must, State, PageHead, Empty, fmtDateTime, money } from '../lib/ui'
+import { thisMonth, monthBounds } from '../lib/refs'
 
+type Money = { amount: number; kind?: string }
 type OpenShift = { id: string; started_at: string; profiles: { full_name: string } | null; branches: { name: string } | null }
 
 // Главная директора и управляющего: только реальные данные из базы, в пределах видимых филиалов.
@@ -15,7 +18,9 @@ export default function Home() {
       if (r.error) throw r.error
       return r.count ?? 0
     }
-    const [branches, staff, students, groups, open] = await Promise.all([
+    const sum = (rows: Money[], kind?: string) => rows.filter((r) => !kind || r.kind === kind).reduce((t, r) => t + Number(r.amount), 0)
+    const { d0, d1, t0, t1 } = monthBounds(thisMonth())
+    const [branches, staff, students, groups, open, pays, exps, sal, ins] = await Promise.all([
       count('branches', (q) => q.eq('is_active', true)),
       count('profiles', (q) => q.eq('status', 'active')),
       count('students', (q) => q.eq('status', 'active')),
@@ -26,8 +31,15 @@ export default function Home() {
         .is('ended_at', null)
         .order('started_at')
         .then(must),
+      // Деньги месяца — как в «Финансах»: поступления − возвраты − расходы − выплаченные зарплаты − медстраховка.
+      sb.from('payments').select('amount, kind').gte('paid_at', t0).lt('paid_at', t1).then(must),
+      sb.from('expenses').select('amount').gte('spent_on', d0).lt('spent_on', d1).then(must),
+      sb.from('salary_payments').select('amount').gte('paid_on', d0).lt('paid_on', d1).then(must),
+      sb.from('employee_insurance').select('amount').gte('paid_on', d0).lt('paid_on', d1).then(must),
     ])
-    return { branches, staff, students, groups, open: (open ?? []) as unknown as OpenShift[] }
+    const revenue = sum(pays as Money[], 'payment') - sum(pays as Money[], 'refund')
+    const costs = sum(exps as Money[]) + sum(sal as Money[]) + sum(ins as Money[])
+    return { branches, staff, students, groups, open: (open ?? []) as unknown as OpenShift[], revenue, costs, profit: revenue - costs }
   }, [])
 
   return (
@@ -41,6 +53,18 @@ export default function Home() {
               <Kpi label="Сотрудники" value={data.staff} />
               <Kpi label="Активные ученики" value={data.students} />
               <Kpi label="Активные группы" value={data.groups} />
+            </div>
+            <div className="kpis">
+              <Link to="/finance" className="card kpi link-card">
+                <span>Расходы общие · {new Date().toLocaleDateString('ru-RU', { month: 'long' })}</span>
+                <b>{money(data.costs)}</b>
+                <small className="muted">расходы, зарплаты, медстраховка</small>
+              </Link>
+              <Link to="/finance" className={'card kpi link-card' + (data.profit < 0 ? ' neg' : '')}>
+                <span>Прибыль · {new Date().toLocaleDateString('ru-RU', { month: 'long' })}</span>
+                <b>{money(data.profit)}</b>
+                <small className="muted">выручка {money(data.revenue)}</small>
+              </Link>
             </div>
             <section className="card">
               <h3>Сейчас на смене · {data.open.length}</h3>
