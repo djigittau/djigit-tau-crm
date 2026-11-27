@@ -24,6 +24,7 @@ import Fines from './pages/Fines'
 import Analytics from './pages/Analytics'
 import AmoCRM from './pages/AmoCRM'
 import Audit from './pages/Audit'
+import MyTrials from './pages/MyTrials'
 
 const PAGES: Record<string, () => React.JSX.Element> = {
   '/': Home,
@@ -47,6 +48,7 @@ const PAGES: Record<string, () => React.JSX.Element> = {
   '/analytics': Analytics,
   '/amocrm': AmoCRM,
   '/audit': Audit,
+  '/my-trials': MyTrials,
 }
 
 function Gate() {

@@ -4,6 +4,7 @@ import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDateTime, TZ } from '../lib/ui'
 import { loadBranches, loadGroups, TRIAL_STATUS, TRIAL_ORDER, toLocalInput, fromLocalInput } from '../lib/refs'
 import { TrialForm } from './TrialFill'
+import { TrainerPick } from './TrainerPick'
 import SaleModal from './SaleModal'
 
 type Lead = {
@@ -14,6 +15,7 @@ type Lead = {
   child_birth_date: string | null
   branch_id: string | null
   group_id: string | null
+  trainer_id: string | null
   manager_id: string | null
   source: string | null
   trial_at: string | null
@@ -237,7 +239,7 @@ function ConvTable({ title, rows }: { title: string; rows: { k: string; total: n
 
 function LeadCard({ id, onClose, onChanged }: { id: string; onClose: () => void; onChanged: () => void }) {
   const me = useMe()
-  const [edit, setEdit] = useState<{ status: string; refusal_reason: string; result: string; trial_at: string; group_id: string } | null>(null)
+  const [edit, setEdit] = useState<{ status: string; refusal_reason: string; result: string; trial_at: string; group_id: string; trainer_id: string } | null>(null)
   const [note, setNote] = useState('')
   const [task, setTask] = useState({ text: '', due: '' })
   const [selling, setSelling] = useState(false)
@@ -248,7 +250,7 @@ function LeadCard({ id, onClose, onChanged }: { id: string; onClose: () => void;
       loadGroups(),
     ])
     const l = lead as unknown as Lead
-    setEdit({ status: l.status, refusal_reason: l.refusal_reason ?? '', result: l.result ?? '', trial_at: toLocalInput(l.trial_at), group_id: l.group_id ?? '' })
+    setEdit({ status: l.status, refusal_reason: l.refusal_reason ?? '', result: l.result ?? '', trial_at: toLocalInput(l.trial_at), group_id: l.group_id ?? '', trainer_id: l.trainer_id ?? '' })
     return { lead: l, events: events as unknown as Ev[], groups }
   }, [id])
 
@@ -273,6 +275,7 @@ function LeadCard({ id, onClose, onChanged }: { id: string; onClose: () => void;
               result: edit.result.trim() || null,
               trial_at: fromLocalInput(edit.trial_at),
               group_id: edit.group_id || null,
+              trainer_id: edit.trainer_id || null,
             })
             .eq('id', id),
         )
@@ -355,6 +358,9 @@ function LeadCard({ id, onClose, onChanged }: { id: string; onClose: () => void;
               </option>
             ))}
           </select>
+        </Field>
+        <Field label="Тренер" hint="Тренер увидит пробник у себя в разделе «Пробники»">
+          <TrainerPick branch={l.branch_id ?? ''} group={edit.group_id} value={edit.trainer_id} onChange={(v) => setEdit((x) => x && { ...x, trainer_id: v })} />
         </Field>
         {edit.status === 'refused' && (
           <Field label="Причина отказа *">

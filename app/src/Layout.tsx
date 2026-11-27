@@ -15,6 +15,7 @@ export const MENU: MenuItem[] = [
   { to: '/trial-new', label: 'Заполнение пробников', icon: 'plus', roles: ['sales'], group: '' },
   { to: '/trials', label: 'Обработка пробников', icon: 'funnel', roles: ['sales'], group: '' },
   { to: '/trials', label: 'Пробники', icon: 'funnel', roles: OFFICE, group: 'Клиенты' },
+  { to: '/my-trials', label: 'Пробники', icon: 'funnel', roles: ['trainer'], group: 'Клиенты' },
   { to: '/students', label: 'Ученики', icon: 'users', roles: [...OFFICE, 'trainer'], group: 'Клиенты' },
   { to: '/attendance', label: 'Посещаемость', icon: 'check', roles: [...OFFICE, 'trainer'], group: 'Занятия' },
   { to: '/groups', label: 'Группы', icon: 'layers', roles: OFFICE, group: 'Занятия' },

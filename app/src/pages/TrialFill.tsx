@@ -4,8 +4,9 @@ import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Field, act, fmtDateTime } from '../lib/ui'
 import { danceId, loadBranches, loadDances, loadGroups, SOURCES, TRIAL_STATUS, fromLocalInput } from '../lib/refs'
 import { DanceInput } from '../lib/DanceInput'
+import { TrainerPick } from './TrainerPick'
 
-const blank = { parent_name: '', phone: '', child_name: '', child_birth_date: '', branch_id: '', dance: '', group_id: '', trial_at: '', source: 'Instagram', comment: '' }
+const blank = { parent_name: '', phone: '', child_name: '', child_birth_date: '', branch_id: '', dance: '', group_id: '', trainer_id: '', trial_at: '', source: 'Instagram', comment: '' }
 
 // Форма записи на пробное. Родитель без дублей: база находит его по телефону (триггер trial_before).
 export function TrialForm({ onSaved }: { onSaved: () => void }) {
@@ -43,6 +44,7 @@ export function TrialForm({ onSaved }: { onSaved: () => void }) {
           branch_id: f.branch_id,
           dance_type_id: await danceId(f.dance),
           group_id: f.group_id || null,
+          trainer_id: f.trainer_id || null,
           trial_at: fromLocalInput(f.trial_at),
           status: f.trial_at ? 'booked' : 'new',
           source: f.source,
@@ -79,7 +81,7 @@ export function TrialForm({ onSaved }: { onSaved: () => void }) {
         <input type="date" value={f.child_birth_date} onChange={(e) => setF({ ...f, child_birth_date: e.target.value })} />
       </Field>
       <Field label="Филиал *">
-        <select value={f.branch_id} onChange={(e) => setF({ ...f, branch_id: e.target.value, group_id: '' })}>
+        <select value={f.branch_id} onChange={(e) => setF({ ...f, branch_id: e.target.value, group_id: '', trainer_id: '' })}>
           <option value="">—</option>
           {d?.branches.map((b) => (
             <option key={b.id} value={b.id}>
@@ -100,6 +102,9 @@ export function TrialForm({ onSaved }: { onSaved: () => void }) {
             </option>
           ))}
         </select>
+      </Field>
+      <Field label="Тренер" hint="Тренер увидит пробник у себя в разделе «Пробники»">
+        <TrainerPick branch={f.branch_id} group={f.group_id} value={f.trainer_id} onChange={(v) => setF((x) => ({ ...x, trainer_id: v }))} />
       </Field>
       <Field label="Дата и время пробного" hint="Если указать — статус «Записан на пробное»">
         <input type="datetime-local" value={f.trial_at} onChange={(e) => setF({ ...f, trial_at: e.target.value })} />
