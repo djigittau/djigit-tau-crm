@@ -3,6 +3,7 @@ import { sb } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, toast, TZ } from '../lib/ui'
 import { loadBranches, loadTrainers, WEEKDAYS, LESSON_STATUS } from '../lib/refs'
+import { TrainerTiles, GroupPupils, useTrainers } from './GroupsBrowse'
 
 type Lesson = {
   id: string
@@ -37,6 +38,9 @@ export default function Schedule() {
   const [reason, setReason] = useState('')
   const [trainer, setTrainer] = useState('')
   const [onward, setOnward] = useState(false)
+  const [view, setView] = useState<'trainers' | 'week'>(me.role === 'director' ? 'trainers' : 'week')
+  const [who, setWho] = useState<string | null>(null) // выбранный тренер в виде «По тренерам»; 'none' — без тренера
+  const staff = useTrainers()
 
   const { data, loading, error, reload } = useLoad(async () => {
     const [lessons, branches, trainers] = await Promise.all([
@@ -53,7 +57,10 @@ export default function Schedule() {
     return { lessons: lessons as unknown as Lesson[], branches, trainers }
   }, [week.getTime(), office])
 
-  const lessons = (data?.lessons ?? []).filter((l) => !branchF || l.branch_id === branchF)
+  const inBranch = (data?.lessons ?? []).filter((l) => !branchF || l.branch_id === branchF)
+  const byTrainer = view === 'trainers' && office
+  const lessons = byTrainer && who ? inBranch.filter((l) => (who === 'none' ? !l.trainer_id : l.trainer_id === who)) : inBranch
+  const whoP = staff.data?.find((t) => t.id === who) ?? null
   const todayIso = dayKey(new Date())
 
   async function generate() {
@@ -112,6 +119,24 @@ export default function Schedule() {
           </button>
         )}
       </PageHead>
+      {office && (
+        <div className="seg" role="tablist" style={{ marginBottom: 12 }}>
+          <button className={view === 'trainers' ? 'on' : ''} onClick={() => setView('trainers')}>
+            По тренерам
+          </button>
+          <button className={view === 'week' ? 'on' : ''} onClick={() => setView('week')}>
+            Вся неделя
+          </button>
+        </div>
+      )}
+      {byTrainer && who && (
+        <div className="row" style={{ alignItems: 'center', marginBottom: 12 }}>
+          <button className="btn ghost sm" style={{ width: 'fit-content' }} onClick={() => setWho(null)}>
+            ← Все тренеры
+          </button>
+          <b>{who === 'none' ? 'Занятия без тренера' : whoP?.full_name}</b>
+        </div>
+      )}
       <div className="toolbar">
         <button className="btn ghost" onClick={() => setWeek(addDays(week, -7))} aria-label="Предыдущая неделя">
           ←
@@ -133,8 +158,19 @@ export default function Schedule() {
           </select>
         )}
       </div>
-      <State loading={loading} error={error}>
-        {lessons.length ? (
+      <State loading={loading || staff.loading} error={error ?? staff.error}>
+        {byTrainer && !who ? (
+          <TrainerTiles
+            items={[
+              ...(staff.data ?? []).map((p) => ({ id: p.id, p })),
+              ...(inBranch.some((l) => !l.trainer_id) ? [{ id: 'none', p: null }] : []),
+            ].map((x) => {
+              const n = inBranch.filter((l) => (x.id === 'none' ? !l.trainer_id : l.trainer_id === x.id)).length
+              return { ...x, line: `Занятий на неделе: ${n}` }
+            })}
+            onPick={setWho}
+          />
+        ) : lessons.length ? (
           <div className="week">
             {WEEKDAYS.map((d, i) => {
               const day = iso(addDays(week, i))
@@ -242,6 +278,12 @@ export default function Schedule() {
                 </>
               )}
             </div>
+          )}
+          {office && (
+            <>
+              <h3>Ученики группы</h3>
+              <GroupPupils groupId={sel.group_id} />
+            </>
           )}
         </Modal>
       )}

@@ -29,10 +29,7 @@ const count = (g: BrowseGroup) => g.group_members.filter((m) => !m.left_at).leng
 export default function GroupsBrowse({ groups }: { groups: BrowseGroup[] }) {
   const [trainer, setTrainer] = useState<string | null>(null)
   const [group, setGroup] = useState<BrowseGroup | null>(null)
-  const { data: trainers, loading, error } = useLoad(
-    async () => must(await sb.from('profiles').select('*').eq('role', 'trainer').eq('status', 'active').order('full_name')) as Profile[],
-    [],
-  )
+  const { data: trainers, loading, error } = useTrainers()
   const groupsOf = (id: string) => groups.filter((g) => (id === NONE ? !g.group_trainers.length : g.group_trainers.some((t) => t.trainer_id === id)))
 
   if (group) return <GroupView g={group} onBack={() => setGroup(null)} />
@@ -82,45 +79,45 @@ export default function GroupsBrowse({ groups }: { groups: BrowseGroup[] }) {
   const cards = [...(trainers ?? []).map((t) => ({ id: t.id, p: t as Profile | null })), ...(groupsOf(NONE).length ? [{ id: NONE, p: null }] : [])]
   return (
     <State loading={loading} error={error}>
-      {cards.length ? (
-        <div className="trial-grid">
-          {cards.map(({ id, p }) => {
-            const list = groupsOf(id)
-            return (
-              <button key={id} className="card tile person-tile" onClick={() => setTrainer(id)}>
-                <span className="avatar xl">{p?.photo_url ? <img src={p.photo_url} alt="" /> : p ? initials(p.full_name) : '—'}</span>
-                <div>
-                  <h3>{p?.full_name ?? 'Без тренера'}</h3>
-                  {p && <small className="muted block">{tenure(p.hired_at) ? `Стаж: ${tenure(p.hired_at)}` : 'Стаж не указан'}</small>}
-                  <small className="block">
-                    Групп: {list.length} · учеников: {list.reduce((t, g) => t + count(g), 0)}
-                  </small>
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      ) : (
-        <Empty text="Тренеров пока нет" icon="users" />
-      )}
+      <TrainerTiles
+        items={cards.map((c) => {
+          const list = groupsOf(c.id)
+          return { ...c, line: `Групп: ${list.length} · учеников: ${list.reduce((t, g) => t + count(g), 0)}` }
+        })}
+        onPick={setTrainer}
+      />
     </State>
+  )
+}
+
+// Действующие тренеры (директор — все, офис — своих филиалов по RLS).
+export const useTrainers = () =>
+  useLoad(async () => must(await sb.from('profiles').select('*').eq('role', 'trainer').eq('status', 'active').order('full_name')) as Profile[], [])
+
+// Плитки тренеров: фото, имя, стаж и строка-сводка. p = null — «Без тренера».
+export function TrainerTiles({ items, onPick }: { items: { id: string; p: Profile | null; line: string }[]; onPick: (id: string) => void }) {
+  if (!items.length) return <Empty text="Тренеров пока нет" icon="users" />
+  return (
+    <div className="trial-grid">
+      {items.map(({ id, p, line }) => (
+        <button key={id} className="card tile person-tile" onClick={() => onPick(id)}>
+          <span className="avatar xl">{p?.photo_url ? <img src={p.photo_url} alt="" /> : p ? initials(p.full_name) : '—'}</span>
+          <div>
+            <h3>{p?.full_name ?? 'Без тренера'}</h3>
+            {p && <small className="muted block">{tenure(p.hired_at) ? `Стаж: ${tenure(p.hired_at)}` : 'Стаж не указан'}</small>}
+            <small className="block">{line}</small>
+          </div>
+        </button>
+      ))}
+    </div>
   )
 }
 
 type Pupil = { id: string; full_name: string; birth_date: string | null; photo_path: string | null; status: string; parent: { full_name: string; phone: string } | null }
 
 function GroupView({ g, onBack }: { g: BrowseGroup; onBack: () => void }) {
-  const { data, loading, error } = useLoad(async () => {
-    const m = must(await sb.from('group_members').select('student_id').eq('group_id', g.id).is('left_at', null)) as { student_id: string }[]
-    if (!m.length) return [] as Pupil[]
-    return must(
-      await sb.from('students').select('id, full_name, birth_date, photo_path, status, parent:parents(full_name, phone)').in('id', m.map((x) => x.student_id)).order('full_name'),
-    ) as unknown as Pupil[]
-  }, [g.id])
-  const [open, setOpen] = useState<string | null>(null)
   return (
     <>
-      {open && <StudentModal id={open} groupId={g.id} onClose={() => setOpen(null)} />}
       <button className="btn ghost sm" style={{ width: "fit-content" }} onClick={onBack}>
         ← Группы тренера
       </button>
@@ -134,31 +131,47 @@ function GroupView({ g, onBack }: { g: BrowseGroup; onBack: () => void }) {
           {g.capacity ? <span className="muted"> / {g.capacity}</span> : null} <small className="muted">учеников</small>
         </div>
       </section>
-      <State loading={loading} error={error}>
-        {data?.length ? (
-          <div className="trial-grid">
-            {data.map((s) => (
-              <button key={s.id} className="card tile person-tile" onClick={() => setOpen(s.id)}>
-                <PupilAvatar s={s} />
-                <div>
-                  <h3>{s.full_name}</h3>
-                  <small className="muted block">
-                    {s.birth_date ? years(age(s.birth_date)!) : 'возраст не указан'} · {STUDENT_STATUS[s.status]}
-                  </small>
-                  {s.parent && (
-                    <small className="block">
-                      {s.parent.full_name}, {s.parent.phone}
-                    </small>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <Empty text="В группе пока нет учеников" icon="users" />
-        )}
-      </State>
+      <GroupPupils groupId={g.id} />
     </>
+  )
+}
+
+// Ученики группы плитками; нажатие — профиль ученика окном (без перехода в «Ученики»).
+export function GroupPupils({ groupId }: { groupId: string }) {
+  const { data, loading, error } = useLoad(async () => {
+    const m = must(await sb.from('group_members').select('student_id').eq('group_id', groupId).is('left_at', null)) as { student_id: string }[]
+    if (!m.length) return [] as Pupil[]
+    return must(
+      await sb.from('students').select('id, full_name, birth_date, photo_path, status, parent:parents(full_name, phone)').in('id', m.map((x) => x.student_id)).order('full_name'),
+    ) as unknown as Pupil[]
+  }, [groupId])
+  const [open, setOpen] = useState<string | null>(null)
+  return (
+    <State loading={loading} error={error}>
+      {open && <StudentModal id={open} groupId={groupId} onClose={() => setOpen(null)} />}
+      {data?.length ? (
+        <div className="trial-grid">
+          {data.map((s) => (
+            <button key={s.id} className="card tile person-tile" onClick={() => setOpen(s.id)}>
+              <PupilAvatar s={s} />
+              <div>
+                <h3>{s.full_name}</h3>
+                <small className="muted block">
+                  {s.birth_date ? years(age(s.birth_date)!) : 'возраст не указан'} · {STUDENT_STATUS[s.status]}
+                </small>
+                {s.parent && (
+                  <small className="block">
+                    {s.parent.full_name}, {s.parent.phone}
+                  </small>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <Empty text="В группе пока нет учеников" icon="users" />
+      )}
+    </State>
   )
 }
 
