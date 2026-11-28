@@ -181,7 +181,7 @@ function PupilAvatar({ s }: { s: Pupil }) {
 }
 
 // Профиль ученика прямо в «Группах»: те же данные, что в «Учениках», и продажа абонемента.
-function StudentModal({ id, groupId, onClose }: { id: string; groupId: string; onClose: () => void }) {
+export function StudentModal({ id, groupId, onClose }: { id: string; groupId: string; onClose: () => void }) {
   const { data: s, reload } = useLoad(async () => must(await sb.from('students').select(STUDENT_SELECT).eq('id', id).single()) as unknown as StudentRow, [id])
   const [selling, setSelling] = useState(false)
   if (selling && s)

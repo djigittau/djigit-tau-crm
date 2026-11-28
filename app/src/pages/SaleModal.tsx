@@ -12,6 +12,7 @@ export default function SaleModal({
   title,
   onClose,
   onDone,
+  preset,
 }: {
   trialId?: string
   studentId?: string
@@ -20,11 +21,13 @@ export default function SaleModal({
   title: string
   onClose: () => void
   onDone: () => void
+  // Из «Оплат»: название, цена и месяц абонемента (validFrom — первый день месяца).
+  preset?: { name: string; price: string; validFrom: string }
 }) {
   // Один ключ на окно: повторное нажатие не создаст вторую продажу.
   const [key] = useState(() => crypto.randomUUID())
   const [busy, setBusy] = useState(false)
-  const [f, setF] = useState({ group: groupId ?? '', name: '', lessons: '8', price: '', discount: '0', paid: '', method: 'kaspi' })
+  const [f, setF] = useState({ group: groupId ?? '', name: preset?.name ?? '', lessons: '8', price: preset?.price ?? '', discount: '0', paid: '', method: 'kaspi' })
   const groups = useLoad(
     async () => must(await sb.from('groups').select('id, name').eq('branch_id', branchId).eq('status', 'active').order('name')) as { id: string; name: string }[],
     [branchId],
@@ -49,6 +52,7 @@ export default function SaleModal({
           p_paid: paid,
           p_method: f.method,
           p_key: key,
+          p_valid_from: preset?.validFrom ?? null,
         }),
       )
     }, 'Абонемент продан')

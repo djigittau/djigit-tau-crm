@@ -21,6 +21,7 @@ export const MENU: MenuItem[] = [
   { to: '/groups', label: 'Группы', icon: 'layers', roles: OFFICE, group: 'Занятия' },
   { to: '/schedule', label: 'Расписание', icon: 'calendar', roles: [...OFFICE, 'trainer'], group: 'Занятия' },
   { to: '/shifts', label: 'Смены сотрудников', icon: 'clock', roles: OFFICE, group: 'Занятия' },
+  { to: '/payments', label: 'Оплаты', icon: 'check', roles: OFFICE, group: 'Деньги' },
   { to: '/finance', label: 'Финансы', icon: 'layers', roles: OFFICE, group: 'Деньги' },
   { to: '/analytics', label: 'Аналитика и LTV', icon: 'funnel', roles: ['director', 'manager'], group: 'Деньги' },
   { to: '/salaries', label: 'Зарплаты', icon: 'user', roles: OFFICE, group: 'Деньги' },
