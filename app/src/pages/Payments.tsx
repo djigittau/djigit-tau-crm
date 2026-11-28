@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sb } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, money, Contact, TZ } from '../lib/ui'
+import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, money, Contact, TZ, fmtDate } from '../lib/ui'
 import { loadBranches, thisMonth, monthBounds, METHODS } from '../lib/refs'
 import SaleModal from './SaleModal'
 import { StudentModal, TrainerTiles, useTrainers } from './GroupsBrowse'
@@ -24,7 +24,8 @@ type Line = {
   paid: number
   due: number
   debtSale: Sale | null
-  last: { amount: number; month: string; day: number } | null
+  last: { amount: number; month: string; day: number; at: string } | null
+  paidAt: string | null // последняя оплата в выбранном месяце
 }
 
 const RU = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
@@ -93,7 +94,8 @@ export default function Payments() {
       paid,
       due,
       debtSale: cur.find((x) => paidOf(x) < Number(x.amount_due)) ?? null,
-      last: prev && lastPay ? { amount: Number(prev.amount_due), month: prev.valid_from.slice(0, 7), day: dayOf(lastPay.paid_at) } : null,
+      last: prev && lastPay ? { amount: Number(prev.amount_due), month: prev.valid_from.slice(0, 7), day: dayOf(lastPay.paid_at), at: lastPay.paid_at } : null,
+      paidAt: cur.flatMap((x) => x.payments).filter((p) => p.kind !== 'refund').map((p) => p.paid_at).sort().pop() ?? null,
     }
   })
 
@@ -291,13 +293,14 @@ export default function Payments() {
                         ) : (
                           <>
                             {money(l.paid)} <span className="muted">/ {money(l.due)}</span>
+                            {l.paidAt && <small className="muted block">оплата {fmtDate(l.paidAt)}</small>}
                             {tab === 'debt' && <small className="danger-text block">долг {money(l.due - l.paid)}</small>}
                           </>
                         )}
                       </td>
                       <td className="num">
                         {l.last ? money(l.last.amount) : '—'}
-                        {l.last && <small className="muted block">{monthName(l.last.month)}</small>}
+                        {l.last && <small className="muted block">{fmtDate(l.last.at)} · за {monthName(l.last.month)}</small>}
                       </td>
                       <td className="act" onClick={(e) => e.stopPropagation()}>
                         <div className="row nowrap">
