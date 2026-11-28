@@ -106,8 +106,8 @@ function MonthMoney() {
     const [pays, exps, sal, ins] = await Promise.all([
       sb.from('payments').select('amount, kind, paid_at').gte('paid_at', from.t0).lt('paid_at', to.t1).then(must),
       sb.from('expenses').select('amount, spent_on, cat:expense_categories(name)').gte('spent_on', from.d0).lt('spent_on', to.d1).then(must),
-      // Зарплата — по начислению за месяц (расчёт в «Зарплатах»), а не по дню выплаты.
-      sb.from('salary_accruals').select('amount:total, paid_on:period').gte('period', from.d0).lt('period', to.d1).then(must),
+      // Зарплата — начисление за месяц или, если его ещё нет, расчёт % тренеров (не по дню выплаты).
+      sb.rpc('salary_expense', { p_from: from.d0, p_to: to.d1 }).then(must).then((r) => (r as { amount: number; period: string }[]).map((x) => ({ amount: x.amount, paid_on: x.period }))),
       sb.from('employee_insurance').select('amount, paid_on').gte('paid_on', from.d0).lt('paid_on', to.d1).then(must),
     ])
     return { pays: pays as Row[], exps: exps as unknown as Row[], sal: sal as Row[], ins: ins as Row[] }
@@ -120,7 +120,7 @@ function MonthMoney() {
   const cats = new Map<string, number>()
   for (const e of data?.exps ?? []) if (monthOf(e) === month) cats.set(e.cat?.name ?? 'Прочие расходы', (cats.get(e.cat?.name ?? 'Прочие расходы') ?? 0) + Number(e.amount))
   if (data) {
-    cats.set('Зарплаты (начислено)', sum(data.sal, month))
+    cats.set('Зарплаты (% тренеров и оклады)', sum(data.sal, month))
     cats.set('Медстраховка', sum(data.ins, month))
   }
   const catList = [...cats].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
