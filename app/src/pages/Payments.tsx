@@ -4,7 +4,7 @@ import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, money, Contact, TZ } from '../lib/ui'
 import { loadBranches, thisMonth, monthBounds, METHODS } from '../lib/refs'
 import SaleModal from './SaleModal'
-import { StudentModal } from './GroupsBrowse'
+import { StudentModal, TrainerTiles, useTrainers } from './GroupsBrowse'
 
 // Оплаты месяца: кто из занимающихся оплатил абонемент на месяц, у кого долг, кто не оплатил.
 // «Оплатил месяц» = есть абонемент с началом в этом месяце (так же перенесены данные из таблицы).
@@ -51,6 +51,8 @@ export default function Payments() {
   const [month, setMonth] = useState(thisMonth())
   const [tab, setTab] = useState<Line['kind']>('unpaid')
   const [f, setF] = useState({ branch: '', trainer: '', group: '', q: '' })
+  const [view, setView] = useState<'trainers' | 'list'>(me.role === 'director' ? 'trainers' : 'list')
+  const staff = useTrainers()
   const [open, setOpen] = useState<Line | null>(null)
   const [selling, setSelling] = useState<Line | null>(null)
   const [topup, setTopup] = useState<{ l: Line; amount: string; method: string; key: string } | null>(null)
@@ -104,10 +106,21 @@ export default function Payments() {
   const filtered = lines.filter(
     (l) =>
       (!f.branch || l.s.branch_id === f.branch) &&
-      (!f.trainer || l.group?.groups?.group_trainers.some((t) => t.trainer_id === f.trainer)) &&
+      (!f.trainer || (f.trainer === 'none' ? !l.group?.groups?.group_trainers.length : l.group?.groups?.group_trainers.some((t) => t.trainer_id === f.trainer))) &&
       (!f.group || l.group?.group_id === f.group) &&
       (!f.q || [l.s.full_name, l.s.parent?.full_name, l.s.parent?.phone].join(' ').toLowerCase().includes(f.q.toLowerCase())),
   )
+  // Плитки «По тренерам»: ученики тренера (по текущей группе) и их оплаты за месяц.
+  const base = lines.filter((l) => (!f.branch || l.s.branch_id === f.branch) && (!f.q || [l.s.full_name, l.s.parent?.full_name, l.s.parent?.phone].join(' ').toLowerCase().includes(f.q.toLowerCase())))
+  const tileLine = (ls: Line[]) => {
+    const paid = ls.filter((l) => l.kind === 'paid').length
+    return `Оплатили ${paid} из ${ls.length} · ${money(ls.reduce((t, l) => t + l.paid, 0))} · не оплатили ${ls.filter((l) => l.kind === 'unpaid').length}`
+  }
+  const tiles = [
+    ...(staff.data ?? []).map((p) => ({ id: p.id, p, line: tileLine(base.filter((l) => l.group?.groups?.group_trainers.some((t) => t.trainer_id === p.id))) })),
+    ...(base.some((l) => !l.group?.groups?.group_trainers.length) ? [{ id: 'none', p: null, line: tileLine(base.filter((l) => !l.group?.groups?.group_trainers.length)) }] : []),
+  ]
+  const showTiles = view === 'trainers' && !f.trainer
   const by = (k: Line['kind']) => filtered.filter((l) => l.kind === k)
   const today = thisMonth() === month ? Number(new Date().toLocaleDateString('sv-SE', { timeZone: TZ }).slice(8, 10)) : null
   const past = month < thisMonth()
@@ -157,6 +170,22 @@ export default function Payments() {
   return (
     <>
       <PageHead title="Оплаты" sub={`Кто оплатил ${monthName(month)} и кто нет`} />
+      <div className="seg" role="tablist" style={{ marginBottom: 12 }}>
+        <button className={view === 'trainers' ? 'on' : ''} onClick={() => { setView('trainers'); setF({ ...f, trainer: '', group: '' }) }}>
+          По тренерам
+        </button>
+        <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>
+          Все ученики
+        </button>
+      </div>
+      {view === 'trainers' && f.trainer && (
+        <div className="row" style={{ alignItems: 'center', marginBottom: 12 }}>
+          <button className="btn ghost sm" style={{ width: 'fit-content' }} onClick={() => setF({ ...f, trainer: '', group: '' })}>
+            ← Все тренеры
+          </button>
+          <b>{f.trainer === 'none' ? 'Ученики групп без тренера' : staff.data?.find((t) => t.id === f.trainer)?.full_name}</b>
+        </div>
+      )}
       <div className="toolbar">
         <input type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} aria-label="Месяц" style={{ width: 'auto' }} />
         {(data?.branches.length ?? 0) > 1 && (
@@ -190,7 +219,11 @@ export default function Payments() {
           <input placeholder="Ученик, родитель, телефон" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} aria-label="Поиск" />
         </div>
       </div>
-      <State loading={loading && !data} error={error}>
+      <State loading={(loading && !data) || staff.loading} error={error ?? staff.error}>
+        {showTiles ? (
+          <TrainerTiles items={tiles} onPick={(id) => setF({ ...f, trainer: id, group: '' })} />
+        ) : (
+        <>
         <div className="kpis k3">
           <div className="card kpi">
             <span>Оплатили</span>
@@ -293,6 +326,8 @@ export default function Payments() {
             <Empty text={tab === 'unpaid' ? 'Все занимающиеся оплатили этот месяц' : tab === 'debt' ? 'Долгов нет' : 'Оплат за этот месяц пока нет'} icon="check" />
           )}
         </section>
+        </>
+        )}
       </State>
 
       {open && <StudentModal id={open.s.id} groupId={open.group?.group_id ?? ''} onClose={() => setOpen(null)} />}
