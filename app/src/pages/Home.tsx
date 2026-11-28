@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom'
 import { sb } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, fetchAll, State, PageHead, Empty, fmtDateTime, money } from '../lib/ui'
-import { thisMonth, monthBounds, loadBranches } from '../lib/refs'
-import { RevenueModal, ExpensesModal, ProfitModal, type MoneyData } from './MoneyDetails'
+import { thisMonth, monthBounds } from '../lib/refs'
 
 type OpenShift = { id: string; started_at: string; profiles: { full_name: string } | null; branches: { name: string } | null }
 
@@ -101,21 +100,17 @@ const mName = (m: string, long = false) => new Date(m + '-15').toLocaleDateStrin
 
 function MonthMoney() {
   const [month, setMonth] = useState(thisMonth())
-  const [open, setOpen] = useState<'inc' | 'out' | 'profit' | null>(null)
   const { data, loading, error } = useLoad(async () => {
     const from = monthBounds(shift(month, -5))
     const to = monthBounds(month)
-    const [pays, exps, sal, ins, branches] = await Promise.all([
+    const [pays, exps, sal, ins] = await Promise.all([
       fetchAll((a, b) => sb.from('payments').select('amount, kind, paid_at, branch_id, method').gte('paid_at', from.t0).lt('paid_at', to.t1).order('id').range(a, b)),
       sb.from('expenses').select('amount, spent_on, branch_id, comment, cat:expense_categories(name)').gte('spent_on', from.d0).lt('spent_on', to.d1).then(must),
       // Зарплата — начисление за месяц или, если его ещё нет, расчёт % тренеров (не по дню выплаты).
       sb.rpc('salary_expense', { p_from: from.d0, p_to: to.d1 }).then(must),
       sb.from('employee_insurance').select('amount, paid_on, branch_id, profile:profiles!employee_insurance_profile_id_fkey(full_name)').gte('paid_on', from.d0).lt('paid_on', to.d1).then(must),
-      loadBranches(),
     ])
-    const raw = { pays, exps, sal, ins, branches } as unknown as MoneyData
     return {
-      raw,
       pays: pays as Row[],
       exps: exps as unknown as Row[],
       sal: (sal as { amount: number; period: string }[]).map((x) => ({ amount: x.amount, paid_on: x.period })) as Row[],
@@ -150,25 +145,25 @@ function MonthMoney() {
       </div>
       <State loading={loading && !data} error={error}>
         <div className="kpis k3">
-          <button className="card kpi tile" onClick={() => setOpen('inc')} disabled={!data}>
+          <Link className="card kpi tile" to={`/money?tab=inc&m=${month}`}>
             <span>
               <i className="dot in" /> Выручка за месяц
             </span>
             <b>{money(cur.inc)}</b>
             <small className="muted">оплаты минус возвраты · подробнее ›</small>
-          </button>
-          <button className="card kpi tile" onClick={() => setOpen('out')} disabled={!data}>
+          </Link>
+          <Link className="card kpi tile" to={`/money?tab=out&m=${month}`}>
             <span>
               <i className="dot out" /> Расходы за месяц
             </span>
             <b>{money(cur.out)}</b>
             <small className="muted">все статьи, зарплаты, медстраховка · подробнее ›</small>
-          </button>
-          <button className={'card kpi tile' + (cur.inc - cur.out < 0 ? ' neg' : '')} onClick={() => setOpen('profit')} disabled={!data}>
+          </Link>
+          <Link className={'card kpi tile' + (cur.inc - cur.out < 0 ? ' neg' : '')} to={`/money?tab=profit&m=${month}`}>
             <span>Прибыль за месяц</span>
             <b>{money(cur.inc - cur.out)}</b>
             <small className="muted">выручка − расходы · подробнее ›</small>
-          </button>
+          </Link>
         </div>
         <div className="grid-2">
           <section className="card">
@@ -236,9 +231,6 @@ function MonthMoney() {
           </section>
         </div>
       </State>
-      {data && open === 'inc' && <RevenueModal d={data.raw} m={month} onClose={() => setOpen(null)} />}
-      {data && open === 'out' && <ExpensesModal d={data.raw} m={month} onClose={() => setOpen(null)} />}
-      {data && open === 'profit' && <ProfitModal d={data.raw} m={month} onClose={() => setOpen(null)} />}
     </>
   )
 }

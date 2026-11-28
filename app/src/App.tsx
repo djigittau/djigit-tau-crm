@@ -11,6 +11,7 @@ import Branches from './pages/Branches'
 import Employees from './pages/Employees'
 import Students from './pages/Students'
 import Payments from './pages/Payments'
+import Money from './pages/Money'
 import Groups from './pages/Groups'
 import Schedule from './pages/Schedule'
 import Attendance from './pages/Attendance'
@@ -80,6 +81,7 @@ function Gate() {
           const P = PAGES[m.to]
           return <Route key={m.to} path={m.to} element={<P />} />
         })}
+        {(profile.role === 'director' || profile.role === 'manager') && <Route path="/money" element={<Money />} />}
         <Route path="*" element={<Navigate to={homeOf(profile.role)} replace />} />
       </Route>
     </Routes>
