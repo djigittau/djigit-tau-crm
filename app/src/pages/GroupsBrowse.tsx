@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { sb, type Profile } from '../lib/supabase'
-import { useLoad, must, State, Empty, initials, tenure, years } from '../lib/ui'
+import { useLoad, must, State, Empty, Modal, initials, tenure, years } from '../lib/ui'
 import { studentPhotoUrl } from '../lib/photo'
 import { age, STUDENT_STATUS, WEEKDAYS } from '../lib/refs'
 import { StaffHead, StaffProps } from './StaffCard'
+import { StudentInfo, STUDENT_SELECT, type StudentRow } from './Students'
+import SaleModal from './SaleModal'
 
 // Группы «по тренерам»: тренеры → группы тренера → ученики группы → профиль ученика (в «Учениках»).
 export type BrowseGroup = {
@@ -116,8 +117,10 @@ function GroupView({ g, onBack }: { g: BrowseGroup; onBack: () => void }) {
       await sb.from('students').select('id, full_name, birth_date, photo_path, status, parent:parents(full_name, phone)').in('id', m.map((x) => x.student_id)).order('full_name'),
     ) as unknown as Pupil[]
   }, [g.id])
+  const [open, setOpen] = useState<string | null>(null)
   return (
     <>
+      {open && <StudentModal id={open} groupId={g.id} onClose={() => setOpen(null)} />}
       <button className="btn ghost sm" style={{ width: "fit-content" }} onClick={onBack}>
         ← Группы тренера
       </button>
@@ -135,7 +138,7 @@ function GroupView({ g, onBack }: { g: BrowseGroup; onBack: () => void }) {
         {data?.length ? (
           <div className="trial-grid">
             {data.map((s) => (
-              <Link key={s.id} to={`/students?open=${s.id}`} className="card tile person-tile">
+              <button key={s.id} className="card tile person-tile" onClick={() => setOpen(s.id)}>
                 <PupilAvatar s={s} />
                 <div>
                   <h3>{s.full_name}</h3>
@@ -148,7 +151,7 @@ function GroupView({ g, onBack }: { g: BrowseGroup; onBack: () => void }) {
                     </small>
                   )}
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         ) : (
@@ -162,4 +165,37 @@ function GroupView({ g, onBack }: { g: BrowseGroup; onBack: () => void }) {
 function PupilAvatar({ s }: { s: Pupil }) {
   const { data: url } = useLoad(() => studentPhotoUrl(s.photo_path), [s.photo_path])
   return <span className="avatar xl">{url ? <img src={url} alt="" /> : initials(s.full_name)}</span>
+}
+
+// Профиль ученика прямо в «Группах»: те же данные, что в «Учениках», и продажа абонемента.
+function StudentModal({ id, groupId, onClose }: { id: string; groupId: string; onClose: () => void }) {
+  const { data: s, reload } = useLoad(async () => must(await sb.from('students').select(STUDENT_SELECT).eq('id', id).single()) as unknown as StudentRow, [id])
+  const [selling, setSelling] = useState(false)
+  if (selling && s)
+    return (
+      <SaleModal
+        studentId={s.id}
+        branchId={s.branch_id}
+        groupId={groupId}
+        title={s.full_name}
+        onClose={() => setSelling(false)}
+        onDone={() => {
+          setSelling(false)
+          reload()
+        }}
+      />
+    )
+  return (
+    <Modal
+      title="Карточка ученика"
+      onClose={onClose}
+      footer={
+        <button className="btn ghost" onClick={() => setSelling(true)} disabled={!s}>
+          Продать абонемент
+        </button>
+      }
+    >
+      {s ? <StudentInfo s={s} canEdit showParent onPhoto={() => reload()} /> : <p className="muted">Загрузка…</p>}
+    </Modal>
+  )
 }

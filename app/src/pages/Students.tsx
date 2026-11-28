@@ -8,6 +8,7 @@ import { DanceInput } from '../lib/DanceInput'
 import { danceId, loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, METHODS, age, today } from '../lib/refs'
 import SaleModal from './SaleModal'
 
+export type StudentRow = Row
 type Row = {
   id: string
   full_name: string
@@ -55,7 +56,7 @@ export default function Students() {
     const [students, branches, groups, dances] = await Promise.all([
       sb
         .from('students')
-        .select('*, parent:parents(full_name, phone), dance:dance_types(name), branch:branches(name), group_members(group_id, joined_at, left_at, groups(name, group_trainers(profiles(full_name))))')
+        .select(STUDENT_SELECT)
         .order('full_name')
         .then(must),
       loadBranches(),
@@ -255,74 +256,15 @@ export default function Students() {
             )
           }
         >
-          <StudentHead
+          <StudentInfo
             s={card}
             canEdit={canEdit}
+            showParent={me.role !== 'trainer'}
             onPhoto={(path) => {
               setCard({ ...card, photo_path: path })
               reload()
             }}
           />
-          <dl className="props">
-            <dt>Статус</dt>
-            <dd>{STUDENT_STATUS[card.status]}</dd>
-            <dt>Группа</dt>
-            <dd>
-              {currentGroup(card)?.groups?.name ?? 'без группы'}
-              {(() => {
-                const t = currentGroup(card)?.groups?.group_trainers.map((x) => x.profiles?.full_name).filter(Boolean)
-                return t?.length ? <span className="muted"> · тренер {t.join(', ')}</span> : null
-              })()}
-            </dd>
-            <dt>Дата рождения</dt>
-            <dd>
-              {fmtDate(card.birth_date)}
-              {age(card.birth_date) != null && ` (${years(age(card.birth_date)!)})`}
-            </dd>
-            <dt>Пол</dt>
-            <dd>{card.gender ? GENDER[card.gender] : '—'}</dd>
-            {me.role !== 'trainer' && (
-              <>
-                <dt>Родитель</dt>
-                <dd>
-                  {card.parent ? `${card.parent.full_name}, ${card.parent.phone}` : '—'}
-                  <Contact phone={card.parent?.phone} />
-                </dd>
-              </>
-            )}
-            <dt>Филиал</dt>
-            <dd>{card.branch?.name}</dd>
-            <dt>Направление</dt>
-            <dd>{card.dance?.name ?? '—'}</dd>
-            <dt>Начало обучения</dt>
-            <dd>
-              {fmtDate(card.start_date)}
-              {tenure(card.start_date) && <span className="muted"> · учится {tenure(card.start_date)}</span>}
-            </dd>
-            <dt>Комментарий</dt>
-            <dd>{card.comment ?? '—'}</dd>
-          </dl>
-          {canEdit && <SalesHistory studentId={card.id} />}
-          <AttendanceHistory studentId={card.id} />
-          <h3>История групп</h3>
-          {card.group_members.length ? (
-            <table>
-              <tbody>
-                {[...card.group_members]
-                  .sort((a, b) => b.joined_at.localeCompare(a.joined_at))
-                  .map((m, i) => (
-                    <tr key={i}>
-                      <td>{m.groups?.name}</td>
-                      <td className="num">
-                        {fmtDate(m.joined_at)} — {m.left_at ? fmtDate(m.left_at) : <span className="badge ok">сейчас</span>}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="muted">Ещё не был в группах</p>
-          )}
         </Modal>
       )}
 
@@ -587,6 +529,78 @@ function SalesHistory({ studentId }: { studentId: string }) {
             </Field>
           </div>
         </Modal>
+      )}
+    </>
+  )
+}
+
+export const STUDENT_SELECT =
+  '*, parent:parents(full_name, phone), dance:dance_types(name), branch:branches(name), group_members(group_id, joined_at, left_at, groups(name, group_trainers(profiles(full_name))))'
+
+// Профиль ученика: шапка с фото, данные, оплаты, посещаемость, история групп. Используется в «Учениках» и «Группах».
+export function StudentInfo({ s, canEdit, showParent, onPhoto }: { s: Row; canEdit: boolean; showParent: boolean; onPhoto: (path: string) => void }) {
+  return (
+    <>
+      <StudentHead s={s} canEdit={canEdit} onPhoto={onPhoto} />
+      <dl className="props">
+        <dt>Статус</dt>
+        <dd>{STUDENT_STATUS[s.status]}</dd>
+        <dt>Группа</dt>
+        <dd>
+          {currentGroup(s)?.groups?.name ?? 'без группы'}
+          {(() => {
+            const t = currentGroup(s)?.groups?.group_trainers.map((x) => x.profiles?.full_name).filter(Boolean)
+            return t?.length ? <span className="muted"> · тренер {t.join(', ')}</span> : null
+          })()}
+        </dd>
+        <dt>Дата рождения</dt>
+        <dd>
+          {fmtDate(s.birth_date)}
+          {age(s.birth_date) != null && ` (${years(age(s.birth_date)!)})`}
+        </dd>
+        <dt>Пол</dt>
+        <dd>{s.gender ? GENDER[s.gender] : '—'}</dd>
+        {showParent && (
+          <>
+            <dt>Родитель</dt>
+            <dd>
+              {s.parent ? `${s.parent.full_name}, ${s.parent.phone}` : '—'}
+              <Contact phone={s.parent?.phone} />
+            </dd>
+          </>
+        )}
+        <dt>Филиал</dt>
+        <dd>{s.branch?.name}</dd>
+        <dt>Направление</dt>
+        <dd>{s.dance?.name ?? '—'}</dd>
+        <dt>Начало обучения</dt>
+        <dd>
+          {fmtDate(s.start_date)}
+          {tenure(s.start_date) && <span className="muted"> · учится {tenure(s.start_date)}</span>}
+        </dd>
+        <dt>Комментарий</dt>
+        <dd>{s.comment ?? '—'}</dd>
+      </dl>
+      {canEdit && <SalesHistory studentId={s.id} />}
+      <AttendanceHistory studentId={s.id} />
+      <h3>История групп</h3>
+      {s.group_members.length ? (
+        <table>
+          <tbody>
+            {[...s.group_members]
+              .sort((a, b) => b.joined_at.localeCompare(a.joined_at))
+              .map((m, i) => (
+                <tr key={i}>
+                  <td>{m.groups?.name}</td>
+                  <td className="num">
+                    {fmtDate(m.joined_at)} — {m.left_at ? fmtDate(m.left_at) : <span className="badge ok">сейчас</span>}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="muted">Ещё не был в группах</p>
       )}
     </>
   )
