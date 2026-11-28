@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { sb } from '../lib/supabase'
-import { useLoad, must, State, PageHead, money, TZ } from '../lib/ui'
+import { useLoad, must, fetchAll, State, PageHead, money, TZ } from '../lib/ui'
 import { loadBranches, loadDances } from '../lib/refs'
 
 type Pay = { amount: number; kind: string; paid_at: string; branch_id: string; student_id: string | null; sale: { manager_id: string | null; manager: { full_name: string } | null } | null }
@@ -43,8 +43,8 @@ export default function Analytics() {
   const { data, loading, error } = useLoad(async () => {
     const yearAgo = new Date(Date.now() - 365 * 864e5).toISOString()
     const [pays, students, leads, exps, sal, ins, branches, dances] = await Promise.all([
-      sb.from('payments').select('amount, kind, paid_at, branch_id, student_id, sale:sales(manager_id, manager:profiles!sales_manager_id_fkey(full_name))').gte('paid_at', yearAgo < R.t0 ? yearAgo : R.t0).then(must),
-      sb.from('students').select('id, branch_id, dance_type_id, start_date, status, updated_at').then(must),
+      fetchAll((a, b) => sb.from('payments').select('amount, kind, paid_at, branch_id, student_id, sale:sales(manager_id, manager:profiles!sales_manager_id_fkey(full_name))').gte('paid_at', yearAgo < R.t0 ? yearAgo : R.t0).order('id').range(a, b)),
+      fetchAll((a, b) => sb.from('students').select('id, branch_id, dance_type_id, start_date, status, updated_at').order('id').range(a, b)),
       sb.from('trial_leads').select('status, branch_id, manager_id, dance_type_id').gte('created_at', R.t0).lt('created_at', R.t1).then(must),
       sb.from('expenses').select('amount, branch_id').gte('spent_on', R.d0).lt('spent_on', R.d1).then(must),
       // Зарплата — начисление или расчёт % тренеров за месяцы периода (как в «Финансах»).

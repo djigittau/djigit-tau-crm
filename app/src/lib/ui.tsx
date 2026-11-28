@@ -31,6 +31,16 @@ export function must<T>(r: { data: T; error: unknown }): T {
   return r.data
 }
 
+// Все строки запроса: сервер отдаёт не больше 1000 за раз, поэтому — страницами. Запрос должен быть упорядочен.
+export async function fetchAll<T>(q: (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }>) {
+  const out: T[] = []
+  for (let i = 0; ; i += 1000) {
+    const rows = must(await q(i, i + 999)) as T[]
+    out.push(...rows)
+    if (rows.length < 1000) return out
+  }
+}
+
 // ---------- уведомления ----------
 type Toast = { id: number; text: string; bad?: boolean }
 let push: (t: Toast) => void = () => {}

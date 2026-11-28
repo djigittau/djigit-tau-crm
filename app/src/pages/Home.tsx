@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { sb } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, fmtDateTime, money } from '../lib/ui'
-import { thisMonth, monthBounds } from '../lib/refs'
+import { useLoad, must, fetchAll, State, PageHead, Empty, fmtDateTime, money } from '../lib/ui'
+import { thisMonth, monthBounds, loadBranches } from '../lib/refs'
+import { RevenueModal, ExpensesModal, ProfitModal, type MoneyData } from './MoneyDetails'
 
 type OpenShift = { id: string; started_at: string; profiles: { full_name: string } | null; branches: { name: string } | null }
 
@@ -100,17 +101,26 @@ const mName = (m: string, long = false) => new Date(m + '-15').toLocaleDateStrin
 
 function MonthMoney() {
   const [month, setMonth] = useState(thisMonth())
+  const [open, setOpen] = useState<'inc' | 'out' | 'profit' | null>(null)
   const { data, loading, error } = useLoad(async () => {
     const from = monthBounds(shift(month, -5))
     const to = monthBounds(month)
-    const [pays, exps, sal, ins] = await Promise.all([
-      sb.from('payments').select('amount, kind, paid_at').gte('paid_at', from.t0).lt('paid_at', to.t1).then(must),
-      sb.from('expenses').select('amount, spent_on, cat:expense_categories(name)').gte('spent_on', from.d0).lt('spent_on', to.d1).then(must),
+    const [pays, exps, sal, ins, branches] = await Promise.all([
+      fetchAll((a, b) => sb.from('payments').select('amount, kind, paid_at, branch_id, method').gte('paid_at', from.t0).lt('paid_at', to.t1).order('id').range(a, b)),
+      sb.from('expenses').select('amount, spent_on, branch_id, comment, cat:expense_categories(name)').gte('spent_on', from.d0).lt('spent_on', to.d1).then(must),
       // Зарплата — начисление за месяц или, если его ещё нет, расчёт % тренеров (не по дню выплаты).
-      sb.rpc('salary_expense', { p_from: from.d0, p_to: to.d1 }).then(must).then((r) => (r as { amount: number; period: string }[]).map((x) => ({ amount: x.amount, paid_on: x.period }))),
-      sb.from('employee_insurance').select('amount, paid_on').gte('paid_on', from.d0).lt('paid_on', to.d1).then(must),
+      sb.rpc('salary_expense', { p_from: from.d0, p_to: to.d1 }).then(must),
+      sb.from('employee_insurance').select('amount, paid_on, branch_id, profile:profiles!employee_insurance_profile_id_fkey(full_name)').gte('paid_on', from.d0).lt('paid_on', to.d1).then(must),
+      loadBranches(),
     ])
-    return { pays: pays as Row[], exps: exps as unknown as Row[], sal: sal as Row[], ins: ins as Row[] }
+    const raw = { pays, exps, sal, ins, branches } as unknown as MoneyData
+    return {
+      raw,
+      pays: pays as Row[],
+      exps: exps as unknown as Row[],
+      sal: (sal as { amount: number; period: string }[]).map((x) => ({ amount: x.amount, paid_on: x.period })) as Row[],
+      ins: ins as Row[],
+    }
   }, [month])
 
   const months = [-5, -4, -3, -2, -1, 0].map((k) => shift(month, k))
@@ -140,25 +150,25 @@ function MonthMoney() {
       </div>
       <State loading={loading && !data} error={error}>
         <div className="kpis k3">
-          <div className="card kpi">
+          <button className="card kpi tile" onClick={() => setOpen('inc')} disabled={!data}>
             <span>
               <i className="dot in" /> Выручка за месяц
             </span>
             <b>{money(cur.inc)}</b>
-            <small className="muted">оплаты минус возвраты</small>
-          </div>
-          <div className="card kpi">
+            <small className="muted">оплаты минус возвраты · подробнее ›</small>
+          </button>
+          <button className="card kpi tile" onClick={() => setOpen('out')} disabled={!data}>
             <span>
               <i className="dot out" /> Расходы за месяц
             </span>
             <b>{money(cur.out)}</b>
-            <small className="muted">все статьи, зарплаты, медстраховка</small>
-          </div>
-          <div className={'card kpi' + (cur.inc - cur.out < 0 ? ' neg' : '')}>
+            <small className="muted">все статьи, зарплаты, медстраховка · подробнее ›</small>
+          </button>
+          <button className={'card kpi tile' + (cur.inc - cur.out < 0 ? ' neg' : '')} onClick={() => setOpen('profit')} disabled={!data}>
             <span>Прибыль за месяц</span>
             <b>{money(cur.inc - cur.out)}</b>
-            <small className="muted">выручка − расходы</small>
-          </div>
+            <small className="muted">выручка − расходы · подробнее ›</small>
+          </button>
         </div>
         <div className="grid-2">
           <section className="card">
@@ -226,6 +236,9 @@ function MonthMoney() {
           </section>
         </div>
       </State>
+      {data && open === 'inc' && <RevenueModal d={data.raw} m={month} onClose={() => setOpen(null)} />}
+      {data && open === 'out' && <ExpensesModal d={data.raw} m={month} onClose={() => setOpen(null)} />}
+      {data && open === 'profit' && <ProfitModal d={data.raw} m={month} onClose={() => setOpen(null)} />}
     </>
   )
 }

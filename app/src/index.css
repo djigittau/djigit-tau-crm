@@ -405,3 +405,4 @@ a.btn { text-decoration: none; }
 .tile h3 { margin: 0 0 4px; font-size: 16px; }
 .person-tile { display: flex; gap: 14px; align-items: center; }
 .tile-num { font-size: 22px; font-weight: 700; margin-top: 6px; }
+.ok-text { color: var(--ok); }

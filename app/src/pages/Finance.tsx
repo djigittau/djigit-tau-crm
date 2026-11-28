@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { sb } from '../lib/supabase'
-import { useLoad, must, State, PageHead, Empty, money } from '../lib/ui'
+import { useLoad, must, fetchAll, State, PageHead, Empty, money } from '../lib/ui'
 import { loadBranches, thisMonth, monthBounds } from '../lib/refs'
 
 type Line = { branch_id: string; amount: number }
@@ -12,7 +12,7 @@ export default function Finance() {
   const { data, loading, error } = useLoad(async () => {
     const { d0, d1, t0, t1 } = monthBounds(month)
     const [pays, exps, sal, ins, branches] = await Promise.all([
-      sb.from('payments').select('branch_id, amount, kind, purpose').gte('paid_at', t0).lt('paid_at', t1).then(must),
+      fetchAll((a, b) => sb.from('payments').select('branch_id, amount, kind, purpose').gte('paid_at', t0).lt('paid_at', t1).order('id').range(a, b)),
       sb.from('expenses').select('branch_id, amount, cat:expense_categories(name)').gte('spent_on', d0).lt('spent_on', d1).then(must),
       sb.rpc('salary_expense', { p_from: d0, p_to: d1 }).then(must),
       sb.from('employee_insurance').select('branch_id, amount').gte('paid_on', d0).lt('paid_on', d1).then(must),

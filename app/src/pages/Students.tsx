@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money, lessons, initials, tenure, Contact, years } from '../lib/ui'
+import { useLoad, must, fetchAll, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money, lessons, initials, tenure, Contact, years } from '../lib/ui'
 import { uploadPhoto, studentPhotoUrl } from '../lib/photo'
 import { DanceInput } from '../lib/DanceInput'
 import { danceId, loadBranches, loadDances, loadGroups, STUDENT_STATUS, GENDER, METHODS, age, today } from '../lib/refs'
@@ -54,11 +54,7 @@ export default function Students() {
 
   const { data, loading, error, reload } = useLoad(async () => {
     const [students, branches, groups, dances] = await Promise.all([
-      sb
-        .from('students')
-        .select(STUDENT_SELECT)
-        .order('full_name')
-        .then(must),
+      fetchAll((a, b) => sb.from('students').select(STUDENT_SELECT).order('full_name').order('id').range(a, b)),
       loadBranches(),
       loadGroups(),
       loadDances(),

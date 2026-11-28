@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sb, type Branch } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act } from '../lib/ui'
+import { useLoad, must, fetchAll, State, PageHead, Empty, Modal, Field, Icon, act } from '../lib/ui'
 
 type Row = Branch & { manager: { full_name: string } | null }
 type Counts = Record<string, { students: number; groups: number }>
@@ -35,7 +35,7 @@ export default function Branches() {
   const { data, loading, error, reload } = useLoad(async () => {
     const [branches, students, groups, managers, trainers] = await Promise.all([
       sb.from('branches').select('*, manager:profiles!branches_manager_id_fkey(full_name)').order('name').then(must),
-      sb.from('students').select('branch_id').eq('status', 'active').then(must),
+      fetchAll((a, b) => sb.from('students').select('branch_id').eq('status', 'active').order('id').range(a, b)),
       sb.from('groups').select('branch_id').eq('status', 'active').then(must),
       isDirector ? sb.from('profiles').select('id, full_name').eq('role', 'manager').eq('status', 'active').order('full_name').then(must) : Promise.resolve([]),
       canEdit ? sb.rpc('branch_trainer_options').then(must) : Promise.resolve([]),

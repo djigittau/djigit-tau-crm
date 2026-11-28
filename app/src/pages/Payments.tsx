@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sb } from '../lib/supabase'
 import { useMe } from '../lib/auth'
-import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, money, Contact, TZ, fmtDate } from '../lib/ui'
+import { useLoad, must, fetchAll, State, PageHead, Empty, Modal, Field, Icon, act, money, Contact, TZ, fmtDate } from '../lib/ui'
 import { loadBranches, thisMonth, monthBounds, METHODS } from '../lib/refs'
 import SaleModal from './SaleModal'
 import { StudentModal, TrainerTiles, useTrainers } from './GroupsBrowse'
@@ -37,16 +37,6 @@ const shift = (m: string, k: number) => {
 const paidOf = (x: Sale) => x.payments.reduce((t, p) => t + (p.kind === 'refund' ? -1 : 1) * Number(p.amount), 0)
 const dayOf = (t: string) => Number(new Date(t).toLocaleDateString('sv-SE', { timeZone: TZ }).slice(8, 10))
 
-// Все строки запроса, страницами по 1000 (больше сервер за раз не отдаёт).
-async function all<T>(q: (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }>) {
-  const out: T[] = []
-  for (let i = 0; ; i += 1000) {
-    const rows = must(await q(i, i + 999)) as T[]
-    out.push(...rows)
-    if (rows.length < 1000) return out
-  }
-}
-
 export default function Payments() {
   const me = useMe()
   const [month, setMonth] = useState(thisMonth())
@@ -62,7 +52,7 @@ export default function Payments() {
     const { d1 } = monthBounds(month)
     const from = monthBounds(shift(month, -3)).d0 // история для «прошлой оплаты» и обычного дня
     const [students, sales, branches] = await Promise.all([
-      all<Stu>((a, b) =>
+      fetchAll<Stu>((a, b) =>
         sb
           .from('students')
           .select('id, full_name, branch_id, branch:branches(name), parent:parents(full_name, phone), group_members(group_id, left_at, groups(name, group_trainers(trainer_id, profiles(full_name))))')
@@ -70,7 +60,7 @@ export default function Payments() {
           .order('full_name')
           .range(a, b),
       ),
-      all<Sale>((a, b) =>
+      fetchAll<Sale>((a, b) =>
         sb.from('sales').select('id, student_id, branch_id, amount_due, valid_from, payments(amount, kind, paid_at)').eq('status', 'active').gte('valid_from', from).lt('valid_from', d1).order('valid_from').range(a, b),
       ),
       loadBranches(),
