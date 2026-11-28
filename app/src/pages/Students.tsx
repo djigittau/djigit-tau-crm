@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { sb, normPhone } from '../lib/supabase'
 import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act, fmtDate, fmtDateTime, money, lessons, initials, tenure, Contact, years } from '../lib/ui'
@@ -48,6 +49,7 @@ export default function Students() {
   const [draft, setDraft] = useState<Draft | null>(null)
   const [card, setCard] = useState<Row | null>(null)
   const [selling, setSelling] = useState<Row | null>(null)
+  const [params, setParams] = useSearchParams()
 
   const { data, loading, error, reload } = useLoad(async () => {
     const [students, branches, groups, dances] = await Promise.all([
@@ -62,6 +64,15 @@ export default function Students() {
     ])
     return { students: students as unknown as Row[], branches, groups, dances }
   }, [])
+  // Переход из «Групп» (#/students?open=<id>) — сразу открыть профиль ученика.
+  useEffect(() => {
+    const id = params.get('open')
+    const r = id && data?.students.find((x) => x.id === id)
+    if (r) {
+      setCard(r)
+      setParams({}, { replace: true })
+    }
+  }, [data, params]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const list = (data?.students ?? []).filter((s) => {
     if (f.status && s.status !== f.status) return false

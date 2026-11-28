@@ -395,3 +395,13 @@ a.btn { text-decoration: none; }
 .pick { display: grid; gap: 8px; }
 .pick-list { display: grid; gap: 8px; max-height: 260px; overflow: auto; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
 .row.nowrap { flex-wrap: nowrap; justify-content: flex-end; gap: 6px; }
+
+/* Переключатель вида и плитки «Группы по тренерам» */
+.seg { display: inline-flex; width: fit-content; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; background: none; color: var(--muted); padding: 8px 14px; font-weight: 600; cursor: pointer; }
+.seg button.on { background: rgba(201,164,76,.14); color: var(--gold-hi); }
+.tile { text-align: left; cursor: pointer; color: inherit; text-decoration: none; font: inherit; width: 100%; }
+.tile:hover { border-color: rgba(201,164,76,.5); }
+.tile h3 { margin: 0 0 4px; font-size: 16px; }
+.person-tile { display: flex; gap: 14px; align-items: center; }
+.tile-num { font-size: 22px; font-weight: 700; margin-top: 6px; }

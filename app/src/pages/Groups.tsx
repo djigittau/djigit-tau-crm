@@ -4,6 +4,7 @@ import { useMe } from '../lib/auth'
 import { useLoad, must, State, PageHead, Empty, Modal, Field, Icon, act } from '../lib/ui'
 import { danceId, loadBranches, loadDances, loadTrainers, WEEKDAYS } from '../lib/refs'
 import { DanceInput } from '../lib/DanceInput'
+import GroupsBrowse from './GroupsBrowse'
 
 type Slot = { weekday: number; start_time: string }
 type Row = {
@@ -89,6 +90,7 @@ export default function Groups() {
   const [q, setQ] = useState('')
   const [branchF, setBranchF] = useState('')
   const [showArchived, setShowArchived] = useState(false)
+  const [view, setView] = useState<'trainers' | 'table'>(me.role === 'director' ? 'trainers' : 'table')
   const [draft, setDraft] = useState<Draft | null>(null)
   const [card, setCard] = useState<Row | null>(null)
   const [adding, setAdding] = useState<{ g: Row; ids: string[] } | null>(null)
@@ -198,6 +200,22 @@ export default function Groups() {
           </button>
         )}
       </PageHead>
+      {canEdit && (
+        <div className="seg" role="tablist" style={{ marginBottom: 12 }}>
+          <button className={view === 'trainers' ? 'on' : ''} onClick={() => setView('trainers')}>
+            По тренерам
+          </button>
+          <button className={view === 'table' ? 'on' : ''} onClick={() => setView('table')}>
+            Таблица
+          </button>
+        </div>
+      )}
+      {view === 'trainers' && canEdit ? (
+        <State loading={loading} error={error}>
+          <GroupsBrowse groups={(data?.groups ?? []).filter((g) => g.status === 'active')} />
+        </State>
+      ) : (
+      <>
       <div className="toolbar">
         <div className="search">
           <Icon name="search" />
@@ -282,6 +300,8 @@ export default function Groups() {
         </section>
 
       </State>
+      </>
+      )}
 
       {card && (
         <Modal
